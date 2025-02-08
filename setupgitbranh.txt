@@ -1,0 +1,45 @@
+cd /c/Users/B/Desktop/FinalProject/myproject
+chmod +x entrypoint.sh
+docker-compose down
+
+    
+class HireforAdmin(models.Model):
+    HireA_ID = models.AutoField(primary_key=True)
+    Width = models.FloatField(verbose_name="Width (m.)")  # FLOAT (ไม่ต้องมี max_length)
+    Length = models.FloatField(verbose_name="Length (m.)")  # FLOAT (ไม่ต้องมี max_length)
+    Height = models.FloatField(verbose_name="Height (m.)")  # FLOAT (ไม่ต้องมี max_length)
+    Type = models.CharField(max_length=100)  # VARCHAR2 (100)
+    Budget = models.CharField(max_length=150)  # VARCHAR2 (150)
+    Location = models.CharField(max_length=150)  # VARCHAR2 (150)
+    
+class PredictHire(models.Model):
+    Predict_ID = models.AutoField(primary_key=True)
+    HireC_ID = models.OneToOneField(HireforCustomer, on_delete=models.CASCADE)  # เชื่อมกับ HireforCustomer
+    Width = models.FloatField()
+    Length = models.FloatField()
+    Height = models.FloatField()
+    Type = models.CharField(max_length=100)
+    Budget = models.CharField(max_length=150)
+    Area = models.FloatField(verbose_name="Area")
+    Wood = models.IntegerField(verbose_name="Wood (pc.)")
+    Lighting = models.IntegerField(verbose_name="Lighting (pc.)")
+    Nail = models.IntegerField(verbose_name="Nail (box.)")
+    Table = models.IntegerField(verbose_name="Table")
+    Chair = models.IntegerField(verbose_name="Chair")
+
+
+    def __str__(self):
+        return f"Predict for Hire {self.HireC_ID.HireC_ID}"
+
+# ใช้ Signal เพื่อสร้าง PredictHire อัตโนมัติเมื่อ HireforCustomer ถูกสร้าง
+@receiver(post_save, sender=HireforCustomer)
+def create_predict_hire(sender, instance, created, **kwargs):
+    if created:  # เช็คว่าเป็นการสร้างใหม่ ไม่ใช่การอัปเดต
+        PredictHire.objects.create(
+            HireC_ID=instance,
+            Width=instance.Width,
+            Length=instance.Length,
+            Height=instance.Height,
+            Type=instance.Type,
+            Budget=instance.Budget
+        )

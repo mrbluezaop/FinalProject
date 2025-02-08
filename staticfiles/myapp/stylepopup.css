@@ -1,0 +1,118 @@
+/* ตั้งค่ารูปแบบ Overlay */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* สีดำโปร่งแสง */
+    z-index: 999; /* ให้อยู่ด้านบน */
+    display: none; /* ซ่อน Overlay */
+}
+
+/* ตั้งค่ารูปแบบ Popup */
+#popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px; /* ขนาดเริ่มต้น */
+    max-width: 90%; /* จำกัดความกว้างให้อยู่ใน 90% ของหน้าจอ */
+    max-height: 90%; /* จำกัดความสูงให้อยู่ใน 90% ของหน้าจอ */
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+    overflow-y: auto; /* เพิ่ม Scroll ถ้าสูงเกิน */
+    box-sizing: border-box;
+}
+
+
+/* หัวข้อ Popup */
+#popup h2 {
+    text-align: center; /* จัดกึ่งกลาง */
+    font-size: 24px; /* ขนาดตัวอักษร */
+    font-weight: bold; /* ตัวหนา */
+    margin-bottom: 20px; /* ระยะห่างจากส่วนอื่น */
+}
+
+/* การตั้งค่าระยะห่างและขนาดของแต่ละกลุ่ม */
+#popup div {
+    margin-bottom: 15px; /* ระยะห่างระหว่างกลุ่ม */
+}
+
+/* การตั้งค่ารูปแบบ Label */
+#popup label {
+    display: block; /* จัดให้ Label อยู่บรรทัดเดียว */
+    font-size: 14px; /* ขนาดตัวอักษร */
+    font-weight: bold; /* ตัวหนา */
+    margin-bottom: 5px; /* ระยะห่างระหว่าง Label และช่องกรอกข้อมูล */
+}
+
+/* การตั้งค่ารูปแบบ Input */
+#popup input,
+#popup textarea {
+    width: 100%; /* กำหนดให้เต็มความกว้าง */
+    padding: 10px; /* เพิ่ม Padding ภายใน */
+    font-size: 14px; /* ขนาดตัวอักษร */
+    border: 1px solid #ccc; /* เส้นขอบ */
+    border-radius: 5px; /* มุมโค้ง */
+    box-sizing: border-box; /* รวม Padding ในขนาด */
+}
+
+/* ปิดการปรับขนาด Textarea */
+#popup textarea {
+    resize: none;
+}
+
+/* รูปแบบปุ่ม */
+#popup button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0 10px; /* ระยะห่างระหว่างปุ่ม */
+}
+
+/* ปุ่ม Save */
+#popup button:first-child {
+    background-color: #007bff; /* สีฟ้าของปุ่ม Save */
+    color: white; /* สีตัวอักษร */
+}
+
+#popup button:first-child:hover {
+    background-color: #0056b3; /* สีเมื่อ Hover */
+}
+
+/* ปุ่ม Close */
+#popup button:last-child {
+    background-color: #6c757d; /* สีเทาของปุ่ม Close */
+    color: white; /* สีตัวอักษร */
+}
+
+#popup button:last-child:hover {
+    background-color: #5a6268; /* สีเมื่อ Hover */
+}
+
+/* ข้อความใน <span> */
+#popup span {
+    font-size: 14px; /* ขนาดตัวอักษร */
+    font-weight: bold; /* ตัวหนา */
+    color: #333; /* สีข้อความ */
+    display: block; /* จัดให้อยู่บรรทัดเดียว */
+    padding: 10px 0; /* ระยะ Padding ด้านบนและล่าง */
+}
+
+/* ปรับขนาดสำหรับหน้าจอที่เล็กกว่า 768px (Notebook และแท็บเล็ตแนวตั้ง) */
+@media (max-width: 768px) {
+    #popup  {
+        width: 90%; /* ปรับขนาดความกว้าง */
+        height: auto; /* ให้สูงตามเนื้อหา */
+        max-height: 80%; /* จำกัดความสูงให้อยู่ใน 80% ของหน้าจอ */
+    }
+}

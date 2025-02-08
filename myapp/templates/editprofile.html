@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+<title>แก้ไขโปรไฟล์</title>
+{% endblock %}
+
+{% block content %}
+<style>
+    form {
+        width: 50%;
+        margin: 0 auto;
+        /* ทำให้แบบฟอร์มอยู่กึ่งกลาง */
+    }
+
+    .fieldWrapper label {
+        font-weight: bold;
+    }
+
+    .fieldWrapper input,
+    .fieldWrapper select,
+    .fieldWrapper textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        margin-top: 5px;
+    }
+</style>
+
+<body>
+    <!-- Toast Notification -->
+    {% if toast_message %}
+    <div id="toast" class="toast {% if toast_type %}{{ toast_type }}{% endif %}">
+        {{ toast_message }}
+    </div>
+    <script>
+        // แสดง Toast Notification และซ่อนหลังจาก 3 วินาที
+        setTimeout(function () {
+            var toast = document.getElementById("toast");
+            if (toast) {
+                toast.style.display = "none";
+            }
+        }, 3000); // Toast หายไปหลัง 3 วินาที
+    </script>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="fieldWrapper">
+            <label for="id_Username">Username:</label>
+            {{ form.Username }}
+            {% if form.Username.errors %}
+            <small class="text-danger">
+                {% for error in form.Username.errors %}
+                {{ error }}
+                {% endfor %}
+            </small>
+            {% endif %}
+        </div>
+
+        <div class="fieldWrapper">
+            <label for="id_Password">Password:</label>
+            {{ form.Password }}
+            {% if form.Password.errors %}
+            <small class="text-danger">
+                {% for error in form.Password.errors %}
+                {{ error }}
+                {% endfor %}
+            </small>
+            {% endif %}
+        </div>
+
+        <div class="fieldWrapper">
+            <label for="id_Firstname">First Name:</label>
+            {{ form.Firstname }}
+            {% if form.Firstname.errors %}
+            <small class="text-danger">
+                {% for error in form.Firstname.errors %}
+                {{ error }}
+                {% endfor %}
+            </small>
+            {% endif %}
+        </div>
+
+        <div class="fieldWrapper">
+            <label for="id_Lastname">Last Name:</label>
+            {{ form.Lastname }}
+            {% if form.Lastname.errors %}
+            <small class="text-danger">
+                {% for error in form.Lastname.errors %}
+                {{ error }}
+                {% endfor %}
+            </small>
+            {% endif %}
+        </div>
+
+        <div class="fieldWrapper">
+            <label for="id_Email">Email:</label>
+            {{ form.Email }}
+            {% if form.Email.errors %}
+            <small class="text-danger">
+                {% for error in form.Email.errors %}
+                {{ error }}
+                {% endfor %}
+            </small>
+            {% endif %}
+        </div>
+
+        <div class="fieldWrapper">
+            <label for="id_Phone">Telephone:</label>
+            {{ form.Phone }}
+            {% if form.Phone.errors %}
+            <small class="text-danger">
+                {% for error in form.Phone.errors %}
+                {{ error }}
+                {% endfor %}
+            </small>
+            {% endif %}
+        </div>
+
+        <div class="fieldWrapper">
+            <label for="id_Address">Address:</label>
+            {{ form.Address }}
+            {% if form.Address.errors %}
+            <small class="text-danger">
+                {% for error in form.Address.errors %}
+                {{ error }}
+                {% endfor %}
+            </small>
+            {% endif %}
+        </div>
+
+        <br>
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <br><br>
+    </form>
+
+    <style>
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #dff0d8; /* Default success background */
+            color: #3c763d; /* Default success text */
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+
+        .toast.error {
+            background-color: #f2dede; /* Error background */
+            color: #a94442; /* Error text */
+        }
+    </style>
+</body>
+
+{% endblock %}

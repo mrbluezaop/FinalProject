@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+<title> หน้าแรก </title>
+{%endblock%}
+
+{% block content %}
+ <!-- banner section start -->
+ <div class="banner_section layout_padding">
+    <div class="container">
+       <div id="costum_slider" class="carousel slide" data-ride="carousel">
+          <div class="carousel-inner">
+             <div class="carousel-item active">
+                <h1 class="furniture_text">The Winner Interiors & Advertising</h1>
+                <p class="there_text">Our company manufactures and installs booths, handles booth setup for events, produces interior design and decorations - quickly, satisfactorily, at good prices.
+                </p>
+                <div class="contact_bt_main">
+                   <div class="contact_bt"><a href="{% url 'contact' %}">Contact Us</a></div>
+                </div>
+             </div>
+             <div class="carousel-item">
+                <h1 class="furniture_text">The Winner Interiors & Advertising</h1>
+                <p class="there_text">Our company manufactures and installs booths, handles booth setup for events, produces interior design and decorations - quickly, satisfactorily, at good prices.
+                </p>
+                <div class="contact_bt_main">
+                   <div class="contact_bt"><a href="{% url 'contact' %}">Contact Us</a></div>
+                </div>
+             </div>
+             <div class="carousel-item">
+                <h1 class="furniture_text">The Winner Interiors & Advertising</h1>
+                <p class="there_text">Our company manufactures and installs booths, handles booth setup for events, produces interior design and decorations - quickly, satisfactorily, at good prices.
+                </p>
+                <div class="contact_bt_main">
+                   <div class="contact_bt"><a href="{% url 'contact' %}">Contact Us</a></div>
+                </div>
+             </div>
+          </div>
+          <a class="carousel-control-prev" href="#costum_slider" role="button" data-slide="prev">
+          <i class=""><img src="{% static 'image/left-arrow.png' %}"></i>
+          </a>
+          <a class="carousel-control-next" href="#costum_slider" role="button" data-slide="next">
+          <i class=""><img src="{% static 'image/right-arrow.png' %}"></i>
+          </a>
+       </div>
+    </div>
+ </div>
+ <!-- banner section end -->
+ <!-- services section start -->
+ <div class="services_section layout_padding">
+    <div class="container">
+       <h1 class="services_taital">our services</h1>
+       <p class="many_taital">All the work that our company undertakes</p>
+       <div class="services_section2 layout_padding">
+          <div class="row">
+             <div class="col-lg-3 col-sm-6">
+                <div class="icon_1"><img src="{% static 'image/icon-booth.png' %}"></div>
+                <h2 class="furnitures_text">booths</h2>
+                <p class="dummy_text">Providing booth set-up services for various types of events and exhibitions</p>
+                <div class="read_bt_main">
+                   <div class="read_bt"><a href="{% url 'product' %}">View More</a></div>
+                </div>
+             </div>
+             <div class="col-lg-3 col-sm-6">
+                <div class="icon_1"><img src="{% static 'image/icon-interior.png' %}"></div>
+                <h2 class="furnitures_text">interior design</h2>
+                <p class="dummy_text">Providing interior design services for houses and various condominium units</p>
+                <div class="read_bt_main">
+                   <div class="read_bt"><a href="{% url 'product' %}">View More</a></div>
+                </div>
+             </div>
+             <div class="col-lg-3 col-sm-6">
+                <div class="icon_1"><img src="{% static 'image/icon-event.png' %}"></div>
+                <h2 class="furnitures_text">event work</h2>
+                <p class="dummy_text">Providing event organization services for various and multiple types of events</p>
+                <div class="read_bt_main">
+                   <div class="read_bt"><a href="{% url 'product' %}">View More</a></div>
+                </div>
+             </div>
+             <div class="col-lg-3 col-sm-6">
+                <div class="icon_1"><img src="{% static 'image/icon-product.png' %}"></div>
+                <h2 class="furnitures_text">product show</h2>
+                <p class="dummy_text">Providing product showcase booth services for various and multiple types of events</p>
+                <div class="read_bt_main">
+                   <div class="read_bt"><a href="{% url 'product' %}">View More</a></div>
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
+ </div>
+ <!-- services section end -->
+ <!-- about section start -->
+ <div class="about_section layout_padding">
+    <div class="container">
+       <div class="row">
+          <div class="col-md-6">
+             <h1 class="about_text">About Us</h1>
+             <p class="lorem_text">Our company provides production and installation of booths, event booth setup, interior production and design, stage and interior decoration, event management, structural works, electrical wiring and lighting, additional decorative services, bakery shops, cake shops, coffee shops, product showcasing, event activity sets, wedding ceremony sets, stage sets, various ceremonial events, product display booths - with fast service, satisfactory quality, and good prices by the team at The Winner Interiors & Advertising</p>
+             <div class="read_bt1"><a href="{% url 'about' %}">Read More</a></div>
+          </div>
+          <div class="col-md-6">
+             <div class="image_1"><img src="{% static 'image/img-1.png' %}"></div>
+          </div>
+       </div>
+    </div>
+ </div>
+ <!-- about section end -->
+ <!-- furnitures section start -->
+ <div class="furnitures_section layout_padding">
+    <div class="container">
+       <h1 class="our_text">OUR BOOTH AND INTERIOR</h1>
+       <div class="furnitures_section2 layout_padding">
+          <div class="row">
+             <div class="col-md-6">
+                <div class="container_main">
+                   <img src="{% static 'image/imgbooth1.jpg' %}" alt="Avatar" class="image">
+                   <div class="overlay">
+                      <a href="{% url 'product' %}" class="icon" title="User Profile">
+                      <i class="fa fa-search"></i>
+                      </a>
+                   </div>
+                </div>
+                <h3 class="temper_text">Roza Booth</h3>
+                <p class="dololr_text">For Roza Booth, it was created to showcase products, with the aim of attracting customers and generating interest in the products </p>
+             </div>
+             <div class="col-md-6">
+                <div class="container_main">
+                   <img src="{% static 'image/imgbooth2.jpg' %}" alt="Avatar" class="image">
+                   <div class="overlay">
+                      <a href="{% url 'product' %}" class="icon" title="User Profile">
+                      <i class="fa fa-search"></i>
+                      </a>
+                   </div>
+                </div>
+                <h3 class="temper_text">Inthanin Coffe Booth</h3>
+                <p class="dololr_text">For the design of the INTHANIN COFFEE BOOTH, it was created to showcase and provide a general sense of the interior of the shop, in order to give customers a preview </p>
+             </div>
+          </div>
+       </div>
+    </div>
+ </div>
+ <!-- furnitures section end -->
+ <!-- who section start -->
+ <div class="who_section layout_padding">
+    <div class="container">
+       <h1 class="who_taital">who we are ?</h1>
+       <h4 class="designer_text">DESIGNERS & INNOVATORS</h4>
+       <p class="lorem_ipsum_text">We are The Winner Interiors & Advertising Company. Our company's goal is to provide maximum satisfaction to our clients with our booth setup and interior design services, delivering the best possible results at the most valuable cost</p>
+    </div>
+    <div class="get_bt_main">
+       <div class="get_bt"><a href="{% url 'contact' %}">Contact</a></div>
+    </div>
+ </div>
+ <!-- who section end -->
+ <!-- projects section start -->
+ <div class="projects_section layout_padding">
+    <div class="container">
+       <h1 class="our_text">Our Project</h1>
+       <p class="ipsum_text">Examples of our work in various types of tasks</p>
+       <div id="main_slider" class="carousel slide" data-ride="carousel">
+          <div class="carousel-inner">
+             <div class="carousel-item active">
+                <div class="projects_section2">
+                   <div class="container_main2">
+                      <div class="row">
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im1.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im2.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im3.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <div class="carousel-item">
+                <div class="projects_section2">
+                   <div class="container_main1">
+                      <div class="row">
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im4.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im5.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im6.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <div class="carousel-item">
+                <div class="projects_section2">
+                   <div class="container_main1">
+                      <div class="row">
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im7.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im8.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                         <div class="col-sm-4">
+                            <div class="container_main1">
+                               <img src="{% static 'image/im9.jpg' %}" alt="Avatar" class="image" style="width:100%">
+                               <div class="middle">
+                                 <a href="{% url 'product' %}" class="text">VIEW MORE</a>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+          <a class="carousel-control-prev" href="#main_slider" role="button" data-slide="prev">
+          <i class="fa fa-angle-left"></i>
+          </a>
+          <a class="carousel-control-next" href="#main_slider" role="button" data-slide="next">
+          <i class="fa fa-angle-right"></i>
+          </a>
+       </div>
+    </div>
+ </div>
+ <!-- projects section end -->
+ <!-- client section start -->
+ <div class="clients_section layout_padding">
+    <div class="container">
+       <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+          <ol class="carousel-indicators">
+             <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+             <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+             <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+             <li data-target="#carouselExampleIndicators" data-slide-to="3"></li>
+          </ol>
+          <div class="carousel-inner">
+             <div class="carousel-item active">
+                <h1 class="client_text">Previous clients</h1>
+                <p class="ipsum_text">See our project highlights to get a sense of the range of our capabilities</p>
+                <div class="clients_section2 layout_padding">
+                   <div class="client_1">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/canon.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">Canon</h1>
+                            <p class="dolor_ipsum_text">Previous work: Booths, events, light boxes</p>
+                         </div>
+                      </div>
+                   </div>
+                   <div class="client_2">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/tipco.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">Tipco</h1>
+                            <p class="dolor_ipsum_text">Previous work: Booths</p>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <div class="carousel-item">
+               <h1 class="client_text">Previous clients</h1>
+               <p class="ipsum_text">See our project highlights to get a sense of the range of our capabilities</p>
+                <div class="clients_section2 layout_padding">
+                   <div class="client_1">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/umay.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">Umay+</h1>
+                            <p class="dolor_ipsum_text">Previous work: Booths, Counter</p>
+                         </div>
+                      </div>
+                   </div>
+                   <div class="client_2">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/thaifex.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">Thaifex</h1>
+                            <p class="dolor_ipsum_text">Previous work: Booths</p>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <div class="carousel-item">
+               <h1 class="client_text">Previous clients</h1>
+               <p class="ipsum_text">See our project highlights to get a sense of the range of our capabilities</p>
+                <div class="clients_section2 layout_padding">
+                   <div class="client_1">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/realme.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">Realme</h1>
+                            <p class="dolor_ipsum_text">Previous work: Booths, Counter, Bulidin</p>
+                         </div>
+                      </div>
+                   </div>
+                   <div class="client_2">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/roza.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">Roza</h1>
+                            <p class="dolor_ipsum_text">Previous work: Booths, light boxes, Counter, Structure </p>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             <div class="carousel-item">
+               <h1 class="client_text">Previous clients</h1>
+               <p class="ipsum_text">See our project highlights to get a sense of the range of our capabilities</p>
+                <div class="clients_section2 layout_padding">
+                   <div class="client_1">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/oppo.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">oppo</h1>
+                            <p class="dolor_ipsum_text">Previous work: Booths, Counter, Booths</p>
+                         </div>
+                      </div>
+                   </div>
+                   <div class="client_2">
+                      <div class="row">
+                         <div class="col-sm-3">
+                            <div class="image_7"><img src="{% static 'image/daikin.png' %}"></div>
+                         </div>
+                         <div class="col-sm-9">
+                            <h1 class="loksans_text">daikin</h1>
+                            <p class="dolor_ipsum_text">Previous work: Stand</p>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
+ </div>
+ <!-- client section end -->
+{%endblock%}

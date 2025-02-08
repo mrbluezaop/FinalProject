@@ -1,0 +1,281 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'myapp/style4.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <nav>
+          <ul>
+            <li><a class="logo">
+                <span class="nav-item">Admin</span>
+              </a></li>
+            <li><a href="{% url 'dashboard' %}">
+                <i class="fas fa-menorah"></i>
+                <span class="nav-item">Dashboard</span>
+              </a></li>
+            <li>
+              <a href="{% url 'hireset' %}">
+                <i class="fas fa-comment"></i>
+                <span class="nav-item">Hires</span>
+              </a>
+            </li>
+            <li><a href="{% url 'predictcustom' %}">
+                <i class="fas fa-database"></i>
+                <span class="nav-item">Predict custom</span>
+              </a></li>
+            <li><a href="{% url 'report' %}">
+                <i class="fas fa-chart-bar"></i>
+                <span class="nav-item">Report</span>
+              </a></li>
+            <li><a href="#">
+                <i class="fas fa-cog"></i>
+                <span class="nav-item">Setting</span>
+              </a></li>
+    
+            <li>
+              <a href="{% url 'logout' %}" class="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="nav-item">Log out</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <section class="main">
+            <section class="attendance">
+                <div class="attendance-list">
+                    <h1>Predict Data</h1>
+                    <div class="form-container">
+                        <label for="width">Width (m):</label>
+                        <input type="text" id="width">
+
+                        <label for="length">Length (m):</label>
+                        <input type="text" id="length">
+
+                        <label for="height">Height (m):</label>
+                        <input type="text" id="height">
+
+                        <label for="job_type">Job Type</label>
+                        <select id="job_type" name="job_type" required>
+                            <option value="Booth">Booth</option>
+                            <option value="BuildIN">Interior Design</option>
+                            <option value="Kiosk">Kiosk</option>
+                            <option value="Logo">Logo</option>
+                            <option value="Stage">Stage</option>
+                            <option value="Stand">Stand</option>
+                            <option value="Towerbox">Tower Box</option>
+                            <option value="Vinyl">Vinyl Sign</option>
+                        </select>
+
+                        <label for="budget">Budget (THB):</label>
+                        <input type="text" id="budget">
+
+                        <button type="button" id="predictBtn">Predict</button>
+                    </div>
+
+                    <!-- กล่องผลลัพธ์ที่อยู่ด้านขวามือ -->
+                    <div class="result-container">
+                        <div class="result-box">
+                            <label>Paint (Cans):</label>
+                            <span id="paintResult"></span>
+                        </div>
+                        <div class="result-box">
+                            <label>Chair:</label>
+                            <span id="chairResult"></span>
+                        </div>
+                        <div class="result-box">
+                            <label>Lighting (Bulbs):</label>
+                            <span id="lightingResult"></span>
+                        </div>
+                        <div class="result-box">
+                            <label>Nail (Boxes):</label>
+                            <span id="nailResult"></span>
+                        </div>
+                        <div class="result-box">
+                            <label>Table:</label>
+                            <span id="tableResult"></span>
+                        </div>
+                        <button type="ResetBTN" id="resetBtn">Reset</button>
+                        <button type="SaveBTN" id="saveBtn">Save Predict</button>
+                    </div>
+                </div>
+            </section>
+        </section>
+        <style>
+          /* ใช้ flexbox เพื่อจัดตำแหน่งฟอร์มและกล่องผลลัพธ์ */
+          .main {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              background-color: #f4f4f4;
+          }
+
+          /* กล่องฟอร์ม */
+          .attendance-list {
+              background: #fff;
+              padding: 50px;
+              border-radius: 10px;
+              box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+              max-width: 500px;
+              width: 100%;
+              text-align: center;
+              margin-right: 20px;
+          }
+
+          .form-container {
+              display: flex;
+              flex-direction: column;
+          }
+
+          /* จัดให้กล่องผลลัพธ์อยู่ทางขวามือ */
+          .result-container {
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+              margin-left: 20px;
+          }
+
+          .result-box {
+              background-color: #f9f9f9;
+              padding: 20px;
+              margin-top: 10px;
+              border-radius: 5px;
+              text-align: left;
+              font-size: 1.1rem;
+              font-weight: bold;
+              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+
+          .result-box span {
+              margin-left: 10px;
+              color: #333;
+          }
+
+          /* ปรับแต่ง input และ label */
+          .form-container label {
+              margin-top: 15px;
+              font-weight: bold;
+              font-size: 1.1rem;
+              text-align: left;
+          }
+
+          .form-container input {
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              font-size: 1rem;
+              width: 100%;
+              background-color: #f9f9f9;
+              box-sizing: border-box;
+          }
+
+          button#predictBtn {
+              margin-top: 20px;
+              padding: 15px;
+              font-size: 1.2rem;
+              font-weight: bold;
+              color: white;
+              background-color: #28a745;
+              border: none;
+              border-radius: 5px;
+              cursor: pointer;
+              transition: background-color 0.3s;
+          }
+
+          button#predictBtn:hover {
+              background-color: #218838;
+          }
+
+          select{
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+              box-sizing: border-box;
+              font-size: 16px;
+          }
+          
+      </style>
+
+      <script>
+          $('#predictBtn').click(function() {
+            var width = $('#width').val();
+            var length = $('#length').val();
+            var height = $('#height').val();
+            var job_type = $('#job_type').val();
+            var budget = $('#budget').val();
+
+            $.ajax({
+                url: '/predict/',
+                type: 'POST',
+                data: JSON.stringify({
+                    'width': width,
+                    'length': length,
+                    'height': height,
+                    'type': job_type,
+                    'budget': budget
+                }),
+                contentType: 'application/json',
+                headers: { "X-CSRFToken": getCookie("csrftoken") },  // ✅ เพิ่ม CSRF Token
+                success: function(response) {
+                    $('#paintResult').text(response.Paint);
+                    $('#chairResult').text(response.Chair);
+                    $('#lightingResult').text(response.Lighting);
+                    $('#nailResult').text(response.Nail);
+                    $('#tableResult').text(response.Table);
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error:", error);
+                    console.log("Status:", status);
+                    console.log("Response:", xhr.responseText);
+                    alert("Error in prediction: " + xhr.responseText);
+                }
+            });
+          })
+          $('#resetBtn').click(function() {
+          $('#width').val('');
+          $('#length').val('');
+          $('#height').val('');
+          $('#job_type').val('');
+          $('#budget').val('');
+
+          // ล้างค่าผลลัพธ์
+          $('#paintResult').text('');
+          $('#chairResult').text('');
+          $('#lightingResult').text('');
+          $('#nailResult').text('');
+          $('#tableResult').text('');
+          });
+        
+
+        // ✅ ฟังก์ชันดึง CSRF Token
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+      </script>
+  </div>
+</body>
+
+</html>

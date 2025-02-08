@@ -1,0 +1,250 @@
+{% load static %}
+<span style="font-family: verdana, geneva, sans-serif;">
+  <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Dashboard | By Code Info</title>
+    <link rel="stylesheet" href="{% static 'myapp/style4.css' %}">
+    <!-- Font Awesome Cdn Link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/stylepopup.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+    <script src="{% static 'js/popup.js' %}"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <nav>
+        <ul>
+          <li><a class="logo">
+              <span class="nav-item">Admin</span>
+            </a></li>
+          <li><a href="{% url 'dashboard' %}">
+              <i class="fas fa-menorah"></i>
+              <span class="nav-item">Dashboard</span>
+            </a></li>
+          <li>
+            <a href="{% url 'hireset' %}">
+              <i class="fas fa-comment"></i>
+              <span class="nav-item">Hires</span>
+            </a>
+          </li>
+          <li><a href="{% url 'predictcustom' %}">
+              <i class="fas fa-database"></i>
+              <span class="nav-item">Predict custom</span>
+            </a></li>
+          <li><a href="{% url 'report' %}">
+              <i class="fas fa-chart-bar"></i>
+              <span class="nav-item">Report</span>
+            </a></li>
+          <li><a href="#">
+              <i class="fas fa-cog"></i>
+              <span class="nav-item">Setting</span>
+            </a></li>
+  
+          <li>
+            <a href="{% url 'logout' %}" class="logout">
+              <i class="fas fa-sign-out-alt"></i>
+              <span class="nav-item">Log out</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <section class="main">
+
+        <div class="users">
+          <div class="card" style="text-align: center; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+            <i class="fa-solid fa-user" style="font-size: 5rem; color: #555; display: block; margin-bottom: 10px;"></i>
+            <h4 style="font-weight: bold; margin: 10px 0;">Total Members</h4>
+            
+            <p style="font-size: 2rem; color: green; font-weight: bold; margin: 10px 0;">{{ member_count }}</p>
+          </div>
+          <div class="card">
+            <div class="per">
+              <i class="fa-brands fa-codepen"
+                style="font-size: 5.5rem; color: #555; display: block; margin-bottom: 10px;"></i>
+              <h4 style="font-weight: bold; margin: 10px 0;">Total Orders</h4>
+              
+              <p style="font-size: 2rem; color: green; font-weight: bold; margin: 10px 0;">{{ job_count }}</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="per">
+              <i class="fa-solid fa-spinner"
+                style="font-size: 5.5rem; color: #555; display: block; margin-bottom: 10px;"></i>
+              <h4 style="font-weight: bold; margin: 10px 0;">Work in progress</h4>
+              
+              <p style="font-size: 2rem; color: green; font-weight: bold; margin: 10px 0;">{{ in_progress_jobs }}</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="per">
+              <i class="fa-solid fa-check"
+                style="font-size: 5.5rem; color: #555; display: block; margin-bottom: 10px;"></i>
+              <h4 style="font-weight: bold; margin: 10px 0;">Work finished </h4>
+              
+              <p style="font-size: 2rem; color: green; font-weight: bold; margin: 10px 0;">{{ completed_jobs }}</p>
+            </div>
+          </div>
+        </div>
+
+        <section class="attendance">
+          <div class="attendance-list">
+            <h1>Members List</h1>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Join Time</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if members %}
+                {% for member in members %}
+                <tr>
+                  <td>{{ forloop.counter0|add:members.start_index }}</td> <!-- เริ่มลำดับตาม Pagination -->
+                  <td>{{ member.Username }}</td>
+                  <td>{{ member.Firstname }}</td>
+                  <td>{{ member.Lastname }}</td>
+                  <td>{{ member.Email }}</td>
+                  <td>{{ member.joined_date|date:"m-d-Y H:i A" }}</td>
+                  <td>
+                    <!-- ปุ่ม Delete -->
+                    <button class="delete-btn" data-id="{{ member.Customer_ID }}"
+                      onclick="deleteMember(this.getAttribute('data-id'))">Delete</button>
+                  </td>
+                  <td>
+                    <!-- ปุ่ม View -->
+                    <button class="view-btn" data-id="{{ member.Customer_ID }}"
+                      onclick="openPopup(this.getAttribute('data-id'))">View</button>
+                  </td>
+
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td colspan="7">No members found.</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+
+            <!-- Popup Modal -->
+            <div id="popup" style="display: none;">
+              <h2>Edit Member</h2>
+              <form>
+                <!-- Member ID -->
+                <div style="margin-bottom: 10px;">
+                  <label>Member ID:</label>
+                  <input type="text" id="popup-id" readonly>
+                </div>
+
+                <!-- Username -->
+                <div style="margin-bottom: 10px;">
+                  <label>Username:</label>
+                  <input type="text" id="popup-username" readonly>
+                </div>
+
+                <!-- Password -->
+                <div style="margin-bottom: 10px;">
+                  <label>Password:</label>
+                  <input type="password" id="popup-password">
+                  <span id="password-error" style="color: red; font-size: 12px; display: none;">Invalid password
+                    format.</span>
+                </div>
+
+                <!-- First Name -->
+                <div style="margin-bottom: 10px;">
+                  <label>First Name:</label>
+                  <input type="text" id="popup-firstname">
+                </div>
+
+                <!-- Last Name -->
+                <div style="margin-bottom: 10px;">
+                  <label>Last Name:</label>
+                  <input type="text" id="popup-lastname">
+                </div>
+
+                <!-- Email -->
+                <div style="margin-bottom: 10px;">
+                  <label>Email:</label>
+                  <input type="email" id="popup-email" readonly>
+                </div>
+
+                <!-- Phone -->
+                <div style="margin-bottom: 10px;">
+                  <label>Phone:</label>
+                  <input type="text" id="popup-phone" maxlength="10">
+                  <span id="phone-error" style="color: red; font-size: 12px; display: none;">Invalid phone number
+                    format.</span>
+                </div>
+
+                <!-- Address -->
+                <div style="margin-bottom: 10px;">
+                  <label>Address:</label>
+                  <textarea id="popup-address" rows="3"></textarea>
+                </div>
+
+                <!-- Birth Date -->
+                <div style="margin-bottom: 10px;">
+                  <label>Birth Date:</label>
+                  <input type="date" id="popup-birthday" max="">
+                </div>
+
+                <script>
+                  document.addEventListener('DOMContentLoaded', () => {
+                    const today = new Date().toISOString().split('T')[0]; // แปลงวันที่ปัจจุบันเป็นรูปแบบ 'YYYY-MM-DD'
+                    document.getElementById('popup-birthday').setAttribute('max', today);
+                  });
+                </script>
+
+                <!-- Buttons -->
+                <div style="margin-top: 20px; text-align: center;">
+                  <button type="button" onclick="saveChanges()">Save</button>
+                  <button type="button" onclick="closePopup()">Close</button>
+                </div>
+              </form>
+            </div>
+
+
+            <!-- Overlay -->
+            <div id="overlay"
+              style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"
+              onclick="closePopup()"></div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+              <span class="step-links">
+                {% if members.has_previous %}
+                <a href="?page={{ members.previous_page_number }}">&#8249; Previous</a>
+                {% endif %}
+
+                <span class="current">
+                  Page {{ members.number }} of {{ members.paginator.num_pages }}
+                </span>
+
+                {% if members.has_next %}
+                <a href="?page={{ members.next_page_number }}">Next &#8250;</a>
+
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </section>
+    </div>
+  </body>
+
+  </html>
+</span>

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+<title> ติดต่อเรา </title>
+{%endblock%}
+
+{% block content %}
+<!-- contact section -->
+
+<section class="about_section layout_padding">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+            <div class="heading_container">
+            <h1 class="about_text">Contact</h1>
+            </div>
+            <div class="lorem_text">
+                <i class="fa-solid fa-phone"></i> : Tel: 123-456-7890
+                <br>
+                <br>
+                <i class="fa-solid fa-envelope"></i> : Email: Thewinner@gmail.com
+                <br>
+                <br>
+                <i class="fa-brands fa-line"></i> : Line : @Thewinner
+                <br>
+                <br>
+                <i class="fa-solid fa-fax"></i> : Fax : 076-371004
+            </div>
+        </div>
+        <div class="col-md-6">
+           <div class="image_9"><img src="{% static 'image/img-1.png' %}"></div>
+        </div>
+     </div>
+  </div>
+</div>
+  </section>
+
+  <!-- end contact section -->
+{%endblock%}

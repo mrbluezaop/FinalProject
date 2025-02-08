@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<link rel="stylesheet" href="{% static 'myapp/stylef.css' %}">
+	<link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+	<div class="main">  	
+		<input type="checkbox" id="chk" aria-hidden="true">
+
+			<div class="signup">
+				<form>
+					<label for="chk" aria-hidden="true">Sign up</label>
+					<input type="text" name="usernme" placeholder="ป้อน ID ของคุณ" required="">
+					<input type="text" name="fanme" placeholder="ป้อน ชื่อจริงของคุณ" required="">
+					<input type="text" name="lname" placeholder="ป้อน นามสกุลของคุณ" required="">
+					<input type="password" name="pswd" placeholder="ป้อน รหัสผ่านของคุณ" required="">
+					<input type="email" name="email" placeholder="ป้อน อีเมลล์ของคุณ" required="">
+					<input type="tel" id="phone" name="phone" placeholder="ป้อน เบอร์โทรศัพท์ของคุณ" required="">
+					<input type="text" name="address" placeholder="ป้อน ที่อยู่ของคุณ" 	required="">
+					<input type="date" name="birthday" placeholder="ป้อน วันเกิดของคุณ" required="">
+					<button type="submit">Sign up</button>
+				</form>
+			</div>
+
+			<div class="login">
+				<form>
+					<label for="chk" aria-hidden="true">Login</label>
+					<input type="email" name="email" placeholder="Email" required="">
+					<input type="password" name="pswd" placeholder="Password" required="">
+					<button type="submit">Login</button>
+				</form>
+			</div>
+	</div>
+</body>
+</html>

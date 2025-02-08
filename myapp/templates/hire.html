@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+<title> ติดต่อเรา </title>
+{%endblock%}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'myapp/stylehire.css' %}">
+    <title>ฟอร์มสั่งซื้อ</title>
+</head>
+
+<body>
+    <section class="buy_section layout_padding">
+        <div class="container">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-6">
+                    <div class="heading_container text-center">
+                        <br>
+                        <h1>Forms</h1>
+                        <form action="/submit-hire" method="POST">
+                            {% csrf_token %}
+
+                            <!-- แสดงข้อความ Error หรือ Success -->
+                            {% if error_message %}
+                            <p style="color: red; font-weight: bold;">{{ error_message }}</p>
+                            {% endif %}
+
+                            {% if success_message %}
+                            <p style="color: green; font-weight: bold;">{{ success_message }}</p>
+                            {% endif %}
+
+                            <!-- Width -->
+                            <label for="width">Width (meters)</label>
+                            <input type="number" step="0.01" id="width" name="width" placeholder="Enter width" required>
+
+                            <!-- Length -->
+                            <label for="length">Length (meters)</label>
+                            <input type="number" step="0.01" id="length" name="length" placeholder="Enter length"
+                                required>
+
+                            <!-- Height -->
+                            <label for="height">Height (meters)</label>
+                            <input type="number" step="0.01" id="height" name="height" placeholder="Enter height"
+                                required>
+
+                            <!-- Job Type -->
+                            <label for="job_type">Job Type</label>
+                            <select id="job_type" name="job_type" required>
+                                <option value="Booth">Booth</option>
+                                <option value="BuildIN">Interior Design</option>
+                                <option value="Kiosk">Kiosk</option>
+                                <option value="Logo">Logo</option>
+                                <option value="Stage">Stage</option>
+                                <option value="Stand">Stand</option>
+                                <option value="Towerbox">Tower Box</option>
+                                <option value="Vinyl">Vinyl Sign</option>
+                            </select>
+
+                            <!-- Budget -->
+                            <label for="budget">Budget (THB)</label>
+                            <input type="number" id="budget" name="budget" placeholder="Enter budget" required>
+
+                            <!-- Location -->
+                            <label for="location">Location</label>
+                            <textarea id="location" name="location" placeholder="Enter work location" rows="4"
+                                required></textarea>
+
+                            <!-- Submit Button -->
+                            <button class="button-41" role="button" type="submit">Order</button>
+
+                            <br>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
+{% endblock %}

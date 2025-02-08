@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background-color: #4070f4;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .content-container {
+            text-align: center;
+        }
+
+        form {
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .login-title {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        header {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .form .field {
+            position: relative;
+            height: 50px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 6px;
+        }
+
+        .form .field input {
+            height: 100%;
+            width: 100%;
+            border: 1px solid #ccc;
+            padding: 0 15px;
+            border-radius: 6px;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+            /* Ensure padding is included in the element's total width and height */
+        }
+
+        .form .field input::placeholder {
+            color: #999;
+        }
+
+        .button {
+            height: 50px;
+            width: 100%;
+            border: none;
+            font-size: 16px;
+            font-weight: 400;
+            border-radius: 6px;
+            color: #fff;
+            background-color: #0171d3;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            line-height: 50px;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 20px;
+            box-sizing: border-box;
+            /* Ensure padding is included in the element's total width and height */
+        }
+
+        .button:hover {
+            background-color: #016dcb;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <section class="content-section content-section-single">
+        <!-- รูปอยู่บน div ของ login -->
+        <div class="logo-container">
+            <img src="{% static 'image/logo.png' %}" alt="Logo">
+        </div>
+
+        <div class="content-container">
+            <!-- Display Success Message -->
+            {% if success_message %}
+            <div class="alert alert-success">
+                <p>{{ success_message }}</p>
+            </div>
+            <script>
+                setTimeout(function () {
+                    window.location.href = "{% url redirect_url %}";
+                }, 2000);
+            </script>
+            {% endif %}
+
+            <form method="post" class="form">
+                {% csrf_token %}
+                <header>Login</header><br>
+
+                <div class="field">
+                    <input type="text" id="username" name="username" placeholder="Username"
+                        value="{{ request.POST.username }}">
+                </div>
+
+                <div class="field">
+                    <input type="password" id="password" name="password" placeholder="Password">
+                </div>
+
+                <button type="submit" class="button">Login</button>
+                <a href="{% url 'register' %}" class="button">Signup</a>
+
+                <!-- Display Error -->
+                {% if error_message %}
+                <div class="general-error">
+                    <span class="text-danger">{{ error_message }}</span>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </section>
+
+    <style>
+        .alert {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+            text-align: center;
+        }
+
+        .text-danger {
+            color: red;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .general-error {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .field {
+            margin-bottom: 15px;
+        }
+
+        /* ปรับขนาดรูปให้ใหญ่ขึ้น */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+            /* ระยะห่างระหว่างรูปกับฟอร์ม */
+        }
+
+        .logo-container img {
+            width: 500px;
+            /* ปรับขนาดรูปตามต้องการ */
+            height: auto;
+            /* ให้คงสัดส่วนเดิม */
+            max-width: 100%;
+            /* ป้องกันไม่ให้รูปใหญ่เกินขนาดจอ */
+
+            /* เลื่อนไปทางซ้ายเล็กน้อย */
+            margin-left: -75px;
+            /* ปรับค่าตามต้องการ (เช่น -30px, -100px) */
+        }
+    </style>
+</body>
+
+
+</html>

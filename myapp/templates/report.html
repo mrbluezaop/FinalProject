@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'myapp/style4.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/graph.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/stylepopup.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/scriptgraph.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <nav>
+          <ul>
+            <li><a class="logo">
+                <span class="nav-item">Admin</span>
+              </a></li>
+            <li><a href="{% url 'dashboard' %}">
+                <i class="fas fa-menorah"></i>
+                <span class="nav-item">Dashboard</span>
+              </a></li>
+            <li>
+              <a href="{% url 'hireset' %}">
+                <i class="fas fa-comment"></i>
+                <span class="nav-item">Hires</span>
+              </a>
+            </li>
+            <li><a href="{% url 'predictcustom' %}">
+                <i class="fas fa-database"></i>
+                <span class="nav-item">Predict custom</span>
+              </a></li>
+            <li><a href="{% url 'report' %}">
+                <i class="fas fa-chart-bar"></i>
+                <span class="nav-item">Report</span>
+              </a></li>
+            <li><a href="#">
+                <i class="fas fa-cog"></i>
+                <span class="nav-item">Setting</span>
+              </a></li>
+    
+            <li>
+              <a href="{% url 'logout' %}" class="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="nav-item">Log out</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <section class="main">
+            <section class="attendance">
+                <div class="attendance-list">
+                    <h1>Report</h1>
+                    <h1>รายงานตามไตรมาส</h1>
+
+    <label for="quarterFilter">เลือกไตรมาส:</label>
+    <select id="quarterFilter" onchange="updateChart()">
+        <option value="Q1">ไตรมาสที่ 1 (ม.ค.-มี.ค.)</option>
+        <option value="Q2">ไตรมาสที่ 2 (เม.ย.-มิ.ย.)</option>
+        <option value="Q3">ไตรมาสที่ 3 (ก.ค.-ก.ย.)</option>
+        <option value="Q4">ไตรมาสที่ 4 (ต.ค.-ธ.ค.)</option>
+    </select>
+
+    <canvas id="pieChart"></canvas>
+
+    <script>
+        fetchChartData();  // เรียกใช้ฟังก์ชันเมื่อหน้าเว็บโหลด
+    </script>
+        
+                    <hr>
+                <button onclick="exportToExcel()"> >>> Dowload File Report <<<</button>
+
+                <table class="table">
+                    <thead>
+                    </thead>
+                </table>
+            </section>
+    </section>
+</body>
+</html>
