@@ -1,4 +1,4 @@
-# 
+# ไม่ต้องรอ Database ให้รัน Django ทันที
 echo "⚙️ Running makemigrations..."
 python manage.py makemigrations --noinput || echo "⚠️ Skipping makemigrations"
 
