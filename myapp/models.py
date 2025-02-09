@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 from django.utils.timezone import now
 
 class Member(models.Model):
@@ -44,18 +45,58 @@ class Hire(models.Model):
     
 class PredictHire(models.Model):
     Predict_ID = models.AutoField(primary_key=True)
-    HireC_ID = models.OneToOneField(Hire, on_delete=models.CASCADE)  # เชื่อมกับ HireforCustomer
+    HireC_ID = models.ForeignKey(
+        "Hire", on_delete=models.CASCADE, null=True, blank=True
+    )  # อนุญาตให้เป็นค่าว่างได้
+    HireA_ID = models.ForeignKey(
+        "HireforAdmin", on_delete=models.CASCADE, null=True, blank=True
+    )  # อนุญาตให้เป็นค่าว่างได้
+
     Width = models.FloatField()
     Length = models.FloatField()
     Height = models.FloatField()
     Type = models.CharField(max_length=100)
-    Budget = models.CharField(max_length=150)
+    Budget = models.DecimalField(max_digits=15, decimal_places=2)
     Area = models.FloatField(verbose_name="Area")
-    Wood = models.IntegerField(verbose_name="Wood (pc.)")
-    Lighting = models.IntegerField(verbose_name="Lighting (pc.)")
-    Nail = models.IntegerField(verbose_name="Nail (box.)")
-    Table = models.IntegerField(verbose_name="Table")
-    Chair = models.IntegerField(verbose_name="Chair")
+    Wood = models.IntegerField(verbose_name="Wood (pc.)", default=0)
+    Lighting = models.IntegerField(verbose_name="Lighting (pc.)", default=0)
+    Nail = models.IntegerField(verbose_name="Nail (box.)", default=0)
+    Table = models.IntegerField(verbose_name="Table", default=0)
+    Chair = models.IntegerField(verbose_name="Chair", default=0)
+
+    def clean(self):
+        """ตรวจสอบว่าต้องมีค่าใน HireC_ID หรือ HireA_ID อย่างใดอย่างหนึ่ง"""
+        if not self.HireC_ID and not self.HireA_ID:
+            raise ValidationError("ต้องมีค่าใน HireC_ID หรือ HireA_ID อย่างน้อยหนึ่งฟิลด์")
+        if self.HireC_ID and self.HireA_ID:
+            raise ValidationError("ต้องเลือกเพียง HireC_ID หรือ HireA_ID เท่านั้น ห้ามมีค่าทั้งสอง")
 
     def __str__(self):
-        return f"Predict for Hire {self.HireC_ID.Hire_ID}"
+        if self.HireC_ID:
+            return f"Predict for Hire (Customer) {self.HireC_ID.Hire_ID}"
+        elif self.HireA_ID:
+            return f"Predict for Hire (Admin) {self.HireA_ID.Hire_ID}"
+        return "Predict for Unknown Hire"
+    
+class Resource(models.Model):
+    Resource_ID = models.AutoField(primary_key=True)
+    Predict_ID = models.OneToOneField("PredictHire", on_delete=models.CASCADE)  # เปลี่ยนเป็น OneToOneField
+    Width = models.FloatField()
+    Length = models.FloatField()
+    Height = models.FloatField()
+    Type = models.CharField(max_length=100)
+    Location = models.CharField(max_length=150, null=True, blank=True)  # อนุญาตให้ว่างได้
+    Budget = models.DecimalField(max_digits=15, decimal_places=2)
+    Wood_P = models.IntegerField(verbose_name="Wood (pc.) Predict", default=0)
+    Lighting_P = models.IntegerField(verbose_name="Lighting (pc.) Predict", default=0)
+    Nail_P = models.IntegerField(verbose_name="Nail (box.) Predict", default=0)  # แก้ไขชื่อ Nai_P → Nail_P
+    Table_P = models.IntegerField(verbose_name="Table Predict", default=0)
+    Chair_P = models.IntegerField(verbose_name="Chair Predict", default=0)
+    Wood = models.IntegerField(verbose_name="Wood (pc.) Actual", default=0)
+    Lighting = models.IntegerField(verbose_name="Lighting (pc.) Actual", default=0)
+    Nail = models.IntegerField(verbose_name="Nail (box.) Actual", default=0)  # แก้ไขชื่อ Nai → Nail
+    Table = models.IntegerField(verbose_name="Table Actual", default=0)
+    Chair = models.IntegerField(verbose_name="Chair Actual", default=0)
+
+    def __str__(self):
+        return f"Resource for PredictHire {self.Predict_ID.Predict_ID if self.Predict_ID else 'Unknown'}"
