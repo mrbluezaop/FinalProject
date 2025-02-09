@@ -61,8 +61,8 @@
           <!-- ฟอร์มตัวกรอง -->
           <form method="get" action="{% url 'filter_hire_by_date' %}" style="margin-bottom: 20px;">
             <label for="sort_order">Sort By Date:</label>
-  
-            
+
+
             <button type="submit">Filter</button>
           </form>
           <table class="table">
@@ -111,12 +111,13 @@
                     onclick="showHirePopup(this.getAttribute('data-id'))">View</button>
                   <!-- ปุ่ม Predict แสดงเฉพาะเมื่อ Status เป็น In Progress -->
                   {% if hire.Status == 'in_progress' %}
-                  <button class="view-btn" onclick="openPredictPopup()">Predict</button>
-                  {% endif %}
-                  <!-- ปุ่ม Save Model แสดงเฉพาะเมื่อ Status เป็น Completed -->
-                  {% if hire.Status == 'completed' %}
-                  <button class="view-btn" onclick="saveModel()">Save Model</button>
-                  {% endif %}
+                  <button class="predict-btn" data-id="{{ hire.Hire_ID }}"
+                    onclick="showPredictPopup(this.getAttribute('data-id'))">Predict
+                    {% endif %}
+                    <!-- ปุ่ม Save Model แสดงเฉพาะเมื่อ Status เป็น Completed -->
+                    {% if hire.Status == 'completed' %}
+                    <button class="save-model-btn" onclick="showSaveModelPopup()">Save Model</button>
+                    {% endif %}
                 </td>
               </tr>
               {% empty %}
@@ -169,38 +170,106 @@
       </div>
       <!-- จบส่วน Popup -->
 
-      <!-- Popup สำหรับ Predict -->
-      <div id="predictPopup" class="predict-popup">
-        <div class="popup-content">
+      <!-- Modal Popup Predict-->
+      <div id="predictModal" class="modal">
+        <div class="modal-content">
           <h2>Prediction Results</h2>
+          <br>
+          <div class="predict-results">
+            <div class="result-box">
+              <label>Paint (Cans):</label>
+              <input type="number" id="paintResult" placeholder="Enter Paint Cans" readonly>
+            </div>
+            <div class="result-box">
+              <label>Chair:</label>
+              <input type="number" id="chairResult" placeholder="Enter Chairs" readonly>
+            </div>
+            <div class="result-box">
+              <label>Lighting (Bulbs):</label>
+              <input type="number" id="lightingResult" placeholder="Enter Lighting" readonly>
+            </div>
+            <div class="result-box">
+              <label>Nail (Boxes):</label>
+              <input type="number" id="nailResult" placeholder="Enter Nail Boxes" readonly>
+            </div>
+            <div class="result-box">
+              <label>Table:</label>
+              <input type="number" id="tableResult" placeholder="Enter Tables" readonly>
+            </div>
+          </div>
 
-          <div class="result-box">
-            <label>Paint (Cans):</label>
-            <span id="paintResult"></span>
+          <!-- ปุ่ม CLOSE -->
+          <div class="form-actions">
+            <button type="button" class="close-btn" id="closePopup">CLOSE</button>
           </div>
-          <div class="result-box">
-            <label>Chair:</label>
-            <span id="chairResult"></span>
-          </div>
-          <div class="result-box">
-            <label>Lighting (Bulbs):</label>
-            <span id="lightingResult"></span>
-          </div>
-          <div class="result-box">
-            <label>Nail (Boxes):</label>
-            <span id="nailResult"></span>
-          </div>
-          <div class="result-box">
-            <label>Table:</label>
-            <span id="tableResult"></span>
-          </div>
-
-          <!-- ปุ่ม Close -->
-          <button id="closePopupBtn">Close</button>
         </div>
       </div>
 
+      <!-- Modal Popup Save model-->
+      <div id="saveModelPopup" class="modal">
+        <div class="modal-content">
+          <h2>Save Model</h2>
 
+          <div class="popup-container">
+            <!-- ✅ ฝั่งซ้าย: ข้อมูลปัจจุบัน (Read-Only) -->
+            <div class="popup-column">
+              <h3>Current Data</h3>
+              <div class="result-box">
+                <label>Paint (Cans):</label>
+                <span id="currentPaint"></span>
+              </div>
+              <div class="result-box">
+                <label>Chair:</label>
+                <span id="currentChair"></span>
+              </div>
+              <div class="result-box">
+                <label>Lighting (Bulbs):</label>
+                <span id="currentLighting"></span>
+              </div>
+              <div class="result-box">
+                <label>Nail (Boxes):</label>
+                <span id="currentNail"></span>
+              </div>
+              <div class="result-box">
+                <label>Table:</label>
+                <span id="currentTable"></span>
+              </div>
+            </div>
+
+            <!-- ✅ ฝั่งขวา: ช่องกรอกค่าที่สามารถเปลี่ยนได้ -->
+            <div class="popup-column">
+              <h3>New Data</h3>
+              <div class="result-box">
+                <label>Paint (Cans):</label>
+                <input type="number" id="newPaint" placeholder="Enter new value">
+              </div>
+              <div class="result-box">
+                <label>Chair:</label>
+                <input type="number" id="newChair" placeholder="Enter new value">
+              </div>
+              <div class="result-box">
+                <label>Lighting (Bulbs):</label>
+                <input type="number" id="newLighting" placeholder="Enter new value">
+              </div>
+              <div class="result-box">
+                <label>Nail (Boxes):</label>
+                <input type="number" id="newNail" placeholder="Enter new value">
+              </div>
+              <div class="result-box">
+                <label>Table:</label>
+                <input type="number" id="newTable" placeholder="Enter new value">
+              </div>
+            </div>
+          </div>
+
+          <!-- ปุ่ม Action -->
+          <div class="form-actions">
+            <button type="button" class="reset-btn">Reset</button>
+            <button type="button" class="save-btn">Save Model</button>
+            <button type="button" class="close-btn" id="closeSaveModelPopup">Close</button>
+          </div>
+        </div>
+      </div>
     </section>
     <style>
       .hire-popup {
@@ -327,6 +396,118 @@
         }
       }
     </style>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("✅ JavaScript Loaded!");
+
+        const modal = document.getElementById("predictModal");
+        const closeBtn = document.getElementById("closePopup"); // ✅ ดึงปุ่ม CLOSE
+        const modalContent = document.querySelector(".modal-content");
+
+        if (!modal) {
+          console.error("❌ Error: Modal not found!");
+          return;
+        }
+
+        // ✅ ฟังก์ชันเปิด Popup และตั้งค่าผลลัพธ์
+        window.showPredictPopup = function () {
+          document.getElementById("paintResult").innerText = "5 Cans";
+          document.getElementById("chairResult").innerText = "10 Chairs";
+          document.getElementById("lightingResult").innerText = "15 Bulbs";
+          document.getElementById("nailResult").innerText = "3 Boxes";
+          document.getElementById("tableResult").innerText = "2 Tables";
+
+          modal.style.display = "flex";
+        };
+
+        // ✅ ปิด Modal เมื่อกดปุ่ม CLOSE
+        closeBtn.addEventListener("click", function () {
+          modal.style.display = "none";
+        });
+
+        // ✅ ปิด Modal เมื่อคลิกข้างนอก Modal Content
+        window.addEventListener("click", function (event) {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("✅ Save Model JavaScript Loaded!");
+
+        // ดึงองค์ประกอบของ Popup
+        const modal = document.getElementById("saveModelPopup");
+        const closeBtn = document.getElementById("closeSaveModelPopup");
+        const resetBtn = document.querySelector(".reset-btn");
+        const saveBtn = document.querySelector(".save-btn");
+
+        if (!modal) {
+          console.error("❌ Error: Save Model Modal not found!");
+          return;
+        }
+
+        // ✅ ฟังก์ชันเปิด Popup และใส่ค่าปัจจุบัน
+        window.showSaveModelPopup = function () {
+          console.log("✅ Opening Save Model Popup");
+
+          // ตั้งค่าข้อมูลฝั่ง Current Data
+          document.getElementById("currentPaint").innerText = "5 Cans";
+          document.getElementById("currentChair").innerText = "10 Chairs";
+          document.getElementById("currentLighting").innerText = "15 Bulbs";
+          document.getElementById("currentNail").innerText = "3 Boxes";
+          document.getElementById("currentTable").innerText = "2 Tables";
+
+          // เคลียร์ค่าฝั่ง New Data
+          document.querySelectorAll(".popup-column input").forEach(input => {
+            input.value = "";
+          });
+
+          // แสดง Popup
+          modal.style.display = "flex";
+        };
+
+        // ✅ ปิด Modal เมื่อกดปุ่ม Close
+        closeBtn.addEventListener("click", function () {
+          modal.style.display = "none";
+        });
+
+        // ✅ ปุ่ม Reset เคลียร์ช่อง Input
+        resetBtn.addEventListener("click", function () {
+          console.log("🔄 Resetting input fields...");
+          document.querySelectorAll(".popup-column input").forEach(input => {
+            input.value = "";
+          });
+        });
+
+        // ✅ ปุ่ม Save Model (เก็บค่าที่กรอกไว้)
+        saveBtn.addEventListener("click", function () {
+          console.log("💾 Saving new model data...");
+
+          const newData = {
+            paint: document.getElementById("newPaint").value || "0",
+            chair: document.getElementById("newChair").value || "0",
+            lighting: document.getElementById("newLighting").value || "0",
+            nail: document.getElementById("newNail").value || "0",
+            table: document.getElementById("newTable").value || "0"
+          };
+
+          console.log("✅ New Data Saved:", newData);
+          alert("New model data saved successfully!");
+
+          modal.style.display = "none"; // ปิด Popup หลังจาก Save
+        });
+
+        // ✅ ปิด Modal เมื่อคลิกข้างนอก
+        window.addEventListener("click", function (event) {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+      });
+
+    </script>
 </body>
 
 </html>
