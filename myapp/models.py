@@ -81,22 +81,17 @@ class PredictHire(models.Model):
 class Resource(models.Model):
     Resource_ID = models.AutoField(primary_key=True)
     Predict_ID = models.OneToOneField("PredictHire", on_delete=models.CASCADE, related_name="resource")
-
     Width = models.FloatField()
     Length = models.FloatField()
     Height = models.FloatField()
     Type = models.CharField(max_length=100)
     Location = models.CharField(max_length=150, null=True, blank=True)
     Budget = models.DecimalField(max_digits=15, decimal_places=2)
-
-    # ค่าพยากรณ์ (Predicted)
     Wood_P = models.IntegerField(verbose_name="Wood (pc.) Predict", default=0)
     Lighting_P = models.IntegerField(verbose_name="Lighting (pc.) Predict", default=0)
     Nail_P = models.IntegerField(verbose_name="Nail (box.) Predict", default=0)
     Table_P = models.IntegerField(verbose_name="Table Predict", default=0)
     Chair_P = models.IntegerField(verbose_name="Chair Predict", default=0)
-
-    # ค่าจริง (Actual)
     Wood = models.IntegerField(verbose_name="Wood (pc.) Actual", default=0)
     Lighting = models.IntegerField(verbose_name="Lighting (pc.) Actual", default=0)
     Nail = models.IntegerField(verbose_name="Nail (box.) Actual", default=0)
