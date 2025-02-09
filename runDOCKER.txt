@@ -1,0 +1,2 @@
+docker build -t myproject-main-web .
+docker run -d -p 8000:8000 --name django_app myproject-main-web
