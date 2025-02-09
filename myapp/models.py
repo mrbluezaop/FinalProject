@@ -1,5 +1,4 @@
 from django.db import models
-from django.forms import ValidationError
 from django.utils.timezone import now
 
 class Member(models.Model):
@@ -63,13 +62,6 @@ class PredictHire(models.Model):
     Nail = models.IntegerField(verbose_name="Nail (box.)", default=0)
     Table = models.IntegerField(verbose_name="Table", default=0)
     Chair = models.IntegerField(verbose_name="Chair", default=0)
-
-    def clean(self):
-        """ตรวจสอบว่าต้องมีค่าใน HireC_ID หรือ HireA_ID อย่างใดอย่างหนึ่ง"""
-        if not self.HireC_ID and not self.HireA_ID:
-            raise ValidationError("ต้องมีค่าใน HireC_ID หรือ HireA_ID อย่างน้อยหนึ่งฟิลด์")
-        if self.HireC_ID and self.HireA_ID:
-            raise ValidationError("ต้องเลือกเพียง HireC_ID หรือ HireA_ID เท่านั้น ห้ามมีค่าทั้งสอง")
 
     def __str__(self):
         if self.HireC_ID:
