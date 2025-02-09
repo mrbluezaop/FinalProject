@@ -59,12 +59,3 @@ class PredictHire(models.Model):
 
     def __str__(self):
         return f"Predict for Hire {self.HireC_ID.Hire_ID}"
-    
-class TestDatabaseJA(models.Model):
-    HireA_ID = models.AutoField(primary_key=True)
-    Width = models.FloatField(verbose_name="Width (m.)")  # FLOAT (ไม่ต้องมี max_length)
-    Length = models.FloatField(verbose_name="Length (m.)")  # FLOAT (ไม่ต้องมี max_length)
-    Height = models.FloatField(verbose_name="Height (m.)")  # FLOAT (ไม่ต้องมี max_length)
-    Type = models.CharField(max_length=100)  # VARCHAR2 (100)
-    Budget = models.CharField(max_length=150)  # VARCHAR2 (150)
-    Location = models.CharField(max_length=150)  # VARCHAR2 (150)

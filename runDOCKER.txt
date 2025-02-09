@@ -1,2 +1,7 @@
 docker build -t myproject-main-web .
 docker run -d -p 8000:8000 --name django_app myproject-main-web
+
+docker stop myproject-main-web
+
+docker rmi myproject-main-web
+docker rmi -f myproject-main-web
