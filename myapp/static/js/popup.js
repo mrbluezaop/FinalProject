@@ -237,3 +237,28 @@ function updateHireStatus() {
     });
 }
 
+// ทำให้ฟังก์ชันเปิด popup ใช้งานได้ใน HTML
+window.openPredictPopup = function() {
+    var popup = document.getElementById('predictPopup');
+    if (popup) {
+        popup.style.display = 'flex';
+    } else {
+        console.error("Error: #predictPopup not found in the document.");
+    }
+};
+
+// ปิด Popup
+document.addEventListener("DOMContentLoaded", function() {
+    var closeBtn = document.getElementById('closePopupBtn');
+    var popup = document.getElementById('predictPopup');
+
+    if (closeBtn && popup) {
+        closeBtn.addEventListener('click', function() {
+            popup.style.display = 'none';
+        });
+    } else {
+        console.error("Error: #closePopupBtn or #predictPopup not found in the document.");
+    }
+});
+
+
