@@ -13,6 +13,50 @@
   <link rel="stylesheet" href="{% static 'myapp/stylepopup.css' %}">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <script src="{% static 'js/popup.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+      // ✅ ฟังก์ชัน getCookie() สำหรับดึงค่า CSRF Token จากคุกกี้
+      function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+              const cookies = document.cookie.split(';');
+              for (let i = 0; i < cookies.length; i++) {
+                  const cookie = cookies[i].trim();
+                  // ตรวจสอบว่าคุกกี้ตรงกับชื่อที่ต้องการหรือไม่
+                  if (cookie.startsWith(name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+  </script>
+  <style>
+    .popup-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  
+    .result-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 10px 0;
+    }
+  
+    .result-box label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  
+    .result-box input {
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
@@ -411,15 +455,100 @@
         }
 
         // ✅ ฟังก์ชันเปิด Popup และตั้งค่าผลลัพธ์
-        window.showPredictPopup = function () {
-          document.getElementById("paintResult").innerText = "5 Cans";
-          document.getElementById("chairResult").innerText = "10 Chairs";
-          document.getElementById("lightingResult").innerText = "15 Bulbs";
-          document.getElementById("nailResult").innerText = "3 Boxes";
-          document.getElementById("tableResult").innerText = "2 Tables";
+        window.showPredictPopup = function (hireId) {
+            console.log("Fetching data for hireId:", hireId);
+            modal.style.display = "flex";
+            $.ajax({
+                url: `/api/hire/${hireId}/`,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log("Received Hire data:", data);
 
-          modal.style.display = "flex";
+                    // ✅ ตรวจสอบข้อมูล
+                    if (!data || !data.Width || !data.Length || !data.Height || !data.Type || !data.Budget) {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "ข้อมูลไม่ครบ!",
+                            text: "กรุณาตรวจสอบฐานข้อมูล",
+                            confirmButtonText: "ตกลง"
+                        });
+                        return;
+                    }
+
+                    // ✅ ส่งข้อมูลไปยัง API /predict/
+                    $.ajax({
+                        url: '/predict/',
+                        type: 'POST',
+                        data: JSON.stringify({
+                            'width': data.Width,
+                            'length': data.Length,
+                            'height': data.Height,
+                            'type': data.Type,
+                            'budget': data.Budget
+                        }),
+                        contentType: 'application/json',
+                        headers: { "X-CSRFToken": getCookie("csrftoken") },
+                        success: function (prediction) {
+                            console.log("Prediction result:", prediction);
+
+                            // ✅ ตรวจสอบค่าผลลัพธ์
+                            if (!prediction || typeof prediction !== "object" ||
+                                !("Paint" in prediction) || !("Chair" in prediction) ||
+                                !("Lighting" in prediction) || !("Nail" in prediction) ||
+                                !("Table" in prediction)) {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Prediction Failed",
+                                    text: "Missing required fields in prediction response.",
+                                    confirmButtonText: "ตกลง"
+                                });
+                                console.error("Incomplete prediction data:", prediction);
+                                return;
+                            }
+
+                            // ✅ อัปเดตค่าผลลัพธ์ใน `<input>`
+                            $('#paintResult').val(prediction.Paint);
+                            $('#chairResult').val(prediction.Chair);
+                            $('#lightingResult').val(prediction.Lighting);
+                            $('#nailResult').val(prediction.Nail);
+                            $('#tableResult').val(prediction.Table);
+
+                            // ✅ แสดง Modal `#predictModal`
+                            let modal = $('#predictModal');
+                            if (modal.length > 0) {
+                                modal.fadeIn();  // ใช้ fadeIn เพื่อให้มี Animation
+                            } else {
+                                console.error("❌ Modal element #predictModal not found!");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error:", error);
+                            Swal.fire({
+                                icon: "error",
+                                title: "Prediction Error",
+                                text: "ไม่สามารถพยากรณ์ได้ กรุณาลองใหม่",
+                                confirmButtonText: "ตกลง"
+                            });
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching hire data:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "ไม่สามารถดึงข้อมูลได้ กรุณาลองใหม่",
+                        confirmButtonText: "ตกลง"
+                    });
+                }
+            });
         };
+
+        // ✅ ปิด Modal เมื่อกดปุ่ม "CLOSE"
+        $('#closeModal').click(function () {
+            $('#predictModal').fadeOut();
+        });
 
         // ✅ ปิด Modal เมื่อกดปุ่ม CLOSE
         closeBtn.addEventListener("click", function () {

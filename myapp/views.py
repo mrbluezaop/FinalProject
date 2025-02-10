@@ -625,36 +625,39 @@ def prediction(request):
 def submit_hireA(request):
     if request.method == 'POST':
         try:
-            # รับค่าจากฟอร์ม
-            width = request.POST.get('width')
-            length = request.POST.get('length')
-            height = request.POST.get('height')
-            job_type = request.POST.get('job_type')
-            budget = request.POST.get('budget')
-            location = request.POST.get('location')
+            # ✅ อ่านค่าจาก request.body (JSON)
+            data = json.loads(request.body)
+            print("📌 Data received:", data)  # ตรวจสอบข้อมูลที่รับมา
 
-            # เรียกใช้งานฟังก์ชัน prediction
-            prediction_response = prediction(request)
-            prediction_data = json.loads(prediction_response.content)
+            width = data.get('width')
+            length = data.get('length')
+            height = data.get('height')
+            job_type = data.get('job_type')
+            budget = data.get('budget')
+            location = data.get('location')
+            paint = data.get('paint')
+            chair = data.get('chair')
+            lighting = data.get('lighting')
+            nail = data.get('nail')
+            table = data.get('table')
 
-            # ตรวจสอบว่ามีข้อผิดพลาดหรือไม่
-            if "error" in prediction_data:
-                return render(request, 'hire.html', {'error_message': f"เกิดข้อผิดพลาด: {prediction_data['error']}"})
+            # ✅ ตรวจสอบว่าข้อมูลที่ได้รับมาครบหรือไม่
+            if not all([width, length, height, job_type, budget, location]):
+                print("❌ Missing required fields")
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
 
-            # ✅ ดึงค่าจาก prediction มาใช้งาน
-            paint = prediction_data['Paint']
-            chair = prediction_data['Chair']
-            lighting = prediction_data['Lighting']
-            nail = prediction_data['Nail']
-            table = prediction_data['Table']
+            # ✅ แสดงค่าที่รับมา
+            print(f"📌 Width: {width}, Length: {length}, Height: {height}")
+            print(f"📌 Job Type: {job_type}, Budget: {budget}, Location: {location}")
+            print(f"📌 Paint: {paint}, Chair: {chair}, Lighting: {lighting}, Nail: {nail}, Table: {table}")
 
             # ✅ คำนวณพื้นที่
             area = round(float(width) * float(length) * float(height), 2)
 
-            # ✅ ฟังก์ชันปัดเศษเอง (ceil ถ้า > 0.5, floor ถ้า < 0.5)
             def round_custom(value):
                 return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
 
+            wood = area / 2.5
             # ✅ บันทึกข้อมูลลงในตาราง HireforAdmin
             hire_admin = HireforAdmin.objects.create(
                 Width=width,
@@ -674,19 +677,24 @@ def submit_hireA(request):
                 Type=job_type,
                 Budget=budget,
                 Area=area,
-                Wood=round_custom(area / 2.5),
-                Paint=paint,  # ✅ ใช้ค่าที่คำนวณได้
+                Wood=round_custom(wood),
+                Paint=paint,
                 Chair=chair,
                 Lighting=lighting,
                 Nail=nail,
                 Table=table
             )
 
-            # ✅ ส่งกลับหน้า hire.html พร้อมข้อความสำเร็จ
-            return render(request, 'hire.html', {'success_message': 'งานของคุณถูกเพิ่มแล้ว!'})
+            print("✅ Data saved successfully!")
+            return JsonResponse({
+                'success': True,
+                'message': 'บันทึกข้อมูลสำเร็จ!',
+                'hire_id': hire_admin.HireA_ID,
+                'predict_id': predict_admin.Predict_ID
+            })
 
         except Exception as e:
-            return render(request, 'hire.html', {'error_message': f'เกิดข้อผิดพลาด: {str(e)}'})
+            print(f"❌ Error in submit_hireA: {str(e)}")  # ตรวจสอบ error ที่เกิดขึ้น
+            return JsonResponse({'error': f'เกิดข้อผิดพลาด: {str(e)}'}, status=500)
 
-    # ✅ ถ้าเป็น GET ให้แสดงฟอร์ม
-    return render(request, 'hire.html')
+    return render(request, 'dashboard.html')

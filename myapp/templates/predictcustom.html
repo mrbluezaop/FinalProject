@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body>
@@ -61,17 +63,17 @@
                             <h1>Predict Data</h1> <!-- หัวข้อนี้จะใหญ่ขึ้นและอยู่ตรงกลาง -->
                             <div class="form-container">
                                 <label for="width">Width (m):</label>
-                                <input type="text" id="width">
+                                <input type="number" id="width" name="width" step="0.01" min="0" required placeholder="Enter The Number">
         
                                 <label for="length">Length (m):</label>
-                                <input type="text" id="length">
+                                <input type="number" id="length" name="length" step="0.01" min="0" required placeholder="Enter The Number">
         
                                 <label for="height">Height (m):</label>
-                                <input type="text" id="height">
+                                <input type="number" id="height" name="height" step="0.01" min="0" required placeholder="Enter The Number">
         
                                 <label for="job_type">Job Type</label>
                                 <select id="job_type" name="job_type" required>
-                                    <option value="Booth">Booth</option>
+                                    <option value="Booth" selected>Booth</option>
                                     <option value="BuildIN">Interior Design</option>
                                     <option value="Kiosk">Kiosk</option>
                                     <option value="Logo">Logo</option>
@@ -81,10 +83,10 @@
                                     <option value="Vinyl">Vinyl Sign</option>
                                 </select>
                                 <label for="location">Location</label>
-                                <textarea id="locationtext" name="location" placeholder="Enter work location" rows="4"></textarea>
+                                <textarea type="text" id="locationtext" name="location" placeholder="Enter work location" rows="4"></textarea>
 
                                 <label for="budget">Budget (THB):</label>
-                                <input type="text" id="budget">
+                                <input type="number" id="budget" name="width" min="0" required placeholder="Enter The Number">
         
                                 <button type="button" id="predictBtn">Predict</button>
                             </div>
@@ -131,7 +133,20 @@
                 var height = $('#height').val();
                 var job_type = $('#job_type').val();
                 var budget = $('#budget').val();
+                var location = $('#locationtext').val();
 
+                // ✅ ตรวจสอบว่ามีช่องไหนว่างหรือไม่
+                if (!width || !length || !height || !job_type || !budget || !location) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "กรุณากรอกข้อมูลให้ครบ!",
+                        text: "กรุณากรอกค่า Width, Length, Height, Budget และเลือก Job Type ก่อนกด Predict",
+                        confirmButtonText: "ตกลง"
+                    });
+                    return; // ❌ ไม่ให้ส่งข้อมูลถ้ายังกรอกไม่ครบ
+                }
+
+                // ✅ ถ้าข้อมูลครบแล้ว ให้ส่ง AJAX ไปยังเซิร์ฟเวอร์
                 $.ajax({
                     url: '/predict/',
                     type: 'POST',
@@ -143,28 +158,34 @@
                         'budget': budget
                     }),
                     contentType: 'application/json',
-                    headers: { "X-CSRFToken": getCookie("csrftoken") },  // ✅ เพิ่ม CSRF Token
+                    headers: { "X-CSRFToken": getCookie("csrftoken") },  
                     success: function (response) {
                         $('#paintResult').text(response.Paint);
                         $('#chairResult').text(response.Chair);
                         $('#lightingResult').text(response.Lighting);
                         $('#nailResult').text(response.Nail);
                         $('#tableResult').text(response.Table);
+
+                        // ✅ เปิดปุ่ม Save Predict หลังจาก Predict สำเร็จ
+                        $('#saveBtn').prop('disabled', false);
                     },
                     error: function (xhr, status, error) {
-                        console.log("Error:", error);
-                        console.log("Status:", status);
-                        console.log("Response:", xhr.responseText);
-                        alert("Error in prediction: " + xhr.responseText);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error in Prediction",
+                            text: "ไม่สามารถพยากรณ์ได้ กรุณาลองใหม่",
+                            confirmButtonText: "ตกลง"
+                        });
                     }
                 });
-            })
+            });
 
             $('#resetBtn').click(function () {
+                // รีเซ็ตค่าฟอร์ม
                 $('#width').val('');
                 $('#length').val('');
                 $('#height').val('');
-                $('#job_type').val('');
+                $('#job_type').val('Booth');
                 $('#budget').val('');
 
                 // ล้างค่าผลลัพธ์
@@ -173,6 +194,17 @@
                 $('#lightingResult').text('');
                 $('#nailResult').text('');
                 $('#tableResult').text('');
+
+                // ✅ ปิดปุ่ม Save Predict เมื่อรีเซ็ต
+                $('#saveBtn').prop('disabled', true);
+
+                // ✅ แจ้งเตือน Reset สำเร็จ
+                Swal.fire({
+                    icon: "success",
+                    title: "Reset สำเร็จ!",
+                    text: "ข้อมูลทั้งหมดถูกล้างแล้ว",
+                    confirmButtonText: "ตกลง"
+                });
             });
 
             $('#saveBtn').click(function() {
@@ -183,40 +215,88 @@
                 var budget = $('#budget').val();
                 var locationtext = $('#locationtext').val();
 
-                // ดึงค่าจากฟิลด์ผลลัพธ์
-                var paint = $('#paintResult').text();
-                var chair = $('#chairResult').text();
-                var lighting = $('#lightingResult').text();
-                var nail = $('#nailResult').text();
-                var table = $('#tableResult').text();
-
-                // ✅ ตรวจสอบว่ามีค่าหรือไม่
-                if (paint === '' || chair === '' || lighting === '' || nail === '' || table === '') {
-                    alert("กรุณากดปุ่ม Predict ก่อนทำการบันทึก!");
-                    return; // ออกจากฟังก์ชันถ้ายังไม่ได้ Predict
+                // ✅ ตรวจสอบว่ามีช่องไหนว่างหรือไม่
+                if (!width || !length || !height || !job_type || !budget) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "กรุณากรอกข้อมูลให้ครบ!",
+                        text: "กรุณากรอกค่า Width, Length, Height, Budget และเลือก Job Type ก่อนกด Save",
+                        confirmButtonText: "ตกลง"
+                    });
+                    return; // ❌ ไม่ให้ส่งข้อมูลถ้ายังกรอกไม่ครบ
+                } 
+                // ✅ ตรวจสอบว่ามีการกด Predict แล้วหรือยัง (ผลลัพธ์ต้องไม่ว่าง)
+                else if (!$('#paintResult').text().trim() && !$('#chairResult').text().trim() &&
+                        !$('#lightingResult').text().trim() && !$('#nailResult').text().trim() &&
+                        !$('#tableResult').text().trim()) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "ต้องกด Predict ก่อน!",
+                        text: "กรุณากดปุ่ม Predict เพื่อคำนวณค่าก่อนทำการบันทึก",
+                        confirmButtonText: "ตกลง"
+                    });
+                    return; // ❌ ไม่ให้ส่งข้อมูลถ้ายังไม่ได้ Predict
                 }
 
+                // ✅ ถ้าข้อมูลครบแล้วให้ส่งข้อมูลไปยังเซิร์ฟเวอร์
+                var paint = parseInt($('#paintResult').text()) || 0;
+                var chair = parseInt($('#chairResult').text()) || 0;
+                var lighting = parseInt($('#lightingResult').text()) || 0;
+                var nail = parseInt($('#nailResult').text()) || 0;
+                var table = parseInt($('#tableResult').text()) || 0;
+
                 $.ajax({
-                    url: '/save_predictA/', // เปลี่ยนเป็น URL ที่ต้องการ
-                    method: 'POST',
-                    data: {
-                        width: width,
-                        length: length,
-                        height: height,
-                        job_type: job_type,
-                        location: locationtext,
-                        budget: budget,
-                        paint: paint,
-                        chair: chair,
-                        lighting: lighting,
-                        nail: nail,
-                        table: table
-                    },
+                    url: '/submit_hireA/',
+                    type: 'POST',
+                    data: JSON.stringify({
+                        'width': width,
+                        'length': length,
+                        'height': height,
+                        'job_type': job_type,
+                        'location': locationtext,
+                        'budget': budget,
+                        'paint': paint,
+                        'chair': chair,
+                        'lighting': lighting,
+                        'nail': nail,
+                        'table': table
+                    }),
+                    contentType: 'application/json',
+                    headers: { "X-CSRFToken": getCookie("csrftoken") },
                     success: function(response) {
-                        alert("บันทึกข้อมูลสำเร็จ!");
+                        Swal.fire({
+                            icon: "success",
+                            title: "บันทึกข้อมูลสำเร็จ!",
+                            html: `
+                                <div style="text-align: left;">
+                                    <p><strong>Width:</strong> ${width} m</p>
+                                    <p><strong>Length:</strong> ${length} m</p>
+                                    <p><strong>Height:</strong> ${height} m</p>
+                                    <p><strong>Job Type:</strong> ${job_type}</p>
+                                    <p><strong>Location:</strong> ${locationtext}</p>
+                                    <p><strong>Budget:</strong> ${budget} THB</p>
+                                    <hr>
+                                    <p><strong>Paint:</strong> ${paint} Cans</p>
+                                    <p><strong>Chair:</strong> ${chair}</p>
+                                    <p><strong>Lighting:</strong> ${lighting} Bulbs</p>
+                                    <p><strong>Nail:</strong> ${nail} Boxes</p>
+                                    <p><strong>Table:</strong> ${table}</p>
+                                </div>
+                            `,
+                            confirmButtonText: "ตกลง"
+                        }).then(() => {
+                            window.location.href = "{% url 'predictcustom' %}";
+                        });
                     },
                     error: function(xhr, status, error) {
-                        alert("เกิดข้อผิดพลาด: " + xhr.responseText);
+                        Swal.fire({
+                            icon: "error",
+                            title: "เกิดข้อผิดพลาด!",
+                            text: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่",
+                            confirmButtonText: "ตกลง"
+                        }).then(() => {
+                            window.location.href = "{% url 'predictcustom' %}";
+                        });
                     }
                 });
             });
@@ -236,6 +316,7 @@
                 }
                 return cookieValue;
             }
+
         </script>
     </div>
 </body>
