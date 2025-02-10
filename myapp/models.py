@@ -15,13 +15,18 @@ class Member(models.Model):
     joined_date = models.DateTimeField(auto_now_add=True)
 
 class HireforAdmin(models.Model):
+    STATUS_CHOICES = [
+        ('in_progress', 'อยู่ระหว่างการทำ'),
+        ('completed', 'ทำเสร็จสิ้นแล้ว'),
+    ]
     HireA_ID = models.AutoField(primary_key=True)
     Width = models.FloatField(verbose_name="Width (m.)")
     Length = models.FloatField(verbose_name="Length (m.)")
     Height = models.FloatField(verbose_name="Height (m.)")
     Type = models.CharField(max_length=100)
     Budget = models.CharField(max_length=150)
-    Location = models.CharField(max_length=150)
+    Location = models.CharField(max_length=150, default="-")
+    Status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress', verbose_name="Status")
 
 class Hire(models.Model):
     STATUS_CHOICES = [
@@ -36,7 +41,7 @@ class Hire(models.Model):
     Height = models.FloatField(verbose_name="Height (m.)")
     Type = models.CharField(max_length=100)
     Budget = models.FloatField()  # ✅ แก้ไข: เอา max_length ออก
-    Location = models.CharField(max_length=150)
+    Location = models.CharField(max_length=150, default="-")
     Dateofhire = models.DateTimeField(default=now)
     Status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting_confirmation', verbose_name="Status")
 
@@ -59,6 +64,7 @@ class PredictHire(models.Model):
     Budget = models.DecimalField(max_digits=15, decimal_places=2)
     Area = models.FloatField(verbose_name="Area")
     Wood = models.IntegerField(verbose_name="Wood (pc.)", default=0)
+    Paint = models.IntegerField(verbose_name="Paint (buck.)", default=0)
     Lighting = models.IntegerField(verbose_name="Lighting (pc.)", default=0)
     Nail = models.IntegerField(verbose_name="Nail (box.)", default=0)
     Table = models.IntegerField(verbose_name="Table", default=0)
@@ -88,11 +94,13 @@ class Resource(models.Model):
     Location = models.CharField(max_length=150, null=True, blank=True)
     Budget = models.DecimalField(max_digits=15, decimal_places=2)
     Wood_P = models.IntegerField(verbose_name="Wood (pc.) Predict", default=0)
+    Paint_P = models.IntegerField(verbose_name="Paint (buck.) Predict", default=0)
     Lighting_P = models.IntegerField(verbose_name="Lighting (pc.) Predict", default=0)
     Nail_P = models.IntegerField(verbose_name="Nail (box.) Predict", default=0)
     Table_P = models.IntegerField(verbose_name="Table Predict", default=0)
     Chair_P = models.IntegerField(verbose_name="Chair Predict", default=0)
     Wood = models.IntegerField(verbose_name="Wood (pc.) Actual", default=0)
+    Paint = models.IntegerField(verbose_name="Paint (buck.)", default=0)
     Lighting = models.IntegerField(verbose_name="Lighting (pc.) Actual", default=0)
     Nail = models.IntegerField(verbose_name="Nail (box.) Actual", default=0)
     Table = models.IntegerField(verbose_name="Table Actual", default=0)

@@ -32,5 +32,6 @@ urlpatterns = [
     path('report/', views.report, name='report'),
     path('report/data/', views.report_chart, name='report_chart'),# เรียกข้อมูล JSON สำหรับกราฟ
     path('predict/', views.prediction, name='predict'),
+    path('submit_hireA/', views.submit_hireA, name='submit_predictA'),
 ]   + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
  
