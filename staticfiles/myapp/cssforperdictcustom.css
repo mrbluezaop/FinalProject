@@ -1,0 +1,142 @@
+/* จัด Layout หลักให้ Sidebar อยู่ซ้าย และ Content อยู่ขวา */
+.content-wrapper {
+    display: flex;
+    margin-left: 220px; /* เว้นระยะให้ Sidebar */
+    padding: 20px;
+}
+
+/* คอนเทนเนอร์สำหรับ Predict Data */
+.predict-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    padding-right: 10x; /* เพิ่ม padding ขวาให้เนื้อหาไม่ชิด */
+}
+
+/* ส่วนซ้าย (ฟอร์มกรอกข้อมูล) */
+.predict-form {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ส่วนขวา (ผลลัพธ์) */
+.predict-results {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* กล่องฟอร์ม */
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* ป้ายกำกับ */
+.form-container label {
+    width: 100%;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* อินพุตและตัวเลือก */
+.form-container input,
+.form-container select {
+    width: calc(50% - 10px);
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* ปุ่มพยากรณ์ */
+#predictBtn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#predictBtn:hover {
+    background: #0056b3;
+}
+
+/* กล่องผลลัพธ์ */
+.result-box {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* ป้ายกำกับผลลัพธ์ */
+.result-box label {
+    font-weight: bold;
+    color: #444;
+}
+
+/* ปุ่ม Reset และ Save */
+#resetBtn, #saveBtn {
+    width: 48%;
+    padding: 10px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#resetBtn {
+    background: #dc3545;
+    color: white;
+}
+
+#resetBtn:hover {
+    background: #a71d2a;
+}
+
+#saveBtn {
+    background: #28a745;
+    color: white;
+}
+
+#saveBtn:hover {
+    background: #1e7e34;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .content-wrapper {
+        flex-direction: column;
+        margin-left: 0;
+    }
+
+    .predict-container {
+        flex-direction: column;
+    }
+
+    .predict-form, .predict-results {
+        width: 100%;
+    }
+}
+
+/* ทำให้ Predict Data มีขนาดใหญ่และอยู่ตรงกลาง */
+.predict-form h1 {
+    font-size: 30px; /* ปรับขนาดให้ใหญ่ขึ้น */
+    font-weight: bold;
+    text-align: center; /* จัดให้ตรงกลาง */
+    margin-bottom: 20px;
+}

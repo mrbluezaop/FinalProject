@@ -80,7 +80,9 @@
                                     <option value="Towerbox">Tower Box</option>
                                     <option value="Vinyl">Vinyl Sign</option>
                                 </select>
-        
+                                <label for="location">Location</label>
+                                <textarea id="locationtext" name="location" placeholder="Enter work location" rows="4"></textarea>
+
                                 <label for="budget">Budget (THB):</label>
                                 <input type="text" id="budget">
         
@@ -157,6 +159,7 @@
                     }
                 });
             })
+
             $('#resetBtn').click(function () {
                 $('#width').val('');
                 $('#length').val('');
@@ -172,6 +175,51 @@
                 $('#tableResult').text('');
             });
 
+            $('#saveBtn').click(function() {
+                var width = $('#width').val();
+                var length = $('#length').val();
+                var height = $('#height').val();
+                var job_type = $('#job_type').val();
+                var budget = $('#budget').val();
+                var locationtext = $('#locationtext').val();
+
+                // ดึงค่าจากฟิลด์ผลลัพธ์
+                var paint = $('#paintResult').text();
+                var chair = $('#chairResult').text();
+                var lighting = $('#lightingResult').text();
+                var nail = $('#nailResult').text();
+                var table = $('#tableResult').text();
+
+                // ✅ ตรวจสอบว่ามีค่าหรือไม่
+                if (paint === '' || chair === '' || lighting === '' || nail === '' || table === '') {
+                    alert("กรุณากดปุ่ม Predict ก่อนทำการบันทึก!");
+                    return; // ออกจากฟังก์ชันถ้ายังไม่ได้ Predict
+                }
+
+                $.ajax({
+                    url: '/save_predictA/', // เปลี่ยนเป็น URL ที่ต้องการ
+                    method: 'POST',
+                    data: {
+                        width: width,
+                        length: length,
+                        height: height,
+                        job_type: job_type,
+                        location: locationtext,
+                        budget: budget,
+                        paint: paint,
+                        chair: chair,
+                        lighting: lighting,
+                        nail: nail,
+                        table: table
+                    },
+                    success: function(response) {
+                        alert("บันทึกข้อมูลสำเร็จ!");
+                    },
+                    error: function(xhr, status, error) {
+                        alert("เกิดข้อผิดพลาด: " + xhr.responseText);
+                    }
+                });
+            });
 
             // ✅ ฟังก์ชันดึง CSRF Token
             function getCookie(name) {

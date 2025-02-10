@@ -22,11 +22,10 @@ from django.core.exceptions import ImproperlyConfigured
 import json
 from datetime import datetime
 from django.contrib import messages
-from .models import Hire, Member
+from .models import Hire, Member, HireforAdmin, Resource, PredictHire
 import bcrypt
 import re
 from django.urls import reverse
-from .models import Hire
 from django.db.models import Count
 import os 
 import joblib
@@ -623,3 +622,71 @@ def prediction(request):
     else:
         return JsonResponse({"error": "Invalid request method"}, status=400)
 
+def submit_hireA(request):
+    if request.method == 'POST':
+        try:
+            # รับค่าจากฟอร์ม
+            width = request.POST.get('width')
+            length = request.POST.get('length')
+            height = request.POST.get('height')
+            job_type = request.POST.get('job_type')
+            budget = request.POST.get('budget')
+            location = request.POST.get('location')
+
+            # เรียกใช้งานฟังก์ชัน prediction
+            prediction_response = prediction(request)
+            prediction_data = json.loads(prediction_response.content)
+
+            # ตรวจสอบว่ามีข้อผิดพลาดหรือไม่
+            if "error" in prediction_data:
+                return render(request, 'hire.html', {'error_message': f"เกิดข้อผิดพลาด: {prediction_data['error']}"})
+
+            # ✅ ดึงค่าจาก prediction มาใช้งาน
+            paint = prediction_data['Paint']
+            chair = prediction_data['Chair']
+            lighting = prediction_data['Lighting']
+            nail = prediction_data['Nail']
+            table = prediction_data['Table']
+
+            # ✅ คำนวณพื้นที่
+            area = round(float(width) * float(length) * float(height), 2)
+
+            # ✅ ฟังก์ชันปัดเศษเอง (ceil ถ้า > 0.5, floor ถ้า < 0.5)
+            def round_custom(value):
+                return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
+
+            # ✅ บันทึกข้อมูลลงในตาราง HireforAdmin
+            hire_admin = HireforAdmin.objects.create(
+                Width=width,
+                Length=length,
+                Height=height,
+                Type=job_type,
+                Budget=budget,
+                Location=location
+            )
+
+            # ✅ บันทึกข้อมูลลงใน PredictHire
+            predict_admin = PredictHire.objects.create(
+                HireA_ID=hire_admin,
+                Width=width,
+                Length=length,
+                Height=height,
+                Type=job_type,
+                Budget=budget,
+                Area=area,
+                Wood=round_custom(area / 2.5),
+                Paint=paint,  # ✅ ใช้ค่าที่คำนวณได้
+                Chair=chair,
+                Lighting=lighting,
+                Nail=nail,
+                Table=table
+            )
+
+            # ✅ ส่งกลับหน้า hire.html พร้อมข้อความสำเร็จ
+            return render(request, 'hire.html', {'success_message': 'งานของคุณถูกเพิ่มแล้ว!'})
+
+        except Exception as e:
+            return render(request, 'hire.html', {'error_message': f'เกิดข้อผิดพลาด: {str(e)}'})
+
+    # ✅ ถ้าเป็น GET ให้แสดงฟอร์ม
+    return render(request, 'hire.html')

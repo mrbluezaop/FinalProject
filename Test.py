@@ -1,109 +1,93 @@
-'''from django.shortcuts import render
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-from django.http import JsonResponse
-from django.apps import AppConfig
-from django.core.exceptions import ImproperlyConfigured
-from pydantic import BaseModel
-import joblib
-import numpy as np
-import pandas as pd
-import os
+'''from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import PredictHire, HireforAdmin
 
-# โหลดโมเดล
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(BASE_DIR, 'models')
-
-try:
-    model_chair = joblib.load(os.path.join(MODEL_DIR, 'model_chair.pkl'))
-    model_lighting = joblib.load(os.path.join(MODEL_DIR, 'model_lighting.pkl'))
-    model_table = joblib.load(os.path.join(MODEL_DIR, 'model_table.pkl'))
-    model_paint_group1 = joblib.load(os.path.join(MODEL_DIR, 'paint', 'model_paint1.pkl'))
-    model_paint_group2 = joblib.load(os.path.join(MODEL_DIR, 'paint', 'model_paint2.pkl'))
-    model_nail_group1 = joblib.load(os.path.join(MODEL_DIR, 'nail', 'model_nail1.pkl'))
-    model_nail_group2 = joblib.load(os.path.join(MODEL_DIR, 'nail', 'model_nail2.pkl'))
-except Exception as e:
-    raise ImproperlyConfigured(f"Error loading models: {e}")
-
-# สร้างฟังก์ชันช่วยสำหรับพยากรณ์
-
-def predicted_paint(area_input, width_input, height_input, length_input):
-    input_data = np.array([[area_input, width_input, height_input, length_input]])
-    if area_input / 15 <= model_paint_group1.predict(input_data):
-        return model_paint_group1.predict(input_data)[0]
-    else:
-        return model_paint_group2.predict(input_data)[0]
-
-def predicted_nail(area_input, width_input, height_input):
-    input_data = np.array([[area_input, width_input, height_input]])
-    if area_input >= 60 and model_nail_group1.predict(input_data) < 18:
-        return model_nail_group1.predict(input_data)[0]
-    else:
-        return model_nail_group2.predict(input_data)[0]
-
-# สร้าง API Endpoint
-class PredictionAPIView(APIView):
-    def post(self, request):
+@csrf_exempt
+def SavePredictHire(request):
+    if request.method == "POST":
         try:
-            data = request.data
+            data = json.loads(request.body.decode('utf-8'))  # อ่าน JSON request
+
+            # ✅ รับค่าจาก JSON
             width = float(data.get('width', 0))
-            height = float(data.get('height', 0))
             length = float(data.get('length', 0))
+            height = float(data.get('height', 0))
+            job_type = data.get('type')
             budget = float(data.get('budget', 0))
-            booth = int(data.get('booth', 0))
+            paint = int(data.get('paint', 0))
+            chair = int(data.get('chair', 0))
+            lighting = int(data.get('lighting', 0))
+            nail = int(data.get('nail', 0))
+            table = int(data.get('table', 0))
+            hire_id = data.get('hire_id')
 
-            area_input = width * length * height
-            wood = area_input / 2.5
+            # ✅ ตรวจสอบว่า `HireA_ID` มีอยู่จริง
+            try:
+                hire_admin = HireforAdmin.objects.get(id=hire_id)
+            except HireforAdmin.DoesNotExist:
+                return JsonResponse({"error": "HireA_ID not found"}, status=400)
 
-            input_data = pd.DataFrame({
-                'Budget': [budget],
-                'Width': [width],
-                'Length': [length],
-                'Height': [height],
-                'Wood (sm.)': [area_input],
-                'Booth': [booth]
+            # ✅ ตรวจสอบว่ามี `PredictHire` ที่เกี่ยวข้องหรือไม่
+            predict_hire = PredictHire.objects.filter(HireA_ID=hire_admin).first()
+
+            if predict_hire:
+                # ✅ ถ้ามีข้อมูลอยู่แล้ว → ดึงข้อมูลเดิมกลับไป (ไม่สร้างใหม่)
+                return JsonResponse({  
+                    "success": "Prediction data found!",
+                    "Predict_ID": predict_hire.Predict_ID,
+                    "Width": predict_hire.Width,
+                    "Length": predict_hire.Length,
+                    "Height": predict_hire.Height,
+                    "Type": predict_hire.Type,
+                    "Budget": predict_hire.Budget,
+                    "Area": predict_hire.Area,
+                    "Wood": predict_hire.Wood,
+                    "Paint": predict_hire.Paint,
+                    "Chair": predict_hire.Chair,
+                    "Lighting": predict_hire.Lighting,
+                    "Nail": predict_hire.Nail,
+                    "Table": predict_hire.Table,
+                    "status": "Data Retrieved"
+                })
+
+            # ✅ ถ้ายังไม่มี `PredictHire` ให้สร้างใหม่
+            predict_hire = PredictHire.objects.create(
+                HireA_ID=hire_admin,  # ใช้ HireA_ID ที่มีอยู่
+                Width=width,
+                Length=length,
+                Height=height,
+                Type=job_type,
+                Budget=budget,
+                Area=round(width * length * height, 2),
+                Wood=round((width * length * height) / 2.5),
+                Paint=paint,
+                Chair=chair,
+                Lighting=lighting,
+                Nail=nail,
+                Table=table
+            )
+
+            return JsonResponse({
+                "success": "Prediction data created successfully!",
+                "Predict_ID": predict_hire.Predict_ID,
+                "Width": predict_hire.Width,
+                "Length": predict_hire.Length,
+                "Height": predict_hire.Height,
+                "Type": predict_hire.Type,
+                "Budget": predict_hire.Budget,
+                "Area": predict_hire.Area,
+                "Wood": predict_hire.Wood,
+                "Paint": predict_hire.Paint,
+                "Chair": predict_hire.Chair,
+                "Lighting": predict_hire.Lighting,
+                "Nail": predict_hire.Nail,
+                "Table": predict_hire.Table,
+                "status": "Created"
             })
 
-            input_data_forlight = pd.DataFrame({
-                'Budget': [budget],
-                'Width': [width],
-                'Length': [length],
-                'Height': [height],
-                'Wood (sm.)': [area_input]
-            })
-
-            input_data_fortable = pd.DataFrame({
-                'Budget': [budget],
-                'Width': [width],
-                'Length': [length],
-                'Height': [height],
-                'Wood (sm.)': [area_input],
-                'Wood (pc.)': [wood],
-                'Booth': [booth]
-            })
-
-            predict_paint = predicted_paint(area_input, width, height, length)
-            predict_chair = model_chair.predict(input_data)[0]
-            predict_lighting = model_lighting.predict(input_data_forlight)[0]
-            predict_nail = predicted_nail(area_input, width, height)
-            predict_table = model_table.predict(input_data_fortable)[0]
-
-            return Response({
-                "Paint": round(predict_paint, 2),
-                "Chair": round(predict_chair, 2),
-                "Lighting": round(predict_lighting, 2),
-                "Nail": round(predict_nail, 2),
-                "Table": round(predict_table, 2)
-            }, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-# กำหนด URL Routing
-from django.urls import path
-
-urlpatterns = [
-    path('predict/', PredictionAPIView.as_view(), name='predict'),
-]
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=400)
 '''
