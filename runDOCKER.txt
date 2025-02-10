@@ -5,3 +5,6 @@ docker stop image myproject-main-web
 
 docker rmi myproject-main-web
 docker rmi -f myproject-main-web
+
+
+TSSESESE
