@@ -28,6 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["thewinnerinteriors.com", "www.thewinnerinteriors.com"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://thewinnerinteriors.com",
+    "https://www.thewinnerinteriors.com"
+]
+
 
 # Application definition
 
