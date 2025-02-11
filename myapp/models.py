@@ -26,6 +26,7 @@ class HireforAdmin(models.Model):
     Type = models.CharField(max_length=100)
     Budget = models.CharField(max_length=150)
     Location = models.CharField(max_length=150, default="-")
+    Dateofhire = models.DateTimeField(default=now)
     Status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress', verbose_name="Status")
 
 class Hire(models.Model):
@@ -69,6 +70,7 @@ class PredictHire(models.Model):
     Nail = models.IntegerField(verbose_name="Nail (box.)", default=0)
     Table = models.IntegerField(verbose_name="Table", default=0)
     Chair = models.IntegerField(verbose_name="Chair", default=0)
+    Dateofhire = models.DateTimeField(default=now)
 
     def clean(self):
         """✅ ตรวจสอบว่าต้องมีค่าใน HireC_ID หรือ HireA_ID อย่างใดอย่างหนึ่ง"""
@@ -76,6 +78,14 @@ class PredictHire(models.Model):
             raise ValidationError("ต้องมีค่าใน HireC_ID หรือ HireA_ID อย่างน้อยหนึ่งฟิลด์")
         if self.HireC_ID and self.HireA_ID:
             raise ValidationError("ต้องเลือกเพียง HireC_ID หรือ HireA_ID เท่านั้น ห้ามมีค่าทั้งสอง")
+
+    def save(self, *args, **kwargs):
+        """✅ กำหนดค่า Dateofhire ตาม HireC_ID หรือ HireA_ID"""
+        if self.HireC_ID:
+            self.Dateofhire = self.HireC_ID.Dateofhire
+        elif self.HireA_ID:
+            self.Dateofhire = self.HireA_ID.Dateofhire
+        super().save(*args, **kwargs)
 
     def __str__(self):
         if self.HireC_ID:
@@ -105,6 +115,15 @@ class Resource(models.Model):
     Nail = models.IntegerField(verbose_name="Nail (box.) Actual", default=0)
     Table = models.IntegerField(verbose_name="Table Actual", default=0)
     Chair = models.IntegerField(verbose_name="Chair Actual", default=0)
+    Dateofhire = models.DateTimeField(null=True, blank=True)  # ✅ อนุญาตให้เป็น null และ blank ได้
+    DateSuccess = models.DateTimeField(default=now)
+
+    def save(self, *args, **kwargs):
+        """✅ กำหนดค่า Dateofhire จาก PredictHire"""
+        if self.Predict_ID and self.Predict_ID.Dateofhire:
+            self.Dateofhire = self.Predict_ID.Dateofhire
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Resource for PredictHire {self.Predict_ID.Predict_ID if self.Predict_ID else 'Unknown'}"
+
