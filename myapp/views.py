@@ -363,42 +363,68 @@ def update_member(request):
 
 def submit_hire(request):
     if request.method == 'POST':
-        # กำหนด Customer_ID จากเซสชัน (หรือวิธีอื่น)
-        customer_id = request.session.get('customer_id')  # ต้องเก็บ customer_id ไว้ในเซสชัน
-        if not customer_id:
-            return render(request, 'hire.html', {'error_message': 'Customer ID not found in session!'})
-
-        # ตรวจสอบว่า Customer_ID มีอยู่ในตาราง Member
         try:
-            customer = Member.objects.get(Customer_ID=customer_id)
-        except Member.DoesNotExist:
-            return render(request, 'hire.html', {'error_message': 'Customer not found!'})
+            customer_id = request.session.get('customer_id')
+            if not customer_id:
+                return render(request, 'hire.html', {'error_message': 'Customer ID not found in session!'})
 
-        # รับค่าจากฟอร์ม
-        width = request.POST.get('width')
-        length = request.POST.get('length')
-        height = request.POST.get('height')
-        job_type = request.POST.get('job_type')
-        budget = request.POST.get('budget')
-        location = request.POST.get('location')
+            try:
+                customer = Member.objects.get(Customer_ID=customer_id)
+            except Member.DoesNotExist:
+                return render(request, 'hire.html', {'error_message': 'Customer not found!'})
 
-        # บันทึกข้อมูลลงในโมเดล Hire
-        hire = Hire(
-            Customer_ID=customer,
-            Width=width,
-            Length=length,
-            Height=height,
-            Type=job_type,
-            Budget=budget,
-            Location=location
-        )
-        hire.save()
+            width = request.POST.get('width')
+            length = request.POST.get('length')
+            height = request.POST.get('height')
+            job_type = request.POST.get('job_type')
+            budget = request.POST.get('budget')
+            location = request.POST.get('location')
 
-        # ส่งกลับหน้าเดิมพร้อมข้อความสำเร็จ
-        return render(request, 'hire.html', {'success_message': 'คำสั่งซื้อของคุณถูกบันทึกเรียบร้อยแล้ว!'})
+            if not all([width, length, height, job_type, budget, location]):
+                return render(request, 'hire.html', {'error_message': 'กรุณากรอกข้อมูลให้ครบถ้วน!'})
 
-    # หากเป็น GET request ให้แสดงฟอร์ม
-    return render(request, 'hire.html')
+            hire = Hire.objects.create(
+                Customer_ID=customer,
+                Width=width,
+                Length=length,
+                Height=height,
+                Type=job_type,
+                Budget=budget,
+                Location=location
+            )
+
+            area = round(float(width) * float(length) * float(height), 2)
+
+            def round_custom(value):
+                return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
+
+            wood = area / 2.5
+
+            # เรียกใช้งานฟังก์ชัน predictionder
+            response = predictionder(width, length, height, job_type, budget)
+            
+            if "error" in response:
+                return render(request, 'hire.html', {'error_message': 'Prediction Error'})
+
+            predict_hire = PredictHire.objects.create(
+                HireC_ID=hire,
+                Width=width,
+                Length=length,
+                Height=height,
+                Type=job_type,
+                Budget=budget,
+                Area=area,
+                Wood=round_custom(wood),
+                Paint=response.get('Paint', 0),
+                Chair=response.get('Chair', 0),
+                Lighting=response.get('Lighting', 0),
+                Nail=response.get('Nail', 0),
+                Table=response.get('Table', 0)
+            )
+
+            return render(request, 'hire.html', {'success_message': 'บันทึกข้อมูลสำเร็จ'})
+        except Exception as e:
+            return render(request, 'hire.html', {'error_message': str(e)})
 
 def hire_list(request):
     # ดึงข้อมูลทั้งหมดจากตาราง Hire
@@ -698,3 +724,78 @@ def submit_hireA(request):
             return JsonResponse({'error': f'เกิดข้อผิดพลาด: {str(e)}'}, status=500)
 
     return render(request, 'dashboard.html')
+
+def predictionder(width, length, height, job_type, budget):
+    try:
+        width_input = float(width)
+        length_input = float(length)
+        height_input = float(height)
+        area = width_input * length_input * height_input
+        wood = area / 3
+        label_type = 1 if job_type == 'Booth' else 0
+
+        def predicted_paint(area, width_input, height_input, length_input):
+            input_data = np.array([[area, width_input, height_input, length_input]])
+            if area / 15 <= model_paint_group1.predict(input_data):
+                return model_paint_group1.predict(input_data)[0]
+            else:
+                return model_paint_group2.predict(input_data)[0]
+
+        def predicted_nail(area, width_input, height_input):
+            input_data = np.array([[area, width_input, height_input]])
+            if area >= 60 and model_nail_group1.predict(input_data) < 18:
+                return model_nail_group1.predict(input_data)[0]
+            else:
+                return model_nail_group2.predict(input_data)[0]
+
+        def round_custom(value):
+            return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
+        
+        input_data_forchair = pd.DataFrame({
+            'Budget': [budget],
+            'Width': [width_input],
+            'Length': [length_input],
+            'Height': [height_input],
+            'Wood (sm.)': [area],
+            'Booth': [label_type]
+        })
+
+        input_data_forlight = pd.DataFrame({
+            'Budget': [budget],
+            'Width': [width_input],
+            'Length': [length_input],
+            'Height': [height_input],
+            'Wood (sm.)': [area]
+        })
+
+        input_data_fortable = pd.DataFrame({
+            'Budget': [budget],
+            'Width': [width_input],
+            'Length': [length_input],
+            'Height': [height_input],
+            'Wood (sm.)': [area],
+            'Wood (pc.)': [wood],
+            'Booth': [label_type]
+        })
+
+        predict_paint = predicted_paint(area, width_input, height_input, length_input)
+        predict_chair = model_chair.predict(input_data_forchair)[0]
+        predict_lighting = model_lighting.predict(input_data_forlight)[0]
+        predict_nail = predicted_nail(area, width_input, height_input)
+        predict_table = model_table.predict(input_data_fortable)[0]
+
+        Paint = round_custom(predict_paint)
+        Chair = round_custom(predict_chair)
+        Lighting = round_custom(predict_lighting)
+        Nail = round_custom(predict_nail)
+        Table = round_custom(predict_table)
+
+        return {
+            "Paint": Paint,
+            "Chair": Chair,
+            "Lighting": Lighting,
+            "Nail": Nail,
+            "Table": Table
+        }
+    except Exception as e:
+        return {"error": str(e)}

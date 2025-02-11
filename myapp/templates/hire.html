@@ -13,6 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'myapp/stylehire.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>ฟอร์มสั่งซื้อ</title>
 </head>
 
@@ -24,7 +25,7 @@
                     <div class="heading_container text-center">
                         <br>
                         <h1>Forms</h1>
-                        <form action="/submit-hire" method="POST">
+                        <form action="/submit-hire" method="POST" id="orderForm">
                             {% csrf_token %}
 
                             <!-- แสดงข้อความ Error หรือ Success -->
@@ -33,7 +34,16 @@
                             {% endif %}
 
                             {% if success_message %}
-                            <p style="color: green; font-weight: bold;">{{ success_message }}</p>
+                                <script>
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'บันทึกข้อมูลสำเร็จ',
+                                        text: '{{ success_message }}',
+                                        confirmButtonText: 'ตกลง'
+                                    }).then(() => {
+                                        window.location.href = "/hire/"; // เปลี่ยนหน้าไปที่อื่นหลังแจ้งเตือน
+                                    });
+                                </script>
                             {% endif %}
 
                             <!-- Width -->
@@ -42,13 +52,11 @@
 
                             <!-- Length -->
                             <label for="length">Length (meters)</label>
-                            <input type="number" step="0.01" id="length" name="length" placeholder="Enter length"
-                                required>
+                            <input type="number" step="0.01" id="length" name="length" placeholder="Enter length" required>
 
                             <!-- Height -->
                             <label for="height">Height (meters)</label>
-                            <input type="number" step="0.01" id="height" name="height" placeholder="Enter height"
-                                required>
+                            <input type="number" step="0.01" id="height" name="height" placeholder="Enter height" required>
 
                             <!-- Job Type -->
                             <label for="job_type">Job Type</label>
@@ -69,12 +77,10 @@
 
                             <!-- Location -->
                             <label for="location">Location</label>
-                            <textarea id="location" name="location" placeholder="Enter work location" rows="4"
-                                required></textarea>
+                            <textarea id="location" name="location" placeholder="Enter work location" rows="4" required></textarea>
 
                             <!-- Submit Button -->
                             <button class="button-41" role="button" type="submit">Order</button>
-
                             <br>
                         </form>
                     </div>

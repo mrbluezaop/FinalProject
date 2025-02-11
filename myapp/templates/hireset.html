@@ -466,7 +466,7 @@
                     console.log("Received Hire data:", data);
 
                     // ✅ ตรวจสอบข้อมูล
-                    if (!data || !data.Width || !data.Length || !data.Height || !data.Type || !data.Budget) {
+                    if (!data || !data.Width || !data.Length || !data.Height || !data.Type || !data.Budget || !data.Location) {
                         Swal.fire({
                             icon: "warning",
                             title: "ข้อมูลไม่ครบ!",
