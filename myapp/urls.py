@@ -3,6 +3,7 @@ from myapp import views
 from .views import filter_hire_by_date
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import generate_pdf
 
 
 urlpatterns = [
@@ -33,5 +34,6 @@ urlpatterns = [
     path('report/data/', views.report_chart, name='report_chart'),# เรียกข้อมูล JSON สำหรับกราฟ
     path('predict/', views.prediction, name='predict'),
     path('submit_hireA/', views.submit_hireA, name='submit_predictA'),
+    path("download-pdf/", generate_pdf, name="download_pdf"),
 ]   + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
  

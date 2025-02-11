@@ -31,6 +31,16 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
+import os
+import io
+from django.http import HttpResponse
+
 # Create your views here.
 
 def base(request):
@@ -799,3 +809,124 @@ def predictionder(width, length, height, job_type, budget):
         }
     except Exception as e:
         return {"error": str(e)}
+
+def generate_pdf(request):
+# ✅ ดึง `Customer_ID` จากเซสชันแทน
+    customer_id = request.session.get("Customer_ID")
+
+    # ✅ ถ้าไม่มี `Customer_ID` ให้แจ้งเตือน
+    if not customer_id:
+        return HttpResponse("ไม่พบ Customer_ID ในเซสชัน", status=400)
+
+    # ✅ ใช้ `get_object_or_404()` เพื่อดึงข้อมูลสมาชิก
+    member = get_object_or_404(Member, Customer_ID=customer_id)
+
+    firstname = member.Firstname
+    lastname = member.Lastname
+    address = member.Address
+    job_type = member.Job_Type
+    
+
+    # ✅ ใช้ os.path.join() เพื่อให้พาธฟอนต์ถูกต้อง
+    font_path = os.path.join(settings.BASE_DIR, "static", "fonts", "THSarabunNew.ttf")
+
+    # ✅ ตรวจสอบว่าไฟล์ฟอนต์มีอยู่จริงก่อนใช้งาน
+    if os.path.exists(font_path):
+        pdfmetrics.registerFont(TTFont("THSarabunNew", font_path))
+        font_name = "THSarabunNew"
+    else:
+        font_name = "Helvetica"  # ใช้ฟอนต์ Default ถ้าไม่พบฟอนต์ไทย
+
+
+    # ข้อมูลบริษัท
+    company_name = "บริษัท เดอะวินเนอร์ อินทีเรีย & แอดเวอร์ไทซิ่ง จำกัด"
+    company_address = "63/2476 ซ.ราษฎร์พัฒนา 5 ถนนราษฎร์พัฒนา เขตสะพานสูง กรุงเทพฯ 10240"
+    company_tax = "เลขประจำตัวผู้เสียภาษี: 010 555 6022 673"
+    company_contact = "โทรศัพท์: 081-440-5192 | Email: thewinnerceo.th@gmail.com"
+    logo_path = os.path.join("static", "image", "Logo.jpg")
+
+    # รายการสินค้า
+    items = [
+        ("โครงสร้างผนัง", 1, 85000),
+        ("โครงสร้างป้าย", 1, 30000),
+        ("ตู้โชว์สินค้า", 4, 8750),
+        ("งานกราฟฟิก", 1, 25000),
+        ("งานพื้น", 1, 15000),
+        ("งานระบบไฟ", 1, 15000),
+        ("งานเคาน์เตอร์", 1, 15000),
+        ("โต๊ะ & เก้าอี้", 2, 3500),
+        ("รวมค่าใช้จ่าย", 1, 30000)
+    ]
+
+    buffer = io.BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+
+    # ✅ เพิ่มโลโก้บริษัท
+    try:
+        pdf.drawImage(logo_path, -100, 720, width=400, height=70)
+    except:
+        pass  # ถ้าไม่มีโลโก้ จะไม่แสดง (ป้องกัน error)
+
+    # ✅ เพิ่มข้อมูลบริษัท (ใช้ฟอนต์ที่ถูกต้อง)
+    pdf.setFont(font_name, 18)
+    pdf.drawString(180, 780, company_name)
+
+    pdf.setFont(font_name, 14)
+    pdf.drawString(180, 760, company_address)
+    pdf.drawString(180, 740, company_tax)
+    pdf.drawString(180, 720, company_contact)
+
+    # ✅ เพิ่มหัวข้อเอกสาร
+    pdf.setFont(font_name, 18)
+    pdf.drawString(200, 690, "ใบเสนอราคา / ใบสั่งซื้อ")
+
+    # ✅ รายละเอียดลูกค้า
+    pdf.setFont(font_name, 16)
+    pdf.drawString(50, 660, f"ชื่อลูกค้า: {firstname} {lastname}")
+    pdf.drawString(50, 640, f"ที่อยู่: {address}")
+    pdf.drawString(50, 620, f"ชื่องาน: {job_type}")
+
+    # ✅ เพิ่มตารางรายการสินค้า
+    y = 400
+    data = [["ลำดับ", "รายละเอียด", "จำนวน", "ราคา/หน่วย", "รวม (บาท)"]]
+    total_price = 0
+    for i, (desc, qty, unit_price) in enumerate(items, start=1):
+        total = qty * unit_price
+        data.append([i, desc, qty, f"{unit_price:,.2f}", f"{total:,.2f}"])
+        total_price += total
+
+    # ✅ ภาษีและยอดรวม
+    vat = total_price * 0.07
+    net_total = total_price + vat
+
+    data.append(["", "รวมทั้งหมด", "", "", f"{total_price:,.2f}"])
+    data.append(["", "ภาษีมูลค่าเพิ่ม 7%", "", "", f"{vat:,.2f}"])
+    data.append(["", "ยอดรวมสุทธิ", "", "", f"{net_total:,.2f}"])
+
+    # ✅ สร้างตาราง
+    table = Table(data, colWidths=[50, 200, 50, 100, 100])
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, 0), font_name),  # ✅ ใช้ฟอนต์ที่โหลดได้
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+    ]))
+
+    table.wrapOn(pdf, 50, 500)
+    table.drawOn(pdf, 50, y - (len(items) * 20))
+
+    # ✅ เงื่อนไขการชำระเงิน
+    pdf.setFont(font_name, 16)
+    pdf.drawString(50, y - (len(items) * 20) - 60, "เงื่อนไขการชำระเงิน:")
+    pdf.drawString(70, y - (len(items) * 20) - 80, "50% เมื่อทำการสั่งซื้อ")
+    pdf.drawString(70, y - (len(items) * 20) - 100, "30% ก่อนเริ่มงาน")
+    pdf.drawString(70, y - (len(items) * 20) - 120, "20% ก่อนส่งมอบงาน")
+
+    # ✅ บันทึก PDF
+    pdf.save()
+    buffer.seek(0)
+
+    response = HttpResponse(buffer, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="quotation.pdf"'
+    return response
