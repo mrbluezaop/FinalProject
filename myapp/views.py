@@ -40,6 +40,12 @@ from reportlab.platypus import Table, TableStyle
 import os
 import io
 from django.http import HttpResponse
+from datetime import datetime  # เพิ่มโมดูล datetime
+import random
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 # Create your views here.
 
@@ -388,10 +394,13 @@ def submit_hire(request):
             height = request.POST.get('height')
             job_type = request.POST.get('job_type')
             budget = request.POST.get('budget')
-            location = request.POST.get('location')
+            location = request.POST.get('location')  # ✅ แทรกการรับค่า Location ที่ผู้ใช้กรอกเข้ามา
 
             if not all([width, length, height, job_type, budget, location]):
                 return render(request, 'hire.html', {'error_message': 'กรุณากรอกข้อมูลให้ครบถ้วน!'})
+
+            # ✅ Debugging เพื่อตรวจสอบค่าที่ได้รับ
+            print("DEBUG: Location =", location)
 
             hire = Hire.objects.create(
                 Customer_ID=customer,
@@ -400,7 +409,7 @@ def submit_hire(request):
                 Height=height,
                 Type=job_type,
                 Budget=budget,
-                Location=location
+                Location=location  # ✅ ใช้ค่าที่รับมาจากฟอร์ม
             )
 
             area = round(float(width) * float(length) * float(height), 2)
@@ -454,6 +463,7 @@ def submit_hire(request):
 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
 
 def hire_list(request):
     # ดึงข้อมูลทั้งหมดจากตาราง Hire
@@ -849,6 +859,7 @@ def generate_pdf(request):
     # ✅ ใช้ `get_object_or_404()` เพื่อดึงข้อมูลสมาชิก
     member = get_object_or_404(Member, Customer_ID=customer_id)
     predict_hire = get_object_or_404(PredictHire, Predict_ID=predict_hire_id)
+    hire = predict_hire.HireC_ID  # ✅ ดึง `Hire` ที่เกี่ยวข้อง
 
     firstname = member.Firstname
     lastname = member.Lastname
@@ -860,6 +871,8 @@ def generate_pdf(request):
     amout_nail = predict_hire.Nail
     amout_table = predict_hire.Table
     amout_chair = predict_hire.Chair
+    location = hire.Location
+    address = location if location else "ไม่ได้ระบุสถานที่"
 
     # ✅ ใช้ os.path.join() เพื่อให้พาธฟอนต์ถูกต้อง
     font_path = os.path.join(settings.BASE_DIR, "static", "fonts", "THSarabunNew.ttf")
@@ -913,15 +926,77 @@ def generate_pdf(request):
     # ✅ เพิ่มหัวข้อเอกสาร
     pdf.setFont(font_name, 18)
     pdf.drawString(200, 690, "ใบเสนอราคา / ใบสั่งซื้อ")
+    
+    # ✅ ขนาดของกรอบและตำแหน่งของตาราง
+    table_width = 500  # ตั้งให้เท่ากันทั้งสองตาราง
+    x_table_start = 45  # จุดเริ่มต้นของทั้งสองตาราง
 
-    # ✅ รายละเอียดลูกค้า
-    pdf.setFont(font_name, 16)
-    pdf.drawString(50, 660, f"ชื่อลูกค้า: {firstname} {lastname}")
-    pdf.drawString(50, 640, f"ที่อยู่: {address}")
-    pdf.drawString(50, 620, f"ชื่องาน: {job_type}")
+    # ✅ กำหนดค่าตายตัวให้ y_start
+    y_start = 610  
+
+    pdf.setFont(font_name, 14)
+
+    # ✅ วาดกรอบตารางข้อมูลลูกค้า (ด้านบน)
+    pdf.rect(x_table_start, y_start - 30, table_width, 100, stroke=1, fill=0)  
+    pdf.line(345, y_start + 70, 345, y_start - 30)  
+    pdf.line(345, y_start + 35, x_table_start + table_width, y_start + 35)  
+
+    # ✅ ลงทะเบียนฟอนต์ภาษาไทย
+    font_path = "static/fonts/THSarabunNew.ttf"  # ✅ ปรับพาธให้ถูกต้อง
+    pdfmetrics.registerFont(TTFont("THSarabunNew", font_path))
+
+    # ✅ ใช้ styles สำหรับการตัดบรรทัดอัตโนมัติ
+    styles = getSampleStyleSheet()
+    style_address = styles["Normal"]
+    style_address.fontName = "THSarabunNew"  # ✅ ใช้ฟอนต์ภาษาไทย
+    style_address.fontSize = 14  # ✅ เพิ่มขนาดฟอนต์
+    style_address.leading = 18   # ✅ ปรับระยะห่างระหว่างบรรทัดให้มากขึ้น
+
+    # ✅ ปรับระยะห่างให้เหมาะสม
+    x_label = 70   # ตำแหน่ง X สำหรับ Label (เช่น "ที่อยู่:")
+    x_value = 130  # ตำแหน่ง X สำหรับค่าของลูกค้า
+    y_gap = 15     # ลดระยะห่างระหว่างบรรทัด
+
+    # ✅ ข้อมูลฝั่งซ้าย (ลูกค้า)
+    pdf.drawString(x_label, y_start + 50, "ชื่อลูกค้า:")  
+    pdf.drawString(x_value, y_start + 50, f"{firstname} {lastname}")  
+
+    pdf.drawString(x_label, y_start + 50 - y_gap, "ชื่องาน:")      
+    pdf.drawString(x_value, y_start + 50 - y_gap, job_type)  
+
+    # ✅ ใช้ Paragraph เพื่อให้ "ที่อยู่" ตัดบรรทัดอัตโนมัติ และรองรับฟอนต์ไทย
+    pdf.drawString(x_label, y_start + 50 - (y_gap * 2), "ที่อยู่:")
+
+    # ✅ คำนวณความสูงของ Paragraph ล่วงหน้า
+    address_paragraph = Paragraph(f"<font name='THSarabunNew' size=14>{address}</font>", style_address)  # ✅ ปรับขนาดฟอนต์ใน Paragraph
+    w, h = address_paragraph.wrap(200, 60)  # ✅ เพิ่มความสูงให้รองรับฟอนต์ที่ใหญ่ขึ้น
+
+    # ✅ ปรับตำแหน่งให้บรรทัดแรกของที่อยู่ อยู่ในระดับเดิม
+    y_adjustment = h - 14  # ✅ ปรับให้ข้อความไม่ดันขึ้นไป
+
+    address_paragraph.drawOn(pdf, x_value, y_start + 50 - (y_gap * 2) - y_adjustment)  # ✅ วางตำแหน่งให้บรรทัดแรกคงที่
+    
+    # ✅ ดึงวันที่ปัจจุบันและสุ่มเลข QC
+    current_date = datetime.now().strftime("%d/%m/%Y")
+    random_number = random.randint(10000, 99999)
+    current_year = datetime.now().year
+    qc_number = f"QC-{random_number}/{current_year}"
+
+    # ✅ ข้อมูลฝั่งขวา (เลขที่และวันที่)
+    pdf.drawString(360, y_start + 50, "เลขที่:")  
+    pdf.drawString(400, y_start + 50, qc_number)  
+
+    pdf.drawString(360, y_start + 15, "ว/ด/ป:")  
+    pdf.drawString(400, y_start + 15, current_date)  
+
+    # ✅ ปรับตำแหน่งให้ตารางสินค้าชิดกับตารางลูกค้า
+    y_table_start = y_start - 50
+
+    # ✅ คำนวณความสูงของตารางลูกค้า และกำหนดให้ตารางสินค้าเท่ากัน
+    table_height = (len(items) + 3) * 20  # ความสูงของตารางสินค้า
+    y_end = y_table_start - table_height  # คำนวณขอบล่างให้เท่ากัน
 
     # ✅ เพิ่มตารางรายการสินค้า
-    y = 400
     data = [["ลำดับ", "รายละเอียด", "จำนวน", "ราคา/หน่วย", "รวม (บาท)"]]
     total_price = 0
     for i, (desc, qty, unit_price) in enumerate(items, start=1):
@@ -937,25 +1012,28 @@ def generate_pdf(request):
     data.append(["", "ภาษีมูลค่าเพิ่ม 7%", "", "", f"{vat:,.2f}"])
     data.append(["", "ยอดรวมสุทธิ", "", "", f"{net_total:,.2f}"])
 
-    # ✅ สร้างตาราง
-    table = Table(data, colWidths=[50, 200, 50, 100, 100])
+    # ❌ ลบ `pdf.rect()` ที่ใช้วาดกรอบรอบตารางสินค้า (เพื่อป้องกันเส้นซ้อน)
+    # pdf.rect(x_table_start, y_end, table_width, table_height, stroke=1, fill=0)  # ลบออก
+
+    # ✅ สร้างตารางสินค้า (ให้ Table ควบคุมเส้นเอง)
+    table = Table(data, colWidths=[55, 200, 50, 100, 100])
     table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), font_name),  # ✅ ใช้ฟอนต์ที่โหลดได้
+        ("FONTNAME", (0, 0), (-1, 0), font_name),
         ("GRID", (0, 0), (-1, -1), 1, colors.black),
     ]))
 
-    table.wrapOn(pdf, 50, 500)
-    table.drawOn(pdf, 50, y - (len(items) * 20))
+    table.wrapOn(pdf, x_table_start, 500)
+    table.drawOn(pdf, x_table_start, y_end)  
 
     # ✅ เงื่อนไขการชำระเงิน
     pdf.setFont(font_name, 16)
-    pdf.drawString(50, y - (len(items) * 20) - 60, "เงื่อนไขการชำระเงิน:")
-    pdf.drawString(70, y - (len(items) * 20) - 80, "50% เมื่อทำการสั่งซื้อ")
-    pdf.drawString(70, y - (len(items) * 20) - 100, "30% ก่อนเริ่มงาน")
-    pdf.drawString(70, y - (len(items) * 20) - 120, "20% ก่อนส่งมอบงาน")
+    pdf.drawString(50, y_end - 60, "เงื่อนไขการชำระเงิน:")
+    pdf.drawString(70, y_end - 80, "50% เมื่อทำการสั่งซื้อ")
+    pdf.drawString(70, y_end - 100, "30% ก่อนเริ่มงาน")
+    pdf.drawString(70, y_end - 120, "20% ก่อนส่งมอบงาน")
 
     # ✅ บันทึก PDF
     pdf.save()

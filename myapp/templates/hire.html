@@ -64,10 +64,10 @@
                             <label for="budget">Budget (THB)</label>
                             <input type="number" id="budget" name="budget" placeholder="Enter budget" required>
 
-                            <!-- Location -->
                             <label for="location">Location</label>
-                            <textarea id="location" name="location" placeholder="Enter work location" rows="4"
-                                required></textarea>
+                            <textarea id="location" name="location" placeholder="Enter work location" rows="4" required
+                                maxlength="100"></textarea>
+
 
                             <!-- Submit Button -->
                             <button class="button-41" role="button" type="button" id="submitBtn">Order</button>
@@ -91,41 +91,41 @@
                     method: "POST",
                     body: formData,
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log("✅ DEBUG: PredictHire Data =", data.predict_hire);
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log("✅ DEBUG: PredictHire Data =", data.predict_hire);
 
-                        Swal.fire({
-                            icon: "success",
-                            title: "บันทึกข้อมูลสำเร็จ",
-                            text: "ใบเสนอราคาของคุณกำลังถูกดาวน์โหลด",
-                            confirmButtonText: "ตกลง"
-                        }).then(() => {
-                            console.log("✅ DEBUG: PredictHire_ID =", data.PredictHire_ID);
-                            let queryParams = new URLSearchParams(formData);
-                            queryParams.append("PredictHire_ID", data.PredictHire_ID); // ✅ เพิ่ม PredictHire_ID ไปใน URL
-                            let downloadUrl = `/download-pdf/?${queryParams.toString()}`;
-                            window.location.href = downloadUrl;
-                        });
-                    } else {
+                            Swal.fire({
+                                icon: "success",
+                                title: "บันทึกข้อมูลสำเร็จ",
+                                text: "ใบเสนอราคาของคุณกำลังถูกดาวน์โหลด",
+                                confirmButtonText: "ตกลง"
+                            }).then(() => {
+                                console.log("✅ DEBUG: PredictHire_ID =", data.PredictHire_ID);
+                                let queryParams = new URLSearchParams(formData);
+                                queryParams.append("PredictHire_ID", data.PredictHire_ID); // ✅ เพิ่ม PredictHire_ID ไปใน URL
+                                let downloadUrl = `/download-pdf/?${queryParams.toString()}`;
+                                window.location.href = downloadUrl;
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "เกิดข้อผิดพลาด",
+                                text: data.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+                                confirmButtonText: "ตกลง"
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error("❌ ERROR:", error);
                         Swal.fire({
                             icon: "error",
                             title: "เกิดข้อผิดพลาด",
-                            text: data.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+                            text: "ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองอีกครั้ง",
                             confirmButtonText: "ตกลง"
                         });
-                    }
-                })
-                .catch(error => {
-                    console.error("❌ ERROR:", error);
-                    Swal.fire({
-                        icon: "error",
-                        title: "เกิดข้อผิดพลาด",
-                        text: "ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองอีกครั้ง",
-                        confirmButtonText: "ตกลง"
                     });
-                });
             });
         });
 
