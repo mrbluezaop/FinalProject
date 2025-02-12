@@ -467,8 +467,8 @@ def submit_hire(request):
 
 def hire_list(request):
     # ดึงข้อมูลทั้งหมดจากตาราง Hire
-    hires = Hire.objects.select_related('Customer_ID').all()  # ใช้ select_related เพื่อรวมข้อมูลจาก ForeignKey
-    return render(request, 'hireset.html', {'hires': hires})  # เปลี่ยนชื่อไฟล์ Template เป็น hireset.html
+    predicts = PredictHire.objects.select_related('HireC_ID', 'HireC_ID__Customer_ID', 'HireA_ID').all()  # ใช้ select_related เพื่อรวมข้อมูลจาก ForeignKey
+    return render(request, 'hireset.html', {'predicts': predicts})  # เปลี่ยนชื่อไฟล์ Template เป็น hireset.html
 
 @csrf_exempt
 def delete_member(request, member_id):

@@ -125,22 +125,22 @@
               </tr>
             </thead>
             <tbody>
-              {% for hire in hires %}
+              {% for predict in predicts %}
               <tr>
-                <td>{{ hire.Hire_ID }}</td>
-                <td>{{ hire.Customer_ID.Firstname }}</td>
-                <td>{{ hire.Customer_ID.Lastname }}</td>
-                <td>{{ hire.Customer_ID.Email }}</td>
-                <td>{{ hire.Customer_ID.Phone }}</td>
-                <td>{{ hire.Type }}</td>
-                <td>{{ hire.Budget }}</td>
-                <td>{{ hire.Dateofhire }}</td>
+                <td>{{ predict.HireC_ID.Hire_ID }}</td>
+                <td>{{ predict.HireC_ID.Customer_ID.Firstname }}</td>
+                <td>{{ predict.HireC_ID.Customer_ID.Lastname }}</td>
+                <td>{{ predict.HireC_ID.Customer_ID.Email }}</td>
+                <td>{{ predict.HireC_ID.Customer_ID.Phone }}</td>
+                <td>{{ predict.Type }}</td>
+                <td>{{ predict.Budget }}</td>
+                <td>{{ predict.Dateofhire|date:"Y-m-d H:i" }}</td>
                 <td>
-                  {% if hire.Status == 'in_progress' %}
+                  {% if predict.HireC_ID.Status == 'in_progress' %}
                   <span style="color: orange; font-weight: bold;">In Progress</span>
-                  {% elif hire.Status == 'completed' %}
+                  {% elif predict.HireC_ID.Status == 'completed' %}
                   <span style="color: green; font-weight: bold;">Completed</span>
-                  {% elif hire.Status == 'waiting_confirmation' %}
+                  {% elif predict.HireC_ID.Status == 'waiting_confirmation' %}
                   <span style="color: blue; font-weight: bold;">Waiting for Confirmation</span>
                   {% else %}
                   <span style="color: gray;">ไม่ระบุสถานะ</span>
@@ -148,20 +148,20 @@
                 </td>
                 <td>
                   <!-- ปุ่ม Delete -->
-                  <button class="delete-btn" data-id="{{ hire.Hire_ID }}"
-                    onclick="deleteHire(this.getAttribute('data-id'))">Delete</button>
+                  <button class="delete-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
+                    onclick="deletePredict(this.getAttribute('data-id'))">Delete</button>
                   <!-- ปุ่ม View -->
-                  <button class="view-btn" data-id="{{ hire.Hire_ID }}"
+                  <button class="view-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
                     onclick="showHirePopup(this.getAttribute('data-id'))">View</button>
                   <!-- ปุ่ม Predict แสดงเฉพาะเมื่อ Status เป็น In Progress -->
-                  {% if hire.Status == 'in_progress' %}
-                  <button class="predict-btn" data-id="{{ hire.Hire_ID }}"
-                    onclick="showPredictPopup(this.getAttribute('data-id'))">Predict
-                    {% endif %}
-                    <!-- ปุ่ม Save Model แสดงเฉพาะเมื่อ Status เป็น Completed -->
-                    {% if hire.Status == 'completed' %}
-                    <button class="save-model-btn" onclick="showSaveModelPopup()">Save Model</button>
-                    {% endif %}
+                  {% if predict.HireC_ID.Status == 'in_progress' or predict.HireA_ID.Status == 'in_progress' %}
+                  <button class="predict-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
+                    onclick="showPredictPopup(this.getAttribute('data-id'))">Predict</button>
+                  {% endif %}
+                  <!-- ปุ่ม Save Model แสดงเฉพาะเมื่อ Status เป็น Completed -->
+                  {% if predict.HireC_ID.Status == 'completed' or predict.HireA_ID.Status == 'completed' %}
+                  <button class="save-model-btn" onclick="showSaveModelPopup()">Save Model</button>
+                  {% endif %}
                 </td>
               </tr>
               {% empty %}
