@@ -432,9 +432,27 @@ def submit_hire(request):
                 Table=response.get('Table', 0)
             )
 
-            return render(request, 'hire.html', {'success_message': 'บันทึกข้อมูลสำเร็จ'})
+            return JsonResponse({
+                'success': True,
+                'message': 'บันทึกข้อมูลสำเร็จ',
+                'predict_hire': {
+                    'Width': predict_hire.Width,
+                    'Length': predict_hire.Length,
+                    'Height': predict_hire.Height,
+                    'Type': predict_hire.Type,
+                    'Budget': predict_hire.Budget,
+                    'Area': predict_hire.Area,
+                    'Wood': predict_hire.Wood,
+                    'Paint': predict_hire.Paint,
+                    'Chair': predict_hire.Chair,
+                    'Lighting': predict_hire.Lighting,
+                    'Nail': predict_hire.Nail,
+                    'Table': predict_hire.Table,
+                }
+            })
+
         except Exception as e:
-            return render(request, 'hire.html', {'error_message': str(e)})
+            return JsonResponse({'error': str(e)}, status=500)
 
 def hire_list(request):
     # ดึงข้อมูลทั้งหมดจากตาราง Hire
@@ -811,9 +829,13 @@ def predictionder(width, length, height, job_type, budget):
         return {"error": str(e)}
 
 def generate_pdf(request):
-# ✅ ดึง `Customer_ID` จากเซสชันแทน
-    customer_id = request.session.get("Customer_ID")
+    print("✅ generate_pdf ถูกเรียกแล้ว")
+    print("DEBUG: Session Data =", request.session.items())  # ดูค่าที่ถูกเก็บใน session
+    customer_id = request.session.get('customer_id')
+    print("DEBUG: Retrieved Customer_ID =", customer_id)
 
+
+    #customer_id = request.GET.get("customer_id")
     # ✅ ถ้าไม่มี `Customer_ID` ให้แจ้งเตือน
     if not customer_id:
         return HttpResponse("ไม่พบ Customer_ID ในเซสชัน", status=400)

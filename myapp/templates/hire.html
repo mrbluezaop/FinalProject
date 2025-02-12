@@ -86,21 +86,47 @@
 
                 let form = document.getElementById("orderForm");
                 let formData = new FormData(form);
-                let queryParams = new URLSearchParams(formData).toString();
 
-                let downloadUrl = `/download-pdf/?${queryParams}`;
-                console.log("✅ DEBUG: Download URL =", downloadUrl);
+                fetch("/submit-hire", {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("✅ DEBUG: PredictHire Data =", data.predict_hire);
 
-                Swal.fire({
-                    icon: "success",
-                    title: "บันทึกข้อมูลสำเร็จ",
-                    text: "ใบเสนอราคาของคุณกำลังถูกดาวน์โหลด",
-                    confirmButtonText: "ตกลง"
-                }).then(() => {
-                    window.location.href = downloadUrl;
+                        Swal.fire({
+                            icon: "success",
+                            title: "บันทึกข้อมูลสำเร็จ",
+                            text: "ใบเสนอราคาของคุณกำลังถูกดาวน์โหลด",
+                            confirmButtonText: "ตกลง"
+                        }).then(() => {
+                            let queryParams = new URLSearchParams(formData).toString();
+                            let downloadUrl = `/download-pdf/?${queryParams}`;
+                            window.location.href = downloadUrl;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "เกิดข้อผิดพลาด",
+                            text: data.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+                            confirmButtonText: "ตกลง"
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("❌ ERROR:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "เกิดข้อผิดพลาด",
+                        text: "ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองอีกครั้ง",
+                        confirmButtonText: "ตกลง"
+                    });
                 });
             });
         });
+
 
 
     </script>
