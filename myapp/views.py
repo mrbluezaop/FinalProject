@@ -435,6 +435,7 @@ def submit_hire(request):
             return JsonResponse({
                 'success': True,
                 'message': 'บันทึกข้อมูลสำเร็จ',
+                'PredictHire_ID': predict_hire.pk,
                 'predict_hire': {
                     'Width': predict_hire.Width,
                     'Length': predict_hire.Length,
@@ -828,26 +829,37 @@ def predictionder(width, length, height, job_type, budget):
     except Exception as e:
         return {"error": str(e)}
 
+#เหลือตั้งค่างบในแต่ละอั้น
 def generate_pdf(request):
     print("✅ generate_pdf ถูกเรียกแล้ว")
     print("DEBUG: Session Data =", request.session.items())  # ดูค่าที่ถูกเก็บใน session
     customer_id = request.session.get('customer_id')
     print("DEBUG: Retrieved Customer_ID =", customer_id)
+    predict_hire_id = request.GET.get("PredictHire_ID")
 
+    print("DEBUG: Retrieved predict_ID =", predict_hire_id)
 
     #customer_id = request.GET.get("customer_id")
     # ✅ ถ้าไม่มี `Customer_ID` ให้แจ้งเตือน
     if not customer_id:
         return HttpResponse("ไม่พบ Customer_ID ในเซสชัน", status=400)
+    if not predict_hire_id:
+        return HttpResponse("ไม่พบ PredictHire_ID ใน request", status=400)
 
     # ✅ ใช้ `get_object_or_404()` เพื่อดึงข้อมูลสมาชิก
     member = get_object_or_404(Member, Customer_ID=customer_id)
+    predict_hire = get_object_or_404(PredictHire, Predict_ID=predict_hire_id)
 
     firstname = member.Firstname
     lastname = member.Lastname
     address = member.Address
-    job_type = member.Job_Type
-    
+    job_type = predict_hire.Type
+    amout_wood = predict_hire.Wood
+    amout_paint = predict_hire.Paint
+    amout_lighting = predict_hire.Lighting
+    amout_nail = predict_hire.Nail
+    amout_table = predict_hire.Table
+    amout_chair = predict_hire.Chair
 
     # ✅ ใช้ os.path.join() เพื่อให้พาธฟอนต์ถูกต้อง
     font_path = os.path.join(settings.BASE_DIR, "static", "fonts", "THSarabunNew.ttf")
@@ -869,12 +881,12 @@ def generate_pdf(request):
 
     # รายการสินค้า
     items = [
-        ("โครงสร้างผนัง", 1, 85000),
-        ("โครงสร้างป้าย", 1, 30000),
-        ("ตู้โชว์สินค้า", 4, 8750),
-        ("งานกราฟฟิก", 1, 25000),
-        ("งานพื้น", 1, 15000),
-        ("งานระบบไฟ", 1, 15000),
+        ("Wood", amout_wood, 85000),
+        ("Paint", amout_paint, 30000),
+        ("Lighting", amout_lighting, 8750),
+        ("Nail", amout_nail, 25000),
+        ("Table", amout_table, 15000),
+        ("Chair", amout_chair, 15000),
         ("งานเคาน์เตอร์", 1, 15000),
         ("โต๊ะ & เก้าอี้", 2, 3500),
         ("รวมค่าใช้จ่าย", 1, 30000)
