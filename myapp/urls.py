@@ -27,6 +27,7 @@ urlpatterns = [
     path('check-duplicate/', views.check_duplicate, name='check_duplicate'),
     path('delete-hire/<int:hire_id>/', views.delete_hire, name='delete_hire'),
     path('api/hire/<int:hire_id>/', views.get_hire_details, name='get_hire_details'),
+    path('api/predictC/<int:predict_id>/', views.get_predict_detailsC, name='get_predict_detailsC'),
     path('update-hire-status/<int:hire_id>/', views.update_hire_status, name='update_hire_status'),
     path('predictcustom/', views.predictcustom, name='predictcustom'),
     path('hires/filter/', filter_hire_by_date, name='filter_hire_by_date'),
@@ -35,5 +36,6 @@ urlpatterns = [
     path('predict/', views.prediction, name='predict'),
     path('submit_hireA/', views.submit_hireA, name='submit_predictA'),
     path("download-pdf/", generate_pdf, name="download_pdf"),
+    path("submit_success/", views.submit_success_hire, name="submit_success_hire"),
 ]   + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
  

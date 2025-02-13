@@ -1042,3 +1042,102 @@ def generate_pdf(request):
     response = HttpResponse(buffer, content_type="application/pdf")
     response["Content-Disposition"] = 'attachment; filename="quotation.pdf"'
     return response
+
+def get_predict_detailsC(request, predict_id):
+    predict = get_object_or_404(PredictHire, pk=predict_id)
+    data = {
+        "Predict_ID": predict.Predict_ID,
+        "Width": predict.Width,
+        "Length": predict.Length,
+        "Height": predict.Height,
+        "Type": predict.Type,
+        "Budget": predict.Budget,
+        "Wood": predict.Wood,
+        "Paint": predict.Paint,
+        "Lighting": predict.Lighting,
+        "Nail": predict.Nail,
+        "Table": predict.Table,
+        "Chair": predict.Chair,
+        "DateOfHire": predict.HireC_ID.Dateofhire,
+        "Type": predict.HireC_ID.Type,
+        "Location": predict.HireC_ID.Location
+    }
+    return JsonResponse(data)
+
+def submit_success_hire(request):
+    if request.method == 'POST':
+        try:
+            # ✅ อ่าน JSON
+            data = json.loads(request.body)
+            print("📌 Data received from frontend:", json.dumps(data, indent=2))
+
+            # ✅ ดึงค่าจาก JSON
+            predict_id = data.get('Predict_ID')
+            width = data.get('Width')
+            length = data.get('Length')
+            height = data.get('Height')
+            job_type = data.get('Job_type')
+            location = data.get('Location')
+            budget = data.get('Budget')
+            wood_p = data.get('Wood_P')  # ✅ แก้ให้ตรงกับ frontend
+            paint_p = data.get('Paint_P')
+            chair_p = data.get('Chair_P')
+            lighting_p = data.get('Lighting_P')
+            nail_p = data.get('Nail_P')
+            table_p = data.get('Table_P')
+            wood = data.get('Wood')
+            paint = data.get('Paint')
+            chair = data.get('Chair')
+            lighting = data.get('Lighting')
+            nail = data.get('Nail')
+            table = data.get('Table')
+            dateofhire = data.get('DateOfHire') or None  # ✅ ถ้าไม่มี ใช้ None
+
+            # ✅ ตรวจสอบค่าที่จำเป็น
+            required_fields = [predict_id, width, length, height, job_type, budget]
+            if any(field is None for field in required_fields):
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+            # ✅ ตรวจสอบว่า PredictHire มีอยู่จริง
+            try:
+                predict_instance = PredictHire.objects.get(Predict_ID=predict_id)
+            except PredictHire.DoesNotExist:
+                return JsonResponse({'error': 'PredictHire not found'}, status=404)
+
+            # ✅ บันทึกลง DB
+            resource_admin = Resource.objects.create(
+                Predict_ID=predict_instance,
+                Width=width,
+                Length=length,
+                Height=height,
+                Type=job_type,
+                Location=location,
+                Budget=budget,
+                Wood_P=wood_p,
+                Paint_P=paint_p,
+                Chair_P=chair_p,
+                Lighting_P=lighting_p,
+                Nail_P=nail_p,
+                Table_P=table_p,
+                Wood=wood,
+                Paint=paint,
+                Chair=chair,
+                Lighting=lighting,
+                Nail=nail,
+                Table=table,
+                Dateofhire=dateofhire
+            )
+
+            print("✅ Data saved successfully!")
+            return JsonResponse({
+                'success': True,
+                'message': 'บันทึกข้อมูลสำเร็จ!',
+                'predict_id': resource_admin.Predict_ID.Predict_ID,
+                'resource_id': resource_admin.Resource_ID
+            })
+
+        except Exception as e:
+            print(f"❌ Error in submit_success_hire: {str(e)}")
+            return JsonResponse({'error': f'เกิดข้อผิดพลาด: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

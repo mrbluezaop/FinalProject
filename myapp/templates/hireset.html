@@ -149,20 +149,23 @@
                 <td>
                   <!-- ปุ่ม Delete -->
                   <button class="delete-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
-                    onclick="deletePredict(this.getAttribute('data-id'))">Delete</button>
+                    onclick="deleteHire(this.getAttribute('data-id'))">Delete</button>
+
                   <!-- ปุ่ม View -->
                   <button class="view-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
                     onclick="showHirePopup(this.getAttribute('data-id'))">View</button>
+
                   <!-- ปุ่ม Predict แสดงเฉพาะเมื่อ Status เป็น In Progress -->
-                  {% if predict.HireC_ID.Status == 'in_progress' or predict.HireA_ID.Status == 'in_progress' %}
-                  <button class="predict-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
+                  {% if predict.HireC_ID.Status == 'in_progress' %}
+                  <button class="predict-btn" data-id="{{ predict.Predict_ID }}"
                     onclick="showPredictPopup(this.getAttribute('data-id'))">Predict</button>
                   {% endif %}
                   <!-- ปุ่ม Save Model แสดงเฉพาะเมื่อ Status เป็น Completed -->
-                  {% if predict.HireC_ID.Status == 'completed' or predict.HireA_ID.Status == 'completed' %}
-                  <button class="save-model-btn" onclick="showSaveModelPopup()">Save Model</button>
+                  {% if predict.HireC_ID.Status == 'completed' %}
+                  <button class="save-model-btn" data-id="{{ predict.Predict_ID }}" 
+                    onclick="showSaveModelPopup(this.getAttribute('data-id'))">Save Resource</button>
                   {% endif %}
-                </td>
+                </td> 
               </tr>
               {% empty %}
               <tr>
@@ -259,6 +262,10 @@
             <div class="popup-column">
               <h3>Current Data</h3>
               <div class="result-box">
+                <label>Wood (pc.):</label>
+                <span id="currentWood"></span>
+              </div>
+              <div class="result-box">
                 <label>Paint (Cans):</label>
                 <span id="currentPaint"></span>
               </div>
@@ -283,6 +290,10 @@
             <!-- ✅ ฝั่งขวา: ช่องกรอกค่าที่สามารถเปลี่ยนได้ -->
             <div class="popup-column">
               <h3>New Data</h3>
+              <div class="result-box">
+                <label>Wood (pc.):</label>
+                <input type="number" id="newWood" placeholder="Enter new value">
+              </div>
               <div class="result-box">
                 <label>Paint (Cans):</label>
                 <input type="number" id="newPaint" placeholder="Enter new value">
@@ -309,7 +320,7 @@
           <!-- ปุ่ม Action -->
           <div class="form-actions">
             <button type="button" class="reset-btn">Reset</button>
-            <button type="button" class="save-btn">Save Model</button>
+            <button type="button" class="save-btn">Save Resource</button>
             <button type="button" class="close-btn" id="closeSaveModelPopup">Close</button>
           </div>
         </div>
@@ -455,90 +466,55 @@
         }
 
         // ✅ ฟังก์ชันเปิด Popup และตั้งค่าผลลัพธ์
-        window.showPredictPopup = function (hireId) {
-            console.log("Fetching data for hireId:", hireId);
+        window.showPredictPopup = function (predictId) {
+            console.log("Fetching prediction data for predictId:", predictId);
             modal.style.display = "flex";
+
+            // ✅ เรียก API `/api/predict/${predictId}/`
             $.ajax({
-                url: `/api/hire/${hireId}/`,
+                url: `/api/predictC/${predictId}/`,
                 type: 'GET',
                 dataType: 'json',
-                success: function (data) {
-                    console.log("Received Hire data:", data);
+                success: function (prediction) {
+                    console.log("✅ Received Prediction Data:", prediction);
 
                     // ✅ ตรวจสอบข้อมูล
-                    if (!data || !data.Width || !data.Length || !data.Height || !data.Type || !data.Budget || !data.Location) {
+                    if (!prediction || typeof prediction !== "object" ||
+                        !("Paint" in prediction) || !("Chair" in prediction) ||
+                        !("Lighting" in prediction) || !("Nail" in prediction) ||
+                        !("Table" in prediction)) {
                         Swal.fire({
-                            icon: "warning",
-                            title: "ข้อมูลไม่ครบ!",
-                            text: "กรุณาตรวจสอบฐานข้อมูล",
+                            icon: "error",
+                            title: "Prediction Failed",
+                            text: "Missing required fields in prediction response.",
                             confirmButtonText: "ตกลง"
                         });
+                        console.error("❌ Incomplete prediction data:", prediction);
                         return;
                     }
 
-                    // ✅ ส่งข้อมูลไปยัง API /predict/
-                    $.ajax({
-                        url: '/predict/',
-                        type: 'POST',
-                        data: JSON.stringify({
-                            'width': data.Width,
-                            'length': data.Length,
-                            'height': data.Height,
-                            'type': data.Type,
-                            'budget': data.Budget
-                        }),
-                        contentType: 'application/json',
-                        headers: { "X-CSRFToken": getCookie("csrftoken") },
-                        success: function (prediction) {
-                            console.log("Prediction result:", prediction);
+                    // ✅ อัปเดตค่าผลลัพธ์ใน `<input>`
+                    $('#paintResult').val(prediction.Wood);
+                    $('#paintResult').val(prediction.Paint);
+                    $('#chairResult').val(prediction.Chair);
+                    $('#lightingResult').val(prediction.Lighting);
+                    $('#nailResult').val(prediction.Nail);
+                    $('#tableResult').val(prediction.Table);
 
-                            // ✅ ตรวจสอบค่าผลลัพธ์
-                            if (!prediction || typeof prediction !== "object" ||
-                                !("Paint" in prediction) || !("Chair" in prediction) ||
-                                !("Lighting" in prediction) || !("Nail" in prediction) ||
-                                !("Table" in prediction)) {
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Prediction Failed",
-                                    text: "Missing required fields in prediction response.",
-                                    confirmButtonText: "ตกลง"
-                                });
-                                console.error("Incomplete prediction data:", prediction);
-                                return;
-                            }
-
-                            // ✅ อัปเดตค่าผลลัพธ์ใน `<input>`
-                            $('#paintResult').val(prediction.Paint);
-                            $('#chairResult').val(prediction.Chair);
-                            $('#lightingResult').val(prediction.Lighting);
-                            $('#nailResult').val(prediction.Nail);
-                            $('#tableResult').val(prediction.Table);
-
-                            // ✅ แสดง Modal `#predictModal`
-                            let modal = $('#predictModal');
-                            if (modal.length > 0) {
-                                modal.fadeIn();  // ใช้ fadeIn เพื่อให้มี Animation
-                            } else {
-                                console.error("❌ Modal element #predictModal not found!");
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error:", error);
-                            Swal.fire({
-                                icon: "error",
-                                title: "Prediction Error",
-                                text: "ไม่สามารถพยากรณ์ได้ กรุณาลองใหม่",
-                                confirmButtonText: "ตกลง"
-                            });
-                        }
-                    });
+                    // ✅ แสดง Modal `#predictModal`
+                    let modal = $('#predictModal');
+                    if (modal.length > 0) {
+                        modal.fadeIn();  // ใช้ fadeIn เพื่อให้มี Animation
+                    } else {
+                        console.error("❌ Modal element #predictModal not found!");
+                    }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error fetching hire data:", error);
+                    console.error("❌ Error fetching prediction data:", error);
                     Swal.fire({
                         icon: "error",
-                        title: "Error",
-                        text: "ไม่สามารถดึงข้อมูลได้ กรุณาลองใหม่",
+                        title: "Prediction Error",
+                        text: "ไม่สามารถดึงข้อมูลพยากรณ์ได้ กรุณาลองใหม่",
                         confirmButtonText: "ตกลง"
                     });
                 }
@@ -564,76 +540,188 @@
       });
 
       document.addEventListener("DOMContentLoaded", function () {
-        console.log("✅ Save Model JavaScript Loaded!");
+          console.log("✅ Save Model JavaScript Loaded!");
 
-        // ดึงองค์ประกอบของ Popup
-        const modal = document.getElementById("saveModelPopup");
-        const closeBtn = document.getElementById("closeSaveModelPopup");
-        const resetBtn = document.querySelector(".reset-btn");
-        const saveBtn = document.querySelector(".save-btn");
+          // ดึงองค์ประกอบของ Popup
+          const modal = document.getElementById("saveModelPopup");
+          const closeBtn = document.getElementById("closeSaveModelPopup");
+          const resetBtn = document.querySelector(".reset-btn");
 
-        if (!modal) {
-          console.error("❌ Error: Save Model Modal not found!");
-          return;
-        }
+          if (!modal) {
+              console.error("❌ Error: Save Model Modal not found!");
+              return;
+          }
 
-        // ✅ ฟังก์ชันเปิด Popup และใส่ค่าปัจจุบัน
-        window.showSaveModelPopup = function () {
-          console.log("✅ Opening Save Model Popup");
+          // ✅ ฟังก์ชันเปิด Popup และใส่ค่าปัจจุบัน
+          window.showSaveModelPopup = function (predictId) {
+              console.log("✅ Opening Save Model Popup for predictId:", predictId);
 
-          // ตั้งค่าข้อมูลฝั่ง Current Data
-          document.getElementById("currentPaint").innerText = "5 Cans";
-          document.getElementById("currentChair").innerText = "10 Chairs";
-          document.getElementById("currentLighting").innerText = "15 Bulbs";
-          document.getElementById("currentNail").innerText = "3 Boxes";
-          document.getElementById("currentTable").innerText = "2 Tables";
+              // เรียก API เพื่อดึงค่าล่าสุดของ Prediction
+              $.ajax({
+                  url: `/api/predictC/${predictId}/`,  // 🔹 แก้ URL ให้เป็น API ที่ใช้ดึงข้อมูล predict
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (predict) {
+                      console.log("✅ Received Predict Data:", predict);
 
-          // เคลียร์ค่าฝั่ง New Data
-          document.querySelectorAll(".popup-column input").forEach(input => {
-            input.value = "";
-          });
+                      // ✅ ตรวจสอบข้อมูลที่ได้รับจาก API
+                      if (!predict || typeof predict !== "object" ||
+                          !("Paint" in predict) || !("Chair" in predict) ||
+                          !("Lighting" in predict) || !("Nail" in predict) ||
+                          !("Table" in predict)) {
+                          Swal.fire({
+                              icon: "error",
+                              title: "Error",
+                              text: "Missing required fields in prediction response.",
+                              confirmButtonText: "OK"
+                          });
+                          console.error("❌ Incomplete prediction data:", predict);
+                          return;
+                      }
 
-          // แสดง Popup
-          modal.style.display = "flex";
-        };
+                      // ✅ ตั้งค่าข้อมูลฝั่ง Current Data
+                      document.getElementById("currentWood").innerText = `${predict.Wood} Cans`;
+                      document.getElementById("currentPaint").innerText = `${predict.Paint} Cans`;
+                      document.getElementById("currentChair").innerText = `${predict.Chair} Chairs`;
+                      document.getElementById("currentLighting").innerText = `${predict.Lighting} Bulbs`;
+                      document.getElementById("currentNail").innerText = `${predict.Nail} Boxes`;
+                      document.getElementById("currentTable").innerText = `${predict.Table} Tables`;
+                      console.log(predict)
 
-        // ✅ ปิด Modal เมื่อกดปุ่ม Close
-        closeBtn.addEventListener("click", function () {
-          modal.style.display = "none";
-        });
+                      // ✅ เคลียร์ค่าฝั่ง New Data
+                      document.querySelectorAll(".popup-column input").forEach(input => {
+                          input.value = "";
+                      });
 
-        // ✅ ปุ่ม Reset เคลียร์ช่อง Input
-        resetBtn.addEventListener("click", function () {
-          console.log("🔄 Resetting input fields...");
-          document.querySelectorAll(".popup-column input").forEach(input => {
-            input.value = "";
-          });
-        });
+                      // ✅ ตั้งค่า data-id ให้ปุ่ม Save
+                      const saveBtn = document.querySelector(".save-btn");
+                      saveBtn.setAttribute("data-id", predictId);
+                      saveBtn.setAttribute("data-predict", JSON.stringify(predict)); 
 
-        // ✅ ปุ่ม Save Model (เก็บค่าที่กรอกไว้)
-        saveBtn.addEventListener("click", function () {
-          console.log("💾 Saving new model data...");
-
-          const newData = {
-            paint: document.getElementById("newPaint").value || "0",
-            chair: document.getElementById("newChair").value || "0",
-            lighting: document.getElementById("newLighting").value || "0",
-            nail: document.getElementById("newNail").value || "0",
-            table: document.getElementById("newTable").value || "0"
+                      // ✅ แสดง Popup
+                      modal.style.display = "flex";
+                  },
+                  error: function (xhr, status, error) {
+                      console.error("❌ Error fetching predict data:", error);
+                      Swal.fire({
+                          icon: "error",
+                          title: "Error",
+                          text: "ไม่สามารถดึงข้อมูลพยากรณ์ได้ กรุณาลองใหม่",
+                          confirmButtonText: "OK"
+                      });
+                  }
+              });
           };
 
-          console.log("✅ New Data Saved:", newData);
-          alert("New model data saved successfully!");
+          document.querySelector(".save-btn").addEventListener("click", function () {
+              console.log("💾 Saving new model data...");
 
-          modal.style.display = "none"; // ปิด Popup หลังจาก Save
-        });
+              const saveBtn = document.querySelector(".save-btn");
+              const predictId = saveBtn.getAttribute("data-id");
+              const predictData = saveBtn.getAttribute("data-predict");
 
-        // ✅ ปิด Modal เมื่อคลิกข้างนอก
-        window.addEventListener("click", function (event) {
-          if (event.target === modal) {
-            modal.style.display = "none";
+              if (!predictId || !predictData) {
+                  console.error("❌ Missing predictId!");
+                  Swal.fire({
+                      icon: "error",
+                      title: "Error",
+                      text: "Predict ID is missing. Cannot proceed.",
+                      confirmButtonText: "OK"
+                  });
+                  return;
+              }
+              const predict = JSON.parse(predictData);
+              // ✅ เตรียมข้อมูลสำหรับบันทึก
+              const newData = {
+                  "Predict_ID": predictId,
+                  "Width": predict.Width,
+                  "Length": predict.Length,
+                  "Height": predict.Height,
+                  "Job_type": predict.Type,
+                  "Budget": predict.Budget,
+                  "Wood_P": predict.Wood,
+                  "Paint_P": predict.Paint,
+                  "Lighting_P": predict.Lighting,
+                  "Nail_P": predict.Nail,
+                  "Table_P": predict.Table,
+                  "Chair_P": predict.Chair,
+                  "DateOfHire": predict.DateOfHire,
+                  "Type": predict.Type,
+                  "Location": predict.Location,
+                  "Wood": document.getElementById("newWood").value || "0",
+                  "Paint": document.getElementById("newPaint").value || "0",
+                  "Chair": document.getElementById("newChair").value || "0",
+                  "Lighting": document.getElementById("newLighting").value || "0",
+                  "Nail": document.getElementById("newNail").value || "0",
+                  "Table": document.getElementById("newTable").value || "0"
+              };
+
+              console.log("📤 Sending data to submit_success/:", newData);
+
+              // ✅ ส่งข้อมูลไปยัง `/submit_success/`
+              $.ajax({
+                  url: '/submit_success/',
+                  type: 'POST',
+                  data: JSON.stringify(newData),
+                  contentType: 'application/json',
+                  headers: { "X-CSRFToken": getCookie("csrftoken") },
+                  success: function (response) {
+                      console.log("✅ Data successfully saved:", response);
+                      Swal.fire({
+                          icon: "success",
+                          title: "Saved Successfully!",
+                          text: "New model data has been saved.",
+                          confirmButtonText: "OK"
+                      });
+
+                      document.getElementById("saveModelPopup").style.display = "none"; // ปิด Popup หลังจาก Save
+                  },
+                  error: function (xhr, status, error) {
+                      console.error("❌ Error saving data:", error);
+                      Swal.fire({
+                          icon: "error",
+                          title: "Save Failed!",
+                          text: "An error occurred while saving. Please try again.",
+                          confirmButtonText: "OK"
+                      });
+                  }
+              });
+          });
+
+          function getCookie(name) {
+              let cookieValue = null;
+              if (document.cookie && document.cookie !== '') {
+                  const cookies = document.cookie.split(';');
+                  for (let i = 0; i < cookies.length; i++) {
+                      const cookie = cookies[i].trim();
+                      if (cookie.startsWith(name + '=')) {
+                          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                          break;
+                      }
+                  }
+              }
+              return cookieValue;
           }
-        });
+
+          // ✅ ปิด Modal เมื่อกดปุ่ม Close
+          closeBtn.addEventListener("click", function () {
+              modal.style.display = "none";
+          });
+
+          // ✅ ปุ่ม Reset เคลียร์ช่อง Input
+          resetBtn.addEventListener("click", function () {
+              console.log("🔄 Resetting input fields...");
+              document.querySelectorAll(".popup-column input").forEach(input => {
+                  input.value = "";
+              });
+          });
+
+          // ✅ ปิด Modal เมื่อคลิกข้างนอก
+          window.addEventListener("click", function (event) {
+              if (event.target === modal) {
+                  modal.style.display = "none";
+              }
+          });
       });
 
     </script>
