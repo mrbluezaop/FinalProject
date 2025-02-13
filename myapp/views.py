@@ -894,15 +894,12 @@ def generate_pdf(request):
 
     # รายการสินค้า
     items = [
-        ("Wood", amout_wood, 85000),
-        ("Paint", amout_paint, 30000),
-        ("Lighting", amout_lighting, 8750),
-        ("Nail", amout_nail, 25000),
-        ("Table", amout_table, 15000),
-        ("Chair", amout_chair, 15000),
-        ("งานเคาน์เตอร์", 1, 15000),
-        ("โต๊ะ & เก้าอี้", 2, 3500),
-        ("รวมค่าใช้จ่าย", 1, 30000)
+        ("Wood", amout_wood, "แผ่น"),
+        ("Paint", amout_paint, "แกลลอน"),
+        ("Lighting", amout_lighting, "ชุด"),
+        ("Nail", amout_nail, "กล่อง"),
+        ("Table", amout_table, "ตัว"),
+        ("Chair", amout_chair, "ตัว")
     ]
 
     buffer = io.BytesIO()
@@ -997,20 +994,10 @@ def generate_pdf(request):
     y_end = y_table_start - table_height  # คำนวณขอบล่างให้เท่ากัน
 
     # ✅ เพิ่มตารางรายการสินค้า
-    data = [["ลำดับ", "รายละเอียด", "จำนวน", "ราคา/หน่วย", "รวม (บาท)"]]
-    total_price = 0
-    for i, (desc, qty, unit_price) in enumerate(items, start=1):
-        total = qty * unit_price
-        data.append([i, desc, qty, f"{unit_price:,.2f}", f"{total:,.2f}"])
-        total_price += total
+    data = [["ลำดับ", "รายละเอียด", "จำนวน", "หน่วย", "หมายเหตุ"]]
+    for i, (desc, qty, unit) in enumerate(items, start=1):
+        data.append([i, desc, qty, unit, "-"])
 
-    # ✅ ภาษีและยอดรวม
-    vat = total_price * 0.07
-    net_total = total_price + vat
-
-    data.append(["", "รวมทั้งหมด", "", "", f"{total_price:,.2f}"])
-    data.append(["", "ภาษีมูลค่าเพิ่ม 7%", "", "", f"{vat:,.2f}"])
-    data.append(["", "ยอดรวมสุทธิ", "", "", f"{net_total:,.2f}"])
 
     # ❌ ลบ `pdf.rect()` ที่ใช้วาดกรอบรอบตารางสินค้า (เพื่อป้องกันเส้นซ้อน)
     # pdf.rect(x_table_start, y_end, table_width, table_height, stroke=1, fill=0)  # ลบออก
@@ -1018,22 +1005,54 @@ def generate_pdf(request):
     # ✅ สร้างตารางสินค้า (ให้ Table ควบคุมเส้นเอง)
     table = Table(data, colWidths=[55, 200, 50, 100, 100])
     table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), font_name),
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-    ]))
+    ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  # ✅ ใช้ฟอนต์ไทย
+    ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
+    ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+    ("GRID", (0, 0), (-1, -1), 1, colors.black),
+]))
 
     table.wrapOn(pdf, x_table_start, 500)
     table.drawOn(pdf, x_table_start, y_end)  
 
-    # ✅ เงื่อนไขการชำระเงิน
-    pdf.setFont(font_name, 16)
-    pdf.drawString(50, y_end - 60, "เงื่อนไขการชำระเงิน:")
-    pdf.drawString(70, y_end - 80, "50% เมื่อทำการสั่งซื้อ")
-    pdf.drawString(70, y_end - 100, "30% ก่อนเริ่มงาน")
-    pdf.drawString(70, y_end - 120, "20% ก่อนส่งมอบงาน")
+    # ✅ ปรับตำแหน่งตารางเงื่อนไขการชำระเงินให้เลื่อนลงมา
+    y_payment_start = y_start - 350  # ปรับระยะให้ตารางเงื่อนไขอยู่ต่ำลงจากตารางหลัก
+
+    payment_data = [["งวดที่ชำระ", "รายละเอียด"]]
+    payments = [
+        ("งวดที่ 1", "50% เมื่อตกลงว่าจ้าง"),
+        ("งวดที่ 2", "30% ก่อนเข้าพื้นที่ ดำเนินการงาน"),
+        ("งวดที่ 3", "20% ก่อนรื้อถอน")
+    ]
+    for payment in payments:
+        payment_data.append(payment)
+
+    # ✅ ตรวจสอบว่าฟอนต์ภาษาไทยถูกต้อง
+    pdfmetrics.registerFont(TTFont("THSarabunNew", "static/fonts/THSarabunNew.ttf"))
+
+    # ✅ ปรับตารางเงื่อนไขการชำระเงินให้รองรับภาษาไทย
+    payment_table = Table(payment_data, colWidths=[100, 350])
+    payment_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  # ✅ ใช้ฟอนต์ภาษาไทย
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+    ]))
+
+    payment_table.wrapOn(pdf, x_table_start, y_payment_start)
+    payment_table.drawOn(pdf, x_table_start, y_payment_start)
+
+    # ✅ เพิ่มพื้นที่สำหรับการลงนามที่มุมขวาล่าง
+    signature_x = 350  # กำหนดตำแหน่ง X ของช่องลงชื่อ
+    signature_y = 100  # กำหนดตำแหน่ง Y ของช่องลงชื่อ
+
+    pdf.setFont("THSarabunNew", 14)
+    pdf.drawString(signature_x, signature_y + 40, "ลงชื่อ................................................")  
+    pdf.drawString(signature_x + 40, signature_y + 20, "(ชื่อ-นามสกุล)")  
+    pdf.drawString(signature_x, signature_y, "วันที่.....................")  
+
+
 
     # ✅ บันทึก PDF
     pdf.save()
