@@ -1,83 +1,51 @@
-function fetchChartData() {
-    fetch('/report/data/')  // เรียกข้อมูลจาก URL API
+document.addEventListener("DOMContentLoaded", function() {
+    updateChart();
+});
+
+function updateChart() {
+    let quarter = document.getElementById("quarterFilter").value;
+
+    fetch(`/api/get_hire_data/?quarter=${quarter}`)
         .then(response => response.json())
         .then(data => {
-            initChart(data);
+            console.log("📌 API Response:", data);  // เช็คค่าที่ได้จาก API
+            renderTable(data.hire);
         })
-        .catch(error => console.error('Error fetching chart data:', error));
+        .catch(error => console.error("🚨 Error fetching data:", error));
 }
 
-function initChart(chartData) {
-    var ctx = document.getElementById('pieChart').getContext('2d');
+function renderTable(hire) {
+    let container = document.getElementById("reportContainer");
+    container.innerHTML = ""; // เคลียร์ข้อมูลก่อนหน้า
 
-    // แสดงข้อมูลไตรมาสที่ 1 เป็นค่าเริ่มต้น
-    var currentQuarter = 'Q1';
+    if (hire.length === 0) {
+        container.innerHTML = "<p>❌ ไม่มีข้อมูลสำหรับไตรมาสที่เลือก</p>";
+        return;
+    }
 
-    // สร้างกราฟ Pie Chart
-    window.pieChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['อยู่ระหว่างการทำ', 'ทำเสร็จสิ้นแล้ว', 'รอการยืนยัน'],
-            datasets: [{
-                data: [
-                    chartData[currentQuarter]['in_progress'],
-                    chartData[currentQuarter]['completed'],
-                    chartData[currentQuarter]['Waiting_confirmation']
-                ],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-                hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-            }]
-        },
-        options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'รายงานสถานะงาน - ไตรมาสที่ 1' }
-            }
-        }
+    let table = document.createElement("table");
+    table.border = "1";
+    let thead = table.createTHead();
+    let row = thead.insertRow();
+
+    let headers = ["ID", "Type", "Budget", "Location", "Date of Hire", "Status"];
+    headers.forEach(header => {
+        let th = document.createElement("th");
+        th.innerText = header;
+        row.appendChild(th);
     });
 
-    // ล็อกขนาดกราฟ
-    document.getElementById('pieChart').style.width = '300x';
-    document.getElementById('pieChart').style.height = '300px';
-}
+    let tbody = table.createTBody();
 
-// ฟังก์ชันเปลี่ยนกราฟตามไตรมาสที่เลือก
-function updateChart() {
-    var selectedQuarter = document.getElementById('quarterFilter').value;
-    fetch('/report/data/')
-        .then(response => response.json())
-        .then(chartData => {
-            pieChart.data.datasets[0].data = [
-                chartData[selectedQuarter]['in_progress'],
-                chartData[selectedQuarter]['completed'],
-                chartData[selectedQuarter]['Waiting_confirmation']
-            ];
-            pieChart.options.plugins.title.text = 'รายงานสถานะงาน - ' + selectedQuarter;
-            pieChart.update();
-        })
-        .catch(error => console.error('Error updating chart:', error));
-}
-
-function exportToExcel() {
-    // ดึงข้อมูลจากกราฟ Chart.js
-    var chartData = pieChart.data.datasets[0].data;
-    var labels = pieChart.data.labels;
-    
-    // สร้างข้อมูลสำหรับ Excel
-    var exportData = labels.map((label, index) => {
-        return {
-            'Category': label,
-            'Value': chartData[index]
-        };
+    hire.forEach(item => {
+        let row = tbody.insertRow();
+        row.insertCell(0).innerText = item.Hire_ID;
+        row.insertCell(1).innerText = item.Type;
+        row.insertCell(2).innerText = item.Budget;
+        row.insertCell(3).innerText = item.Location;
+        row.insertCell(4).innerText = new Date(item.Dateofhire).toLocaleDateString();
+        row.insertCell(5).innerText = item.Status;
     });
 
-    // แปลงข้อมูลเป็น sheet
-    var worksheet = XLSX.utils.json_to_sheet(exportData);
-    var workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Report Data");
-
-    // ดาวน์โหลดไฟล์ Excel
-    XLSX.writeFile(workbook, "chart_data.xlsx");
+    container.appendChild(table);
 }

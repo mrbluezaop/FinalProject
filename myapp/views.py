@@ -40,12 +40,14 @@ from reportlab.platypus import Table, TableStyle
 import os
 import io
 from django.http import HttpResponse
-from datetime import datetime  # เพิ่มโมดูล datetime
 import random
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.utils.timezone import now
 
 # Create your views here.
 
@@ -1239,3 +1241,29 @@ def filter_hireA_by_date(request):
 def hireA_list(request):
     predicts = PredictHire.objects.select_related('HireA_ID').filter(HireA_ID__isnull=False)
     return render(request, 'adminhire.html', {'predicts': predicts})
+
+def get_quarter_range(quarter):
+    """ คืนค่าช่วงวันที่ตามไตรมาสของปี 2024 """
+    year = 2024  # ดึงข้อมูลเฉพาะปี 2024
+
+    quarter_dates = {
+        "Q1": (datetime.datetime(year, 1, 1), datetime.datetime(year, 3, 31, 23, 59, 59)),
+        "Q2": (datetime.datetime(year, 4, 1), datetime.datetime(year, 6, 30, 23, 59, 59)),
+        "Q3": (datetime.datetime(year, 7, 1), datetime.datetime(year, 9, 30, 23, 59, 59)),
+        "Q4": (datetime.datetime(year, 10, 1), datetime.datetime(year, 12, 31, 23, 59, 59)),
+    }
+    return quarter_dates.get(quarter, (None, None))
+
+
+
+
+def Report_list(request):
+    resources = Resource.objects.select_related(
+        'Predict_ID',
+        'Predict_ID__HireC_ID',
+        'Predict_ID__HireC_ID__Customer_ID',
+        'Predict_ID__HireA_ID'
+    ).filter(Predict_ID__HireC_ID__isnull=False)  # แก้ filter ให้ถูกต้อง
+    print(resources)
+    return render(request, 'report.html', {'resources': resources})
+

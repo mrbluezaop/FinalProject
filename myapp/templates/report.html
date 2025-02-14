@@ -1,87 +1,160 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'myapp/style4.css' %}">
-    <link rel="stylesheet" href="{% static 'myapp/graph.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'myapp/stylepopup.css' %}">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/scriptgraph.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>Attendance Dashboard | By Code Info</title>
+  <link rel="stylesheet" href="{% static 'myapp/style4.css' %}">
+  <link rel="stylesheet" href="{% static 'myapp/popupcsspredic.css' %}">
+  <!-- Font Awesome Cdn Link -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'myapp/stylepopup.css' %}">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <script src="{% static 'js/popup.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // ✅ ฟังก์ชัน getCookie() สำหรับดึงค่า CSRF Token จากคุกกี้
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          // ตรวจสอบว่าคุกกี้ตรงกับชื่อที่ต้องการหรือไม่
+          if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+  <style>
+    .popup-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .result-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .result-box label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .result-box input {
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-      <nav>
-        <ul>
-          <li><a class="logo">
-              <span class="nav-item">Admin</span>
-            </a></li>
-          <li><a href="{% url 'dashboard' %}">
-              <i class="fas fa-menorah"></i>
-              <span class="nav-item">Dashboard</span>
-            </a></li>
-          <li>
-            <a href="{% url 'hireset' %}">
-              <i class="fas fa-comment"></i>
-              <span class="nav-item">Hires</span>
-            </a>
-          </li>
-          <li><a href="{% url 'adminhires' %}">
+  <div class="container">
+    <nav>
+      <ul>
+        <li><a class="logo">
+            <span class="nav-item">Admin</span>
+          </a></li>
+        <li><a href="{% url 'dashboard' %}">
+            <i class="fas fa-menorah"></i>
+            <span class="nav-item">Dashboard</span>
+          </a></li>
+        <li>
+          <a href="{% url 'hireset' %}">
+            <i class="fas fa-comment"></i>
+            <span class="nav-item">Hires</span>
+          </a>
+        </li>
+        <li><a href="{% url 'adminhires' %}">
             <i class="fas fa-comment"></i>
             <span class="nav-item">Admin Hires</span>
           </a></li>
-          <li><a href="{% url 'predictcustom' %}">
-              <i class="fas fa-database"></i>
-              <span class="nav-item">Predict custom</span>
-            </a></li>
-          <li><a href="{% url 'report' %}">
-              <i class="fas fa-chart-bar"></i>
-              <span class="nav-item">Report</span>
-            </a></li>
-  
-          <li>
-            <a href="{% url 'logout' %}" class="logout">
-              <i class="fas fa-sign-out-alt"></i>
-              <span class="nav-item">Log out</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+        <li><a href="{% url 'predictcustom' %}">
+            <i class="fas fa-database"></i>
+            <span class="nav-item">Predict custom</span>
+          </a></li>
+        <li><a href="{% url 'report' %}">
+            <i class="fas fa-chart-bar"></i>
+            <span class="nav-item">Report</span>
+          </a></li>
 
-        <section class="main">
-            <section class="attendance">
-                <div class="attendance-list">
-                    <h1>Report</h1>
-                    <h1>รายงานตามไตรมาส</h1>
+        <li>
+          <a href="{% url 'logout' %}" class="logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="nav-item">Log out</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
 
-    <label for="quarterFilter">เลือกไตรมาส:</label>
-    <select id="quarterFilter" onchange="updateChart()">
-        <option value="Q1">ไตรมาสที่ 1 (ม.ค.-มี.ค.)</option>
-        <option value="Q2">ไตรมาสที่ 2 (เม.ย.-มิ.ย.)</option>
-        <option value="Q3">ไตรมาสที่ 3 (ก.ค.-ก.ย.)</option>
-        <option value="Q4">ไตรมาสที่ 4 (ต.ค.-ธ.ค.)</option>
-    </select>
-
-    <canvas id="pieChart"></canvas>
-
-    <script>
-        fetchChartData();  // เรียกใช้ฟังก์ชันเมื่อหน้าเว็บโหลด
-    </script>
-        
-                    <hr>
-                <button onclick="exportToExcel()"> >>> Dowload File Report <<<</button>
-
-                <table class="table">
-                    <thead>
-                    </thead>
-                </table>
-            </section>
+    <section class="main">
+      <section class="attendance">
+        <div class="attendance-list">
+          <h1>Hire List</h1>
+          <!-- ฟอร์มตัวกรอง -->
+          <form method="get" action="{% url 'filter_hire_by_date' %}" style="margin-bottom: 20px;">
+          </form>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>HireID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Type</th>
+                <th>Budget</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for resource in resources %}
+              <tr>
+                {% if resource.Predict_ID.HireC_ID %}
+                  <td>{{ resource.Predict_ID.HireC_ID.Hire_ID }}</td>
+                  <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Firstname }}</td>
+                  <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Lastname }}</td>
+                  <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Email }}</td>
+                  <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Phone }}</td>
+                {% elif resource.Predict_ID.HireA_ID %}
+                  <td>{{ resource.Predict_ID.HireA_ID.HireA_ID }}</td>
+                  <td colspan="4">Admin Hire</td>
+                {% else %}
+                  <td colspan="5">No Data</td>
+                {% endif %}
+                <td>{{ resource.Predict_ID.Type }}</td>
+                <td>{{ resource.Predict_ID.Budget }}</td>
+                <td>{{ resource.Predict_ID.Dateofhire|date:"Y-m-d H:i" }}</td>
+                <td>
+                  <!-- ปุ่ม Delete -->
+                  <button class="delete-btn" data-id="{{ resource.Predict_ID.HireC_ID.Hire_ID }}"
+                    onclick="deleteHire(this.getAttribute('data-id'))">Delete</button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9" style="text-align: center;">No data available</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            
+          </table>
+        </div>
+      </section>
     </section>
 </body>
+
 </html>
