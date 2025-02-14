@@ -88,12 +88,15 @@ def hire(requset):
 def hireset(requset):
     return render(requset, "hireset.html")
 
+def adminhire(request):
+    return render(request, 'adminhire.html')  # ชี้ไปที่ไฟล์เทมเพลต
+
 def predictcustom(request):
     return render(request, "predictcustom.html")
 
 def report(request):
     return render(request, "report.html")
-    
+
 def check_user_in_database(username, password):
     db_settings = settings.DATABASES['default']
     with mysql.connector.connect(
@@ -467,7 +470,7 @@ def submit_hire(request):
 
 def hire_list(request):
     # ดึงข้อมูลทั้งหมดจากตาราง Hire
-    predicts = PredictHire.objects.select_related('HireC_ID', 'HireC_ID__Customer_ID', 'HireA_ID').all()  # ใช้ select_related เพื่อรวมข้อมูลจาก ForeignKey
+    predicts = PredictHire.objects.select_related('HireC_ID', 'HireC_ID__Customer_ID').filter(HireC_ID__isnull=False)  # ใช้ select_related เพื่อรวมข้อมูลจาก ForeignKey
     return render(request, 'hireset.html', {'predicts': predicts})  # เปลี่ยนชื่อไฟล์ Template เป็น hireset.html
 
 @csrf_exempt
@@ -1160,3 +1163,79 @@ def submit_success_hire(request):
             return JsonResponse({'error': f'เกิดข้อผิดพลาด: {str(e)}'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def delete_hireA(request, hire_id):
+    if request.method == 'DELETE':
+        try:
+            HireforAdmins = HireforAdmin.objects.get(pk=hire_id)  # ค้นหา Hire ด้วย Hire_ID
+            HireforAdmins.delete()  # ลบข้อมูลในฐานข้อมูล
+            return JsonResponse({"message": f"HireA ID {hire_id} deleted successfully."}, status=200)
+        except HireforAdmins.DoesNotExist:
+            return JsonResponse({"error": f"HireA ID {hire_id} not found."}, status=404)
+    return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=400)
+
+def get_hireA_details(request, hire_id):
+    HireforAdmins = get_object_or_404(HireforAdmin, pk=hire_id)
+    data = {
+        "Hire_ID": HireforAdmins.HireA_ID,
+        "Width": HireforAdmins.Width,
+        "Length": HireforAdmins.Length,
+        "Height": HireforAdmins.Height,
+        "Type": HireforAdmins.Type,
+        "Budget": HireforAdmins.Budget,
+        "Location": HireforAdmins.Location,
+        "Status": HireforAdmins.Status,
+        "DateOfHire": HireforAdmins.Dateofhire
+    }
+    return JsonResponse(data)
+
+def get_predict_detailsA(request, predict_id):
+    predict = get_object_or_404(PredictHire, pk=predict_id)
+    data = {
+        "Predict_ID": predict.Predict_ID,
+        "Width": predict.Width,
+        "Length": predict.Length,
+        "Height": predict.Height,
+        "Type": predict.Type,
+        "Budget": predict.Budget,
+        "Wood": predict.Wood,
+        "Paint": predict.Paint,
+        "Lighting": predict.Lighting,
+        "Nail": predict.Nail,
+        "Table": predict.Table,
+        "Chair": predict.Chair,
+        "DateOfHire": predict.HireA_ID.Dateofhire,
+        "Type": predict.HireA_ID.Type,
+        "Location": predict.HireA_ID.Location
+    }
+    return JsonResponse(data)
+
+def update_hireA_status(request, hire_id):
+    if request.method == 'POST':
+        try:
+            HireforAdmins = get_object_or_404(HireforAdmin, pk=hire_id)
+            data = json.loads(request.body)
+            HireforAdmins.Status = data.get('Status')
+            HireforAdmins.save()
+            return JsonResponse({"message": "Hire status updated successfully."}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+def filter_hireA_by_date(request):
+    # ดึงข้อมูลจากฐานข้อมูล
+    hires = HireforAdmin.objects.all()
+
+    # ตรวจสอบค่าตัวกรองที่ส่งมาจากฟอร์ม
+    sort_order = request.GET.get('sort_order', 'desc')  # ค่าเริ่มต้น: จากล่าสุดก่อน
+    if sort_order == 'asc':
+        hires = hires.order_by('Dateofhire')  # เรียงจากน้อยไปมาก (เก่าสุดก่อน)
+    else:
+        hires = hires.order_by('-Dateofhire')  # เรียงจากมากไปน้อย (ล่าสุดก่อน)
+
+    # ส่งข้อมูลไปยัง Template
+    return render(request, 'adminhire.html', {'hires': hires})
+
+def hireA_list(request):
+    predicts = PredictHire.objects.select_related('HireA_ID').filter(HireA_ID__isnull=False)
+    return render(request, 'adminhire.html', {'predicts': predicts})

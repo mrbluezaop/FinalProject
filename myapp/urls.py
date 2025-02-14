@@ -1,6 +1,6 @@
 from django.urls import path
 from myapp import views
-from .views import filter_hire_by_date
+from .views import filter_hire_by_date, filter_hireA_by_date
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import generate_pdf
@@ -23,6 +23,7 @@ urlpatterns = [
     path('submit-hire', views.submit_hire, name='submit_hire'),
     path('login/', views.login, name='login'),
     path('hireset/', views.hire_list, name='hireset'),  # URL สำหรับหน้า Hire List
+    path('adminhires/', views.hireA_list, name='adminhires'),
     path('delete-member/<int:member_id>/', views.delete_member, name='delete_member'),
     path('check-duplicate/', views.check_duplicate, name='check_duplicate'),
     path('delete-hire/<int:hire_id>/', views.delete_hire, name='delete_hire'),
@@ -37,5 +38,10 @@ urlpatterns = [
     path('submit_hireA/', views.submit_hireA, name='submit_predictA'),
     path("download-pdf/", generate_pdf, name="download_pdf"),
     path("submit_success/", views.submit_success_hire, name="submit_success_hire"),
+    path('delete-hireA/<int:hire_id>/', views.delete_hireA, name='delete_hireA'),
+    path('api/hireA/<int:hire_id>/', views.get_hireA_details, name='get_hireA_details'),
+    path('api/predictA/<int:predict_id>/', views.get_predict_detailsA, name='get_predict_detailsA'),
+    path('update-hire-statusA/<int:hire_id>/', views.update_hireA_status, name='update_hireA_status'),
+    path('hiresA/filter/', filter_hireA_by_date, name='filter_hireA_by_date'),
 ]   + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
  

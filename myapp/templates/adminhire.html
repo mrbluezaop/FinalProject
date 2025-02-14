@@ -12,7 +12,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'myapp/stylepopup.css' %}">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <script src="{% static 'js/popup.js' %}"></script>
+  <script src="{% static 'js/popup2.js' %}"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
@@ -103,7 +103,7 @@
         <div class="attendance-list">
           <h1>Hire List</h1>
           <!-- ฟอร์มตัวกรอง -->
-          <form method="get" action="{% url 'filter_hire_by_date' %}" style="margin-bottom: 20px;">
+          <form method="get" action="{% url 'filter_hireA_by_date' %}" style="margin-bottom: 20px;">
             <label for="sort_order">Sort By Date:</label>
 
 
@@ -113,10 +113,10 @@
             <thead>
               <tr>
                 <th>HireID</th>
-                <th>First Name</th>
+                <!-- <th>First Name</th>
                 <th>Last Name</th>
                 <th>Email</th>
-                <th>Phone</th>
+                <th>Phone</th> -->
                 <th>Type</th>
                 <th>Budget</th>
                 <th>Date</th>
@@ -127,20 +127,20 @@
             <tbody>
               {% for predict in predicts %}
               <tr>
-                <td>{{ predict.HireC_ID.Hire_ID }}</td>
-                <td>{{ predict.HireC_ID.Customer_ID.Firstname }}</td>
+                <td>{{ predict.HireA_ID.HireA_ID }}</td>
+                <!-- <td>{{ predict.HireC_ID.Customer_ID.Firstname }}</td>
                 <td>{{ predict.HireC_ID.Customer_ID.Lastname }}</td>
                 <td>{{ predict.HireC_ID.Customer_ID.Email }}</td>
-                <td>{{ predict.HireC_ID.Customer_ID.Phone }}</td>
+                <td>{{ predict.HireC_ID.Customer_ID.Phone }}</td> -->
                 <td>{{ predict.Type }}</td>
                 <td>{{ predict.Budget }}</td>
                 <td>{{ predict.Dateofhire|date:"Y-m-d H:i" }}</td>
                 <td>
-                  {% if predict.HireC_ID.Status == 'in_progress' %}
+                  {% if predict.HireA_ID.Status == 'in_progress' %}
                   <span style="color: orange; font-weight: bold;">In Progress</span>
-                  {% elif predict.HireC_ID.Status == 'completed' %}
+                  {% elif predict.HireA_ID.Status == 'completed' %}
                   <span style="color: green; font-weight: bold;">Completed</span>
-                  {% elif predict.HireC_ID.Status == 'waiting_confirmation' %}
+                  {% elif predict.HireA_ID.Status == 'waiting_confirmation' %}
                   <span style="color: blue; font-weight: bold;">Waiting for Confirmation</span>
                   {% else %}
                   <span style="color: gray;">ไม่ระบุสถานะ</span>
@@ -148,20 +148,20 @@
                 </td>
                 <td>
                   <!-- ปุ่ม Delete -->
-                  <button class="delete-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
+                  <button class="delete-btn" data-id="{{ predict.HireA_ID.HireA_ID }}"
                     onclick="deleteHire(this.getAttribute('data-id'))">Delete</button>
 
                   <!-- ปุ่ม View -->
-                  <button class="view-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
+                  <button class="view-btn" data-id="{{ predict.HireA_ID.HireA_ID }}"
                     onclick="showHirePopup(this.getAttribute('data-id'))">View</button>
 
                   <!-- ปุ่ม Predict แสดงเฉพาะเมื่อ Status เป็น In Progress -->
-                  {% if predict.HireC_ID.Status == 'in_progress' %}
+                  {% if predict.HireA_ID.Status == 'in_progress' %}
                   <button class="predict-btn" data-id="{{ predict.Predict_ID }}"
                     onclick="showPredictPopup(this.getAttribute('data-id'))">Predict</button>
                   {% endif %}
                   <!-- ปุ่ม Save Model แสดงเฉพาะเมื่อ Status เป็น Completed -->
-                  {% if predict.HireC_ID.Status == 'completed' %}
+                  {% if predict.HireA_ID.Status == 'completed' %}
                   <button class="save-model-btn" data-id="{{ predict.Predict_ID }}" 
                     onclick="showSaveModelPopup(this.getAttribute('data-id'))">Save Resource</button>
                   {% endif %}
@@ -472,7 +472,7 @@
 
             // ✅ เรียก API `/api/predict/${predictId}/`
             $.ajax({
-                url: `/api/predictC/${predictId}/`,
+                url: `/api/predictA/${predictId}/`,
                 type: 'GET',
                 dataType: 'json',
                 success: function (prediction) {
@@ -558,7 +558,7 @@
 
               // เรียก API เพื่อดึงค่าล่าสุดของ Prediction
               $.ajax({
-                  url: `/api/predictC/${predictId}/`,  // 🔹 แก้ URL ให้เป็น API ที่ใช้ดึงข้อมูล predict
+                  url: `/api/predictA/${predictId}/`,  // 🔹 แก้ URL ให้เป็น API ที่ใช้ดึงข้อมูล predict
                   type: 'GET',
                   dataType: 'json',
                   success: function (predict) {
