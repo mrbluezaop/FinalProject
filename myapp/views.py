@@ -1242,21 +1242,6 @@ def hireA_list(request):
     predicts = PredictHire.objects.select_related('HireA_ID').filter(HireA_ID__isnull=False)
     return render(request, 'adminhire.html', {'predicts': predicts})
 
-def get_quarter_range(quarter):
-    """ คืนค่าช่วงวันที่ตามไตรมาสของปี 2024 """
-    year = 2024  # ดึงข้อมูลเฉพาะปี 2024
-
-    quarter_dates = {
-        "Q1": (datetime.datetime(year, 1, 1), datetime.datetime(year, 3, 31, 23, 59, 59)),
-        "Q2": (datetime.datetime(year, 4, 1), datetime.datetime(year, 6, 30, 23, 59, 59)),
-        "Q3": (datetime.datetime(year, 7, 1), datetime.datetime(year, 9, 30, 23, 59, 59)),
-        "Q4": (datetime.datetime(year, 10, 1), datetime.datetime(year, 12, 31, 23, 59, 59)),
-    }
-    return quarter_dates.get(quarter, (None, None))
-
-
-
-
 def Report_list(request):
     resources = Resource.objects.select_related(
         'Predict_ID',
@@ -1267,3 +1252,50 @@ def Report_list(request):
     print(resources)
     return render(request, 'report.html', {'resources': resources})
 
+def filter_hire_by_date(request):
+    year = request.GET.get('year', '2024')  # ค่าปีเริ่มต้นเป็น 2024
+    quarter = request.GET.get('quarter', '1')  # ค่าตั้งต้นเป็นไตรมาสที่ 1
+
+    # กำหนดช่วงวันที่ตามไตรมาส
+    quarter_dates = {
+        "1": ("01-01", "03-31"),
+        "2": ("04-01", "06-30"),
+        "3": ("07-01", "09-30"),
+        "4": ("10-01", "12-31"),
+    }
+
+    start_date = f"{year}-{quarter_dates[quarter][0]}"
+    end_date = f"{year}-{quarter_dates[quarter][1]}"
+
+    # แปลงเป็น datetime
+    start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
+    end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
+
+    # คัดกรองข้อมูลตามวันที่
+    resources = Resource.objects.filter(Predict_ID__Dateofhire__range=(start_datetime, end_datetime))
+
+    return render(request, 'report.html', {'resources': resources})
+
+def get_resource_data(request):
+    hire_id = request.GET.get("hire_id")
+
+    # ✅ ลองค้นหาทั้ง HireC_ID และ HireA_ID
+    resource = None
+    try:
+        resource = Resource.objects.get(Predict_ID__HireC_ID__Hire_ID=hire_id)
+    except Resource.DoesNotExist:
+        try:
+            resource = Resource.objects.get(Predict_ID__HireA_ID__HireA_ID=hire_id)
+        except Resource.DoesNotExist:
+            return JsonResponse({"error": "Resource not found"}, status=404)
+
+    # ✅ คืนค่า JSON ถ้าพบข้อมูล
+    data = {
+        "Wood_P": resource.Wood_P,
+        "Paint_P": resource.Paint_P,
+        "Lighting_P": resource.Lighting_P,
+        "Nail_P": resource.Nail_P,
+        "Table_P": resource.Table_P,
+        "Chair_P": resource.Chair_P,
+    }
+    return JsonResponse(data)

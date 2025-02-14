@@ -4,6 +4,7 @@ from .views import filter_hire_by_date, filter_hireA_by_date
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import generate_pdf
+from .views import get_resource_data
 
 
 urlpatterns = [
@@ -43,5 +44,6 @@ urlpatterns = [
     path('api/predictA/<int:predict_id>/', views.get_predict_detailsA, name='get_predict_detailsA'),
     path('update-hire-statusA/<int:hire_id>/', views.update_hireA_status, name='update_hireA_status'),
     path('hiresA/filter/', filter_hireA_by_date, name='filter_hireA_by_date'),
+    path("get_resource_data/", get_resource_data, name="get_resource_data"),
 ]   + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
  

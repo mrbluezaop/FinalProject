@@ -15,6 +15,8 @@
   <script src="{% static 'js/popup.js' %}"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{% static 'scriptgraph.js' %}"></script>
   <script>
     // ✅ ฟังก์ชัน getCookie() สำหรับดึงค่า CSRF Token จากคุกกี้
     function getCookie(name) {
@@ -34,27 +36,84 @@
     }
   </script>
   <style>
-    .popup-column {
+    /* สไตล์สำหรับฟอร์ม */
+    form {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      text-align: center;
+      gap: 10px;
+      background: #f8f9fa;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+      width: fit-content;
     }
 
-    .result-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 10px 0;
-    }
-
-    .result-box label {
+    label {
       font-weight: bold;
-      margin-bottom: 5px;
+      color: #333;
     }
 
-    .result-box input {
-      text-align: center;
+    /* สไตล์สำหรับ dropdown */
+    select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      background-color: #fff;
+      cursor: pointer;
+      transition: 0.3s ease-in-out;
+    }
+
+    select:hover {
+      border-color: #007bff;
+    }
+
+    /* สไตล์สำหรับปุ่ม */
+    button {
+      padding: 8px 15px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* ทำให้แถวของ Customer และ Admin Hire List คลิกได้ */
+    .clickable-row,
+    .clickable-row-admin {
+      cursor: pointer;
+      /* เปลี่ยนเมาส์เป็นแบบคลิกได้ */
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    /* เปลี่ยนสีพื้นหลังเมื่อชี้เมาส์ */
+    .clickable-row:hover,
+    .clickable-row-admin:hover {
+      background-color: #f1f1f1;
+      /* สีเทาอ่อน */
+    }
+
+    #chart-container {
+      display: none;
+      width: 300%;
+      /* ปรับขนาดของ container */
+      max-width: 600px;
+      /* จำกัดความกว้างสูงสุด */
+      margin: auto;
+      /* จัดให้อยู่ตรงกลาง */
+    }
+
+    #resourceChart {
+      width: 100% !important;
+      height: 400px !important;
+      /* กำหนดความสูงของกราฟ */
     }
   </style>
 </head>
@@ -104,90 +163,152 @@
           <h1>Hire List</h1>
           <!-- ฟอร์มตัวกรอง -->
           <form method="get" action="{% url 'filter_hire_by_date' %}" style="margin-bottom: 20px;">
-          </form>
+            <label for="year">Select Year:</label>
+            <select name="year" id="year">
+                <option value="2023" {% if request.GET.year|default:"2024" == "2023" %}selected{% endif %}>2023</option>
+                <option value="2024" {% if request.GET.year|default:"2024" == "2024" %}selected{% endif %}>2024</option>
+            </select>
+        
+            <label for="quarter">Select Quarter:</label>
+            <select name="quarter" id="quarter">
+                <option value="1" {% if request.GET.quarter|default:"1" == "1" %}selected{% endif %}>Q1 (Jan - Mar)</option>
+                <option value="2" {% if request.GET.quarter|default:"1" == "2" %}selected{% endif %}>Q2 (Apr - Jun)</option>
+                <option value="3" {% if request.GET.quarter|default:"1" == "3" %}selected{% endif %}>Q3 (Jul - Sep)</option>
+                <option value="4" {% if request.GET.quarter|default:"1" == "4" %}selected{% endif %}>Q4 (Oct - Dec)</option>
+            </select>
+        
+            <button type="submit">Filter</button>
+        </form>
+
+          <!-- ส่วนแสดงกราฟ -->
+          <div id="chart-container" style="display: none; margin-bottom: 20px;">
+            <canvas id="resourceChart"></canvas>
+          </div>
+
+          <h2>Customer Hire List</h2>
           <table class="table">
+            <thead>
+              <tr>
+                <th>HireID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Type</th>
+                <th>Budget</th>
+                <th>Date</th>
+              </tr>
+            </thead>
             <tbody>
-              <!-- ส่วนแสดง Hire List ของลูกค้า (Customer Hire) -->
-              <h2>Customer Hire List</h2>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>HireID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Type</th>
-                    <th>Budget</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for resource in resources %}
-                    {% if resource.Predict_ID.HireC_ID %}
-                    <tr>
-                      <td>{{ resource.Predict_ID.HireC_ID.Hire_ID }}</td>
-                      <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Firstname }}</td>
-                      <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Lastname }}</td>
-                      <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Email }}</td>
-                      <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Phone }}</td>
-                      <td>{{ resource.Predict_ID.Type }}</td>
-                      <td>{{ resource.Predict_ID.Budget }}</td>
-                      <td>{{ resource.Predict_ID.Dateofhire|date:"Y-m-d H:i" }}</td>
-                      <td>
-                        <button class="delete-btn" data-id="{{ resource.Predict_ID.HireC_ID.Hire_ID }}"
-                          onclick="deleteHire(this.getAttribute('data-id'))">Delete</button>
-                      </td>
-                    </tr>
-                    {% endif %}
-                  {% empty %}
-                  <tr>
-                    <td colspan="9" style="text-align: center;">No data available</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            
-              <!-- ส่วนแสดง Hire List ของ Admin (Admin Hire) -->
-              <h2>Admin Hire List</h2>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>HireID</th>
-                    <th>Details</th>
-                    <th>Type</th>
-                    <th>Budget</th>
-                    <th>Date</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for resource in resources %}
-                    {% if resource.Predict_ID.HireA_ID %}
-                    <tr>
-                      <td>{{ resource.Predict_ID.HireA_ID.HireA_ID }}</td>
-                      <td>Admin Hire</td>
-                      <td>{{ resource.Predict_ID.Type }}</td>
-                      <td>{{ resource.Predict_ID.Budget }}</td>
-                      <td>{{ resource.Predict_ID.Dateofhire|date:"Y-m-d H:i" }}</td>
-                      <td>
-                        <button class="delete-btn" data-id="{{ resource.Predict_ID.HireA_ID.HireA_ID }}"
-                          onclick="deleteHire(this.getAttribute('data-id'))">Delete</button>
-                      </td>
-                    </tr>
-                    {% endif %}
-                  {% empty %}
-                  <tr>
-                    <td colspan="6" style="text-align: center;">No data available</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+              {% for resource in resources %}
+              {% if resource.Predict_ID.HireC_ID %}
+              <tr class="clickable-row" data-hire-id="{{ resource.Predict_ID.HireC_ID.Hire_ID }}">
+                <td>{{ resource.Predict_ID.HireC_ID.Hire_ID }}</td>
+                <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Firstname }}</td>
+                <td>{{ resource.Predict_ID.HireC_ID.Customer_ID.Lastname }}</td>
+                <td>{{ resource.Predict_ID.Type }}</td>
+                <td>{{ resource.Predict_ID.Budget }}</td>
+                <td>{{ resource.Predict_ID.Dateofhire|date:"Y-m-d H:i" }}</td>
+              </tr>
+              {% endif %}
+              {% empty %}
+              <tr>
+                <td colspan="6" style="text-align: center;">No data available</td>
+              </tr>
+              {% endfor %}
             </tbody>
-            
           </table>
+
+          <h2>Admin Hire List</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>HireID</th>
+                <th>Details</th>
+                <th>Type</th>
+                <th>Budget</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for resource in resources %}
+              {% if resource.Predict_ID.HireA_ID %}
+              <tr class="clickable-row-admin" data-hire-id="{{ resource.Predict_ID.HireA_ID.HireA_ID }}">
+                <td>{{ resource.Predict_ID.HireA_ID.HireA_ID }}</td>
+                <td>Admin Hire</td>
+                <td>{{ resource.Predict_ID.Type }}</td>
+                <td>{{ resource.Predict_ID.Budget }}</td>
+                <td>{{ resource.Predict_ID.Dateofhire|date:"Y-m-d H:i" }}</td>
+              </tr>
+              {% endif %}
+              {% empty %}
+              <tr>
+                <td colspan="5" style="text-align: center;">No data available</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <!-- JavaScript -->
+          <script>
+            document.addEventListener("DOMContentLoaded", function () {
+              // ✅ ทำให้ Customer Hire List กดได้
+              document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function () {
+                  const hireID = this.getAttribute("data-hire-id");
+                  fetchChartData(hireID);
+                });
+              });
+
+              // ✅ ทำให้ Admin Hire List กดได้
+              document.querySelectorAll(".clickable-row-admin").forEach(row => {
+                row.addEventListener("click", function () {
+                  const hireID = this.getAttribute("data-hire-id");
+                  fetchChartData(hireID);
+                });
+              });
+
+              function fetchChartData(hireID) {
+                fetch(`/get_resource_data/?hire_id=${hireID}`)
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.error) {
+                      console.error("Error: Resource not found");
+                      return;
+                    }
+                    showChart(data);
+                  })
+                  .catch(error => console.error("Error fetching data:", error));
+              }
+
+              function showChart(data) {
+                document.getElementById("chart-container").style.display = "block";
+
+                const ctx = document.getElementById("resourceChart").getContext("2d");
+
+                // 🔥 ตรวจสอบว่ามีกราฟเก่าและเป็น Object ของ Chart.js ก่อนทำลาย
+                if (window.resourceChart instanceof Chart) {
+                  window.resourceChart.destroy();
+                }
+
+                // 🔹 สร้างกราฟใหม่
+                window.resourceChart = new Chart(ctx, {
+                  type: "bar",
+                  data: {
+                    labels: ["Wood_P", "Paint_P", "Lighting_P", "Nail_P", "Table_P", "Chair_P"],
+                    datasets: [{
+                      label: "Predicted Usage",
+                      data: [data.Wood_P, data.Paint_P, data.Lighting_P, data.Nail_P, data.Table_P, data.Chair_P],
+                      backgroundColor: ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#FF5722", "#607D8B"]
+                    }]
+                  },
+                  options: {
+                    responsive: true,
+                    scales: {
+                      y: { beginAtZero: true }
+                    }
+                  }
+                });
+              }
+            });
+          </script>
         </div>
       </section>
     </section>

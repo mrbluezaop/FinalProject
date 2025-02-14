@@ -1,51 +1,49 @@
 document.addEventListener("DOMContentLoaded", function() {
-    updateChart();
+    document.querySelectorAll(".clickable-row").forEach(row => {
+        row.addEventListener("click", function() {
+            const hireID = this.getAttribute("data-hire-id");
+
+            fetch(`/get_resource_data/?hire_id=${hireID}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error("Error: Resource not found");
+                        return;
+                    }
+                    showChart(data);
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        });
+    });
 });
 
-function updateChart() {
-    let quarter = document.getElementById("quarterFilter").value;
+// ฟังก์ชันแสดงกราฟ
+function showChart(data) {
+    document.getElementById("chart-container").style.display = "block";
+    
+    const ctx = document.getElementById("resourceChart").getContext("2d");
 
-    fetch(`/api/get_hire_data/?quarter=${quarter}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log("📌 API Response:", data);  // เช็คค่าที่ได้จาก API
-            renderTable(data.hire);
-        })
-        .catch(error => console.error("🚨 Error fetching data:", error));
-}
-
-function renderTable(hire) {
-    let container = document.getElementById("reportContainer");
-    container.innerHTML = ""; // เคลียร์ข้อมูลก่อนหน้า
-
-    if (hire.length === 0) {
-        container.innerHTML = "<p>❌ ไม่มีข้อมูลสำหรับไตรมาสที่เลือก</p>";
-        return;
+    // 🔥 ตรวจสอบว่ามีกราฟเก่าและเป็น Object ของ Chart.js ก่อนทำลาย
+    if (window.resourceChart instanceof Chart) {
+        window.resourceChart.destroy();
     }
 
-    let table = document.createElement("table");
-    table.border = "1";
-    let thead = table.createTHead();
-    let row = thead.insertRow();
-
-    let headers = ["ID", "Type", "Budget", "Location", "Date of Hire", "Status"];
-    headers.forEach(header => {
-        let th = document.createElement("th");
-        th.innerText = header;
-        row.appendChild(th);
+    // 🔹 สร้างกราฟใหม่
+    window.resourceChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["Wood_P", "Paint_P", "Lighting_P", "Nail_P", "Table_P", "Chair_P"],
+            datasets: [{
+                label: "Predicted Usage",
+                data: [data.Wood_P, data.Paint_P, data.Lighting_P, data.Nail_P, data.Table_P, data.Chair_P],
+                backgroundColor: ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#FF5722", "#607D8B"]
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
     });
-
-    let tbody = table.createTBody();
-
-    hire.forEach(item => {
-        let row = tbody.insertRow();
-        row.insertCell(0).innerText = item.Hire_ID;
-        row.insertCell(1).innerText = item.Type;
-        row.insertCell(2).innerText = item.Budget;
-        row.insertCell(3).innerText = item.Location;
-        row.insertCell(4).innerText = new Date(item.Dateofhire).toLocaleDateString();
-        row.insertCell(5).innerText = item.Status;
-    });
-
-    container.appendChild(table);
 }
