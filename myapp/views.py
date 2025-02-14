@@ -1263,7 +1263,7 @@ def Report_list(request):
         'Predict_ID__HireC_ID',
         'Predict_ID__HireC_ID__Customer_ID',
         'Predict_ID__HireA_ID'
-    ).filter(Predict_ID__HireC_ID__isnull=False)  # แก้ filter ให้ถูกต้อง
+    ).all()
     print(resources)
     return render(request, 'report.html', {'resources': resources})
 
