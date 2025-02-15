@@ -1301,3 +1301,36 @@ def get_resource_data(request):
         "Chair_P": resource.Chair_P,
     }
     return JsonResponse(data)
+
+def get_resource_by_predict(request, predict_id):
+    """
+    ✅ ดึงข้อมูล Resource ตาม Predict_ID โดยไม่ใช้ Serializer
+    """
+    resource = get_object_or_404(Resource, Predict_ID__Predict_ID=predict_id)
+
+    data = {
+        "Resource_ID": resource.Resource_ID,
+        "Predict_ID": resource.Predict_ID.Predict_ID,
+        "Width": resource.Width,
+        "Length": resource.Length,
+        "Height": resource.Height,
+        "Type": resource.Type,
+        "Location": resource.Location,
+        "Budget": resource.Budget,
+        "Wood_P": resource.Wood_P,
+        "Paint_P": resource.Paint_P,
+        "Lighting_P": resource.Lighting_P,
+        "Nail_P": resource.Nail_P,
+        "Table_P": resource.Table_P,
+        "Chair_P": resource.Chair_P,
+        "Wood": resource.Wood,
+        "Paint": resource.Paint,
+        "Lighting": resource.Lighting,
+        "Nail": resource.Nail,
+        "Table": resource.Table,
+        "Chair": resource.Chair,
+        "Dateofhire": resource.Dateofhire,
+        "DateSuccess": resource.DateSuccess,
+    }
+
+    return JsonResponse(data)

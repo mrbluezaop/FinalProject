@@ -552,6 +552,48 @@
               return;
           }
 
+          function loadResourceData(predictId) {
+              $.ajax({
+                  url: `/api/resource/${predictId}/`,
+                  type: 'GET',
+                  dataType: 'json',
+                  success: function (resource) {
+                      console.log("✅ Received Resource Data:", resource);
+
+                      // ✅ ตรวจสอบว่าทุกช่องมีค่าหรือไม่
+                      if (
+                          resource.Wood !== null && resource.Wood !== "" &&
+                          resource.Paint !== null && resource.Paint !== "" &&
+                          resource.Chair !== null && resource.Chair !== "" &&
+                          resource.Table !== null && resource.Table !== "" &&
+                          resource.Nail !== null && resource.Nail !== "" &&
+                          resource.Lighting !== null && resource.Lighting !== ""
+                      ) {
+                          console.log("✅ All fields have values, updating inputs...");
+
+                          // ✅ ตั้งค่าค่าในช่อง input และกำหนดเป็น readonly
+                          $('#newWood').val(resource.Wood).prop('readonly', true);
+                          $('#newPaint').val(resource.Paint).prop('readonly', true);
+                          $('#newChair').val(resource.Chair).prop('readonly', true);
+                          $('#newTable').val(resource.Table).prop('readonly', true);
+                          $('#newTable').val(resource.Table).prop('readonly', true);
+                          $('#newLighting').val(resource.Lighting).prop('readonly', true);
+                      } else {
+                          console.warn("⚠️ Some fields are empty, skipping input update.");
+                      }
+                  },
+                  error: function (xhr, status, error) {
+                      console.error("❌ Error fetching resource data:", error);
+                      Swal.fire({
+                          icon: "error",
+                          title: "Error",
+                          text: "ไม่สามารถดึงข้อมูลทรัพยากรได้ กรุณาลองใหม่",
+                          confirmButtonText: "OK"
+                      });
+                  }
+              });
+          }
+
           // ✅ ฟังก์ชันเปิด Popup และใส่ค่าปัจจุบัน
           window.showSaveModelPopup = function (predictId) {
               console.log("✅ Opening Save Model Popup for predictId:", predictId);
@@ -568,7 +610,7 @@
                       if (!predict || typeof predict !== "object" ||
                           !("Paint" in predict) || !("Chair" in predict) ||
                           !("Lighting" in predict) || !("Nail" in predict) ||
-                          !("Table" in predict)) {
+                          !("Table" in predict) || !("Wood" in predict)) {
                           Swal.fire({
                               icon: "error",
                               title: "Error",
@@ -591,6 +633,42 @@
                       // ✅ เคลียร์ค่าฝั่ง New Data
                       document.querySelectorAll(".popup-column input").forEach(input => {
                           input.value = "";
+                          input.removeAttribute("readonly"); // ให้สามารถแก้ไขได้ตอนเริ่ม
+                      });
+
+                      // ✅ ดึงข้อมูล Resource และตั้งค่าค่าในฟอร์ม
+                      $.ajax({
+                          url: `/api/resource/${predictId}/`,
+                          type: 'GET',
+                          dataType: 'json',
+                          success: function (resource) {
+                              console.log("✅ Received Resource Data:", resource);
+
+                              // ✅ ตรวจสอบว่าข้อมูลทุกช่องมีค่าหรือไม่
+                              if (
+                                  resource.Wood !== null && resource.Wood !== "" &&
+                                  resource.Paint !== null && resource.Paint !== "" &&
+                                  resource.Chair !== null && resource.Chair !== "" &&
+                                  resource.Table !== null && resource.Table !== "" &&
+                                  resource.Nail !== null && resource.Nail !== "" &&
+                                  resource.Lighting !== null && resource.Lighting !== ""
+                              ) {
+                                  console.log("✅ All fields have values, updating inputs...");
+
+                                  // ✅ ตั้งค่าค่าในช่อง input และกำหนดเป็น readonly
+                                  $('#newWood').val(resource.Wood).prop('readonly', true);
+                                  $('#newPaint').val(resource.Paint).prop('readonly', true);
+                                  $('#newChair').val(resource.Chair).prop('readonly', true);
+                                  $('#newTable').val(resource.Table).prop('readonly', true);
+                                  $('#newNail').val(resource.Nail).prop('readonly', true);
+                                  $('#newLighting').val(resource.Lighting).prop('readonly', true);
+                              } else {
+                                  console.warn("⚠️ Some fields are empty, skipping input update.");
+                              }
+                          },
+                          error: function (xhr, status, error) {
+                              console.error("❌ Error fetching resource data:", error);
+                          }
                       });
 
                       // ✅ ตั้งค่า data-id ให้ปุ่ม Save
@@ -613,6 +691,20 @@
               });
           };
 
+          function validateInput(fieldId, fieldName) {
+              const value = document.getElementById(fieldId).value.trim(); // ตัดช่องว่างออก
+              if (value === "") {
+                  Swal.fire({
+                      icon: "warning",
+                      title: "Missing Input",
+                      text: `Please Enter ${fieldName} Value`,
+                      confirmButtonText: "OK"
+                  });
+                  return false; // หยุดการทำงานถ้ายังไม่ได้กรอกค่า
+              }
+              return value; // คืนค่าที่กรอก
+          }
+
           document.querySelector(".save-btn").addEventListener("click", function () {
               console.log("💾 Saving new model data...");
 
@@ -630,7 +722,22 @@
                   });
                   return;
               }
+              
               const predict = JSON.parse(predictData);
+
+              // ✅ ตรวจสอบค่าที่กรอก (ถ้าไม่มี ให้แจ้งเตือนแล้วหยุดการทำงาน)
+              const wood = validateInput("newWood", "Wood");
+              const paint = validateInput("newPaint", "Paint");
+              const chair = validateInput("newChair", "Chair");
+              const lighting = validateInput("newLighting", "Lighting");
+              const nail = validateInput("newNail", "Nail");
+              const table = validateInput("newTable", "Table");
+
+              if (!wood || !paint || !chair || !lighting || !nail || !table) {
+                  console.warn("⚠️ Some fields are empty, stopping save process.");
+                  return; // หยุดทำงานถ้ามีช่องที่ไม่ได้กรอก
+              }
+
               // ✅ เตรียมข้อมูลสำหรับบันทึก
               const newData = {
                   "Predict_ID": predictId,
@@ -648,12 +755,12 @@
                   "DateOfHire": predict.DateOfHire,
                   "Type": predict.Type,
                   "Location": predict.Location,
-                  "Wood": document.getElementById("newWood").value || "0",
-                  "Paint": document.getElementById("newPaint").value || "0",
-                  "Chair": document.getElementById("newChair").value || "0",
-                  "Lighting": document.getElementById("newLighting").value || "0",
-                  "Nail": document.getElementById("newNail").value || "0",
-                  "Table": document.getElementById("newTable").value || "0"
+                  "Wood": wood,
+                  "Paint": paint,
+                  "Chair": chair,
+                  "Lighting": lighting,
+                  "Nail": nail,
+                  "Table": table
               };
 
               console.log("📤 Sending data to submit_success/:", newData);
