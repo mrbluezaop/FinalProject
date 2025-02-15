@@ -471,8 +471,10 @@ def submit_hire(request):
 
 
 def hire_list(request):
-    # ดึงข้อมูลทั้งหมดจากตาราง Hire
-    predicts = PredictHire.objects.select_related('HireC_ID', 'HireC_ID__Customer_ID').filter(HireC_ID__isnull=False)  # ใช้ select_related เพื่อรวมข้อมูลจาก ForeignKey
+        # ดึงข้อมูลทั้งหมดจากตาราง Hire และเรียงลำดับตาม HireC_ID จากน้อยไปมาก
+    predicts = PredictHire.objects.select_related('HireC_ID', 'HireC_ID__Customer_ID')\
+                                 .filter(HireC_ID__isnull=False)\
+                                 .order_by('HireC_ID')  # เรียงลำดับตาม HireC_ID จากน้อยไปมาก
     return render(request, 'hireset.html', {'predicts': predicts})  # เปลี่ยนชื่อไฟล์ Template เป็น hireset.html
 
 @csrf_exempt
