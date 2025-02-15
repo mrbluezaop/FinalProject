@@ -256,7 +256,7 @@
                   fetchChartData(hireID);
                 });
               });
-
+            
               // ✅ ทำให้ Admin Hire List กดได้
               document.querySelectorAll(".clickable-row-admin").forEach(row => {
                 row.addEventListener("click", function () {
@@ -264,7 +264,7 @@
                   fetchChartData(hireID);
                 });
               });
-
+            
               function fetchChartData(hireID) {
                 fetch(`/get_resource_data/?hire_id=${hireID}`)
                   .then(response => response.json())
@@ -277,38 +277,63 @@
                   })
                   .catch(error => console.error("Error fetching data:", error));
               }
-
+            
               function showChart(data) {
                 document.getElementById("chart-container").style.display = "block";
-
+            
                 const ctx = document.getElementById("resourceChart").getContext("2d");
-
+            
                 // 🔥 ตรวจสอบว่ามีกราฟเก่าและเป็น Object ของ Chart.js ก่อนทำลาย
                 if (window.resourceChart instanceof Chart) {
                   window.resourceChart.destroy();
                 }
-
-                // 🔹 สร้างกราฟใหม่
+            
+                // 🔹 สร้างกราฟใหม่ (เพิ่มระยะห่างระหว่างแท่ง)
                 window.resourceChart = new Chart(ctx, {
                   type: "bar",
                   data: {
-                    labels: ["Wood_P", "Paint_P", "Lighting_P", "Nail_P", "Table_P", "Chair_P"],
-                    datasets: [{
-                      label: "Predicted Usage",
-                      data: [data.Wood_P, data.Paint_P, data.Lighting_P, data.Nail_P, data.Table_P, data.Chair_P],
-                      backgroundColor: ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#FF5722", "#607D8B"]
-                    }]
+                    labels: ["Wood", "Paint", "Lighting", "Nail", "Table", "Chair"],
+                    datasets: [
+                      {
+                        label: "Predicted Usage",
+                        data: [data.Wood_P, data.Paint_P, data.Lighting_P, data.Nail_P, data.Table_P, data.Chair_P],
+                        backgroundColor: "rgba(0, 0, 255, 0.6)", // 🔵 สีน้ำเงินโปร่งใส
+                        borderColor: "rgba(0, 0, 255, 1)",
+                        borderWidth: 1,
+                        barThickness: 25, // ✅ ควบคุมขนาดแท่งให้แยกออกจากกัน
+                      },
+                      {
+                        label: "Actual Usage",
+                        data: [data.Wood, data.Paint, data.Lighting, data.Nail, data.Table, data.Chair],
+                        backgroundColor: "rgba(0, 128, 0, 0.6)", // 🟩 สีเขียวโปร่งใส
+                        borderColor: "rgba(0, 128, 0, 1)",
+                        borderWidth: 1,
+                        barThickness: 25, // ✅ ควบคุมขนาดแท่งให้แยกออกจากกัน
+                      }
+                    ]
                   },
                   options: {
                     responsive: true,
                     scales: {
-                      y: { beginAtZero: true }
+                      y: { beginAtZero: true },
+                      x: {
+                        stacked: false, // ✅ ปิดการซ้อนแท่งกราฟ
+                        categoryPercentage: 0.8, // ✅ ลดขนาดพื้นที่ของแต่ละกลุ่ม
+                        barPercentage: 0.9 // ✅ ควบคุมระยะห่างระหว่างแท่ง
+                      }
+                    },
+                    plugins: {
+                      legend: {
+                        labels: {
+                          boxWidth: 20
+                        }
+                      }
                     }
                   }
                 });
               }
             });
-          </script>
+            </script>
         </div>
       </section>
     </section>

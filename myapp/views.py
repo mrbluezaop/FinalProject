@@ -1281,7 +1281,6 @@ def filter_hire_by_date(request):
 def get_resource_data(request):
     hire_id = request.GET.get("hire_id")
 
-    # ✅ ลองค้นหาทั้ง HireC_ID และ HireA_ID
     resource = None
     try:
         resource = Resource.objects.get(Predict_ID__HireC_ID__Hire_ID=hire_id)
@@ -1291,7 +1290,6 @@ def get_resource_data(request):
         except Resource.DoesNotExist:
             return JsonResponse({"error": "Resource not found"}, status=404)
 
-    # ✅ คืนค่า JSON ถ้าพบข้อมูล
     data = {
         "Wood_P": resource.Wood_P,
         "Paint_P": resource.Paint_P,
@@ -1299,6 +1297,12 @@ def get_resource_data(request):
         "Nail_P": resource.Nail_P,
         "Table_P": resource.Table_P,
         "Chair_P": resource.Chair_P,
+        "Wood": resource.Wood,
+        "Paint": resource.Paint,
+        "Lighting": resource.Lighting,
+        "Nail": resource.Nail,
+        "Table": resource.Table,
+        "Chair": resource.Chair,
     }
     return JsonResponse(data)
 
