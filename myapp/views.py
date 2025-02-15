@@ -290,38 +290,39 @@ def edit_profile(request):
     return render(request, 'editprofile.html', {'form': form})
 
 def dashboard(request):
-    # ดึงข้อมูลสมาชิกทั้งหมด
-    members_list = Member.objects.all()
-    paginator = Paginator(members_list, 5)  # แบ่งข้อมูลสมาชิก 5 รายการต่อหน้า
+    # ✅ ดึงข้อมูลสมาชิกทั้งหมด และเรียงตาม Customer_ID
+    members_list = Member.objects.all().order_by('Customer_ID')
 
-    # ดึงหมายเลขหน้าจาก URL
+    # ✅ แบ่งข้อมูลเป็น 10 รายการต่อหน้า
+    paginator = Paginator(members_list, 10)
     page_number = request.GET.get('page')
     members = paginator.get_page(page_number)
 
-    # นับจำนวนสมาชิกทั้งหมด
+    # ✅ นับจำนวนสมาชิกทั้งหมด
     member_count = members_list.count()
 
-    # นับจำนวนงานในฐานข้อมูล
+    # ✅ นับจำนวนงานทั้งหมด (รวมทั้งของปกติและของ Admin)
     job_count = Hire.objects.count()
+    jobA_count = HireforAdmin.objects.count()
+    total_jobs = job_count + jobA_count
 
-    # นับจำนวนงานที่มีสถานะเป็น 'in_progress'
+    # ✅ นับจำนวนงานที่อยู่ในสถานะ 'in_progress'
     in_progress_jobs = Hire.objects.filter(Status='in_progress').count()
+    in_progressA_jobs = HireforAdmin.objects.filter(Status='in_progress').count()
+    total_progress = in_progress_jobs + in_progressA_jobs
 
-    # นับจำนวนงานที่มีสถานะเป็น 'completed'
+    # ✅ นับจำนวนงานที่มีสถานะ 'completed'
     completed_jobs = Hire.objects.filter(Status='completed').count()
+    completedA_jobs = HireforAdmin.objects.filter(Status='completed').count()
+    total_completed = completed_jobs + completedA_jobs
 
-    context = {
-        'in_progress_jobs': in_progress_jobs,
-        'completed_jobs': completed_jobs,
-    }
-
-    # ส่งข้อมูลทั้งหมดไปยัง Template
+    # ✅ ส่งค่าที่ได้ไปยัง Template
     return render(request, 'dashboard.html', {
         'members': members,
         'member_count': member_count,
-        'job_count': job_count,
-        'in_progress_jobs' : in_progress_jobs,
-        'completed_jobs': completed_jobs,
+        'job_count': total_jobs,
+        'in_progress_jobs': total_progress,
+        'completed_jobs': total_completed
     })
 
 def logout(request):

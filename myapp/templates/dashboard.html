@@ -140,7 +140,29 @@
                 {% endif %}
               </tbody>
             </table>
-
+            <div class="pagination-container">
+              <div class="pagination">
+                {% if members.has_previous %}
+                  <a href="?page={{ members.previous_page_number }}" class="pagination-btn">&lt;</a>
+                {% else %}
+                  <span class="pagination-btn disabled">&lt;</span>
+                {% endif %}
+            
+                <select id="memberPageSelect" onchange="changePage(this)">
+                  {% for num in members.paginator.page_range %}
+                    <option value="{{ num }}" {% if members.number == num %}selected{% endif %}>
+                      {{ num }}
+                    </option>
+                  {% endfor %}
+                </select>
+            
+                {% if members.has_next %}
+                  <a href="?page={{ members.next_page_number }}" class="pagination-btn">&gt;</a>
+                {% else %}
+                  <span class="pagination-btn disabled">&gt;</span>
+                {% endif %}
+              </div>
+            </div>
             <!-- Popup Modal -->
             <div id="popup" style="display: none;">
               <h2>Edit Member</h2>
@@ -222,29 +244,69 @@
             <!-- Overlay -->
             <div id="overlay"
               style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"
-              onclick="closePopup()"></div>
-
-            <!-- Pagination -->
-            <div class="pagination">
-              <span class="step-links">
-                {% if members.has_previous %}
-                <a href="?page={{ members.previous_page_number }}">&#8249; Previous</a>
-                {% endif %}
-
-                <span class="current">
-                  Page {{ members.number }} of {{ members.paginator.num_pages }}
-                </span>
-
-                {% if members.has_next %}
-                <a href="?page={{ members.next_page_number }}">Next &#8250;</a>
-
-                {% endif %}
-              </span>
+              onclick="closePopup()"></div>     
             </div>
-          </div>
-        </section>
-    </div>
-  </body>
+          </section>
+      </div>
+    </body>
+  <style>
+    .pagination-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px;
+    }
 
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #f8f9fa;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .pagination-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 5px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .pagination-btn:hover {
+      background: #0056b3;
+    }
+
+    .pagination-btn.disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #memberPageSelect, #customerPageSelect {
+      width: 60px;
+      height: 42px;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 5px;
+      border: 1px solid #007bff;
+      cursor: pointer;
+      outline: none;
+    }
+  </style>
+
+  <script>
+    function changePage(select) {
+      const selectedPage = select.value;
+      window.location.href = `?page=${selectedPage}`;
+    }
+  </script>  
   </html>
 </span>
