@@ -125,7 +125,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for predict in predicts %}
+              {% for predict in page_obj %}
               <tr>
                 <td>{{ predict.HireC_ID.Hire_ID }}</td>
                 <td>{{ predict.HireC_ID.Customer_ID.Firstname }}</td>
@@ -147,20 +147,12 @@
                   {% endif %}
                 </td>
                 <td>
-                  <!-- ปุ่ม Delete -->
-                  <button class="delete-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
-                    onclick="deleteHire(this.getAttribute('data-id'))">Delete</button>
-
-                  <!-- ปุ่ม View -->
                   <button class="view-btn" data-id="{{ predict.HireC_ID.Hire_ID }}"
                     onclick="showHirePopup(this.getAttribute('data-id'))">View</button>
-
-                  <!-- ปุ่ม Predict แสดงเฉพาะเมื่อ Status เป็น In Progress -->
                   {% if predict.HireC_ID.Status == 'in_progress' %}
                   <button class="predict-btn" data-id="{{ predict.Predict_ID }}"
                     onclick="showPredictPopup(this.getAttribute('data-id'))">Predict</button>
                   {% endif %}
-                  <!-- ปุ่ม Save Model แสดงเฉพาะเมื่อ Status เป็น Completed -->
                   {% if predict.HireC_ID.Status == 'completed' %}
                   <button class="save-model-btn" data-id="{{ predict.Predict_ID }}" 
                     onclick="showSaveModelPopup(this.getAttribute('data-id'))">Save Resource</button>
@@ -169,11 +161,37 @@
               </tr>
               {% empty %}
               <tr>
-                <td colspan="8" style="text-align: center;">No data available</td>
+                <td colspan="10" style="text-align: center;">No data available</td>
               </tr>
               {% endfor %}
-            </tbody>
+            </tbody>            
           </table>
+          <div class="pagination-container">
+            <div class="pagination">
+              <!-- ปุ่ม Previous -->
+              {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn">&lt;</a>
+              {% else %}
+                <span class="pagination-btn disabled">&lt;</span>
+              {% endif %}
+          
+              <!-- Dropdown เลือกหน้า -->
+              <select id="pageSelect" onchange="changePage(this)">
+                {% for num in page_obj.paginator.page_range %}
+                  <option value="{{ num }}" {% if page_obj.number == num %}selected{% endif %}>
+                    {{ num }}
+                  </option>
+                {% endfor %}
+              </select>
+          
+              <!-- ปุ่ม Next -->
+              {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="pagination-btn">&gt;</a>
+              {% else %}
+                <span class="pagination-btn disabled">&gt;</span>
+              {% endif %}
+            </div>
+          </div>          
         </div>
       </section>
 
@@ -327,6 +345,67 @@
       </div>
     </section>
     <style>
+      /* ✅ จัดตำแหน่ง Pagination ให้ชิดขวา */
+      .pagination-container {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+      }
+
+      /* ✅ ปรับขนาดและตำแหน่งให้ปุ่มอยู่ตรงกลาง */
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        background: #f8f9fa;
+        padding: 8px;
+        border-radius: 8px;
+      }
+
+      /* ✅ ปรับขนาดของปุ่มให้เท่ากัน */
+      .pagination-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 5px;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .pagination-btn:hover {
+        background: #0056b3;
+      }
+
+      /* ✅ ปุ่มที่ Disabled */
+      .pagination-btn.disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      /* ✅ ปรับขนาดของ Dropdown ให้เท่ากับปุ่ม */
+      #pageSelect {
+        width: 60px;
+        height: 42px;
+        font-size: 18px;
+        text-align: center;
+        border-radius: 5px;
+        border: 1px solid #007bff;
+        cursor: pointer;
+        outline: none;
+      }
+
+      #pageSelect:hover {
+        border-color: #0056b3;
+      }
+
       .hire-popup {
         display: none;
         position: fixed;
@@ -453,6 +532,11 @@
     </style>
 
     <script>
+      function changePage(select) {
+        const selectedPage = select.value;
+        window.location.href = `?page=${selectedPage}`;
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         console.log("✅ JavaScript Loaded!");
 

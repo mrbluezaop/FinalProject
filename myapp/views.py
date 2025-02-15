@@ -470,12 +470,31 @@ def submit_hire(request):
             return JsonResponse({'error': str(e)}, status=500)
 
 
-def hire_list(request):
+'''def hire_list(request):
         # ดึงข้อมูลทั้งหมดจากตาราง Hire และเรียงลำดับตาม HireC_ID จากน้อยไปมาก
     predicts = PredictHire.objects.select_related('HireC_ID', 'HireC_ID__Customer_ID')\
                                  .filter(HireC_ID__isnull=False)\
                                  .order_by('HireC_ID')  # เรียงลำดับตาม HireC_ID จากน้อยไปมาก
-    return render(request, 'hireset.html', {'predicts': predicts})  # เปลี่ยนชื่อไฟล์ Template เป็น hireset.html
+    return render(request, 'hireset.html', {'predicts': predicts})  # เปลี่ยนชื่อไฟล์ Template เป็น hireset.html'''
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from .models import PredictHire
+
+def hire_list(request):
+    # ดึงค่าหมายเลขหน้าจาก request (ค่าเริ่มต้นเป็นหน้า 1)
+    page_number = request.GET.get('page', 1)
+
+    # ดึงข้อมูลจากฐานข้อมูล และเรียงลำดับตาม HireC_ID
+    predicts = PredictHire.objects.select_related('HireC_ID', 'HireC_ID__Customer_ID')\
+                                  .filter(HireC_ID__isnull=False)\
+                                  .order_by('HireC_ID')
+
+    # ใช้ Paginator แบ่งหน้า (12 รายการต่อหน้า)
+    paginator = Paginator(predicts, 12)
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'hireset.html', {'page_obj': page_obj})
 
 @csrf_exempt
 def delete_member(request, member_id):
@@ -1241,8 +1260,17 @@ def filter_hireA_by_date(request):
     return render(request, 'adminhire.html', {'hires': hires})
 
 def hireA_list(request):
+    # ดึงค่าหน้าปัจจุบันจาก request (ค่าเริ่มต้นคือ 1)
+    page_number = request.GET.get('page', 1)
+
+    # ดึงข้อมูลจากฐานข้อมูล
     predicts = PredictHire.objects.select_related('HireA_ID').filter(HireA_ID__isnull=False)
-    return render(request, 'adminhire.html', {'predicts': predicts})
+
+    # ใช้ Paginator เพื่อแบ่งข้อมูลเป็น 12 รายการต่อหน้า
+    paginator = Paginator(predicts, 12)
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'adminhire.html', {'page_obj': page_obj})
 
 def Report_list(request):
     resources = Resource.objects.select_related(
