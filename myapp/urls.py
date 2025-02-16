@@ -8,14 +8,14 @@ from .views import generate_pdf
 
 urlpatterns = [
     path('base/', views.base, name='base'),
-    path('main/', views.main, name='main'),
+    path('', views.main, name='main'),  # ตั้ง main เป็นหน้าแรก
     path('about/', views.about, name='about'),
     path('product/', views.product, name='product'),
     path('hire/', views.hire, name='hire'),
     path('contact/', views.contact, name='contact'),
     path('editprofile/', views.profile_edit_view, name='editprofile'),
     path('register/', views.register_user, name='register'),
-    path('', views.login, name='login'),
+    path('login/', views.login, name='login'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('logout/', views.logout, name='logout'),
     path('update-member/', views.update_member, name='update_member'),

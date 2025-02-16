@@ -48,6 +48,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.timezone import now
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 
@@ -64,7 +65,14 @@ def product(request):
     return render(request,"product.html")
 
 def hire(request):
-    return render(request,"hire.html")
+    if not request.user.is_authenticated:
+        return redirect('login')  # ถ้าผู้ใช้ยังไม่ได้ล็อกอิน ให้เด้งไปหน้า Login
+    return render(request, 'hire.html')
+
+def profile_edit_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')  # ถ้าผู้ใช้ยังไม่ได้ล็อกอิน ให้เด้งไปหน้า Login
+    return render(request, 'editprofile.html')
 
 def contact(request):
     return render(request,"contact.html")
@@ -258,14 +266,28 @@ def register_user(request):
 
 def profile_edit_view(request):
     username = request.session.get('username')
-    member = Member.objects.get(Username=username)
+
+    if not username:
+        messages.warning(request, "กรุณาเข้าสู่ระบบก่อนแก้ไขโปรไฟล์")
+        return redirect('login')  # ถ้าผู้ใช้ไม่ได้ล็อกอิน ให้ไปหน้า login
+
+    try:
+        member = Member.objects.get(Username=username)
+    except ObjectDoesNotExist:
+        messages.error(request, "ไม่พบข้อมูลสมาชิกของคุณ")
+        return redirect('main')  # หรือจะเปลี่ยนเป็น redirect ไปหน้า login ก็ได้
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=member)
         if form.is_valid():
             form.save()
-            return redirect('main')  # หรือหน้าที่คุณต้องการให้เป็นหน้าหลังจากบันทึก
+            messages.success(request, "อัปเดตโปรไฟล์สำเร็จ")
+            return redirect('main')  # หรือหน้าที่ต้องการให้กลับไป
+        else:
+            messages.error(request, "กรุณาตรวจสอบข้อมูลที่กรอก")
     else:
         form = ProfileForm(instance=member)
+
     return render(request, 'editprofile.html', {'form': form})
 
 def edit_profile(request):
