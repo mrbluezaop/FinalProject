@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
+        /* ตั้งค่าพื้นฐานของหน้า */
         body {
             min-height: 100vh;
             display: flex;
@@ -17,9 +19,13 @@
             background-color: #4070f4;
             font-family: 'Poppins', sans-serif;
         }
+
+        /* คอนเทนเนอร์หลัก */
         .content-container {
             text-align: center;
         }
+
+        /* ฟอร์มสมัครสมาชิก */
         form {
             width: 300px;
             padding: 20px;
@@ -27,26 +33,36 @@
             border-radius: 5px;
             background-color: #f9f9f9;
         }
+
+        /* หัวข้อฟอร์ม */
         .register-title {
             background-color: #fff;
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
+        /* ข้อความหัวข้อ */
         header {
             font-size: 24px;
             font-weight: 500;
         }
-        .form .field {
-            position: relative;
+
+        /* ปรับฟิลด์ Input */
+        .field {
+            display: flex;
+            flex-direction: column;
+            /* จัดเรียง Help Text ใต้ Input */
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 20px;
+            /* เพิ่มระยะห่าง */
+        }
+
+        /* Input Fields */
+        .field input {
             height: 50px;
             width: 100%;
-            margin-top: 20px;
-            border-radius: 6px;
-        }
-        .form .field input {
-            height: 100%;
-            width: 100%;
             border: 1px solid #ccc;
             padding: 0 15px;
             border-radius: 6px;
@@ -54,19 +70,13 @@
             font-family: 'Poppins', sans-serif;
             box-sizing: border-box;
         }
-        .form .field input::placeholder {
+
+        /* ปรับ Placeholder */
+        .field input::placeholder {
             color: #999;
         }
-        .form-input {
-            height: 50px; /* Adjust height as needed */
-            width: 100%;
-            border: 1px solid #ccc;
-            padding: 0 15px;
-            border-radius: 6px;
-            outline: none;
-            font-family: 'Poppins', sans-serif;
-            box-sizing: border-box;
-        }
+
+        /* ปรับปุ่มสมัคร */
         .button {
             height: 50px;
             width: 100%;
@@ -86,63 +96,93 @@
             margin-top: 20px;
             box-sizing: border-box;
         }
+
         .button:hover {
             background-color: #016dcb;
         }
-        .check-message {
-            font-size: 12px;
-            margin-top: 5px;
-        }
+
+        /* ปรับปุ่มที่ถูกปิดใช้งาน */
         .button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
-        .help-text {
-        display: block;
-        font-size: 0.7rem;
-        color: #1679cf;
-        white-space: normal;
-        word-wrap: break-word;
-        max-width: 300px;
-    }
-    .field {
-        width: auto;
-        max-width: 100%;
-        overflow: visible;
-    }
-    .errorlist {
-        color: red;              /* สีแดงสำหรับข้อความข้อผิดพลาด */
-        font-size: 0.6rem;      /* ขนาดตัวอักษร */
-        margin-top: 5px;         /* เพิ่มระยะห่างด้านบน */
-    }
 
-    .field .errorlist {
-        margin-left: 5px;        /* เพิ่มระยะห่างด้านซ้าย */
-    }
-        
+        /* ปรับข้อความตรวจสอบ */
+        .check-message {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* ปรับ Help Text */
+        .help-text {
+            font-size: 0.75rem;
+            color: #1679cf;
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-word;
+            width: 100%;
+            max-width: 100%;
+            display: block;
+            margin-top: 5px;
+            /* เว้นระยะห่างระหว่าง Input กับ Help Text */
+            min-height: 14px;
+            /* ป้องกันข้อความซ้อน */
+        }
+
+        /* ปิด Help Text อัตโนมัติของ Django */
+        .help-text.django {
+            display: none;
+        }
+
+        /* ปรับข้อความ Error */
+        .errorlist {
+            color: red;
+            font-size: 0.6rem;
+            margin-top: 5px;
+        }
+
+        .field .errorlist {
+            margin-left: 5px;
+        }
+
+        /* ปรับ Alert */
+        .alert {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
     <section class="content-section content-section-single">
         <div class="content-container">
             <!-- Display Success Message -->
-        {% if success_message %}
-        <div class="alert alert-success">
-            <p>{{ success_message }}</p>
-        </div>
-        <script>
-            setTimeout(function() {
-                window.location.href = "{% url redirect_url %}";
-            }, 2000);  // หน่วงเวลา 2 วินาทีก่อนเปลี่ยนเส้นทาง
-        </script>
-        {% endif %}
-            <form method="post" class="form" id="registerForm">
+            {% if success_message %}
+            <div class="alert alert-success">
+                <p>{{ success_message }}</p>
+            </div>
+            <script>
+                setTimeout(function () {
+                    window.location.href = "{% url redirect_url %}";
+                }, 2000);  // หน่วงเวลา 2 วินาทีก่อนเปลี่ยนเส้นทาง
+            </script>
+            {% endif %}
+            <form method="post" class="form" id="registerForm" novalidate>
                 {% csrf_token %}
-                
+
                 <div class="field">
                     {{ form.Username }}
                     <small id="usernameHelp" class="help-text" style="color: #1679cf;">
-                        Username ห้ามมีอักขระพิเศษ และไม่สามารถเกิน 20 ตัว
+                        The username must not contain special characters and must not exceed 20 characters
                     </small>
                     <div id="username-check" class="check-message" style="margin-top: 5px;"></div>
                     {{ form.errors.Username }}
@@ -161,7 +201,7 @@
                 <div class="field">
                     {{ form.Password }}
                     <small id="passwordHelp" class="help-text" style="display: none; color: #1679cf;">
-                        อย่างน้อย 8 ตัว และต้องมีอักษรพิมพ์ใหญ่,และอักขระพิเศษ
+                        At least 8 characters long and must contain an uppercase letter and a special character
                     </small>
                     {{ form.Password.errors }}
                 </div>
@@ -169,7 +209,7 @@
                 <div class="field">
                     {{ form.Email }}
                     <small id="emailHelp" class="help-text" style="display: none; color: #1679cf;">
-                        กรุณากรอกให้ถูกต้องตามหลัก เช่นเติม @
+                        Please enter a valid format, such as including "@"
                     </small>
                     <div id="email-check" class="check-message" style="margin-top: 5px;"></div>
                     {{ form.errors.Email }}
@@ -178,7 +218,7 @@
                 <div class="field">
                     {{ form.Phone }}
                     <small id="phoneHelp" class="help-text" style="display: none; color: #1679cf;">
-                        เบอร์โทรศัพท์ต้องเป็นตัวเลข 10 หลัก เช่น 0812345678
+                        The phone number must be 10 digits long, e.g., 0812345678
                     </small>
                     {{ form.Phone.errors }}
                 </div>
@@ -191,7 +231,7 @@
                 <div class="field">
                     {{ form.Birthday }}
                     <small id="birthdayHelp" class="help-text" style="color: #1679cf;">
-                        กรุณาเลือกวันที่ไม่เกินวันที่ปัจจุบัน
+                        Please select a date that is not later than today
                     </small>
                     {{ form.errors.Birthday }}
                 </div>
@@ -202,23 +242,9 @@
             </form>
         </div>
     </section>
-    <style>
-        .alert {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid transparent;
-            border-radius: 4px;
-        }
-    
-        .alert-success {
-            color: #3c763d;
-            background-color: #dff0d8;
-            border-color: #d6e9c6;
-            text-align: center;
-        }
-    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/realtimecheck.js' %}"></script>
     <script src="{% static 'js/helpregister.js' %}"></script>
 </body>
+
 </html>

@@ -210,17 +210,17 @@ def register_user(request):
             # ตรวจสอบว่า Username ไม่มีอักขระพิเศษ
             username = form.cleaned_data.get('Username')
             if not username or not re.match(r'^[A-Za-z0-9]+$', username):  # อนุญาตเฉพาะ A-Z, a-z, 0-9
-                form.add_error('Username', 'Username ห้ามมีอักขระพิเศษ.')
+                form.add_error('Username', 'The username must not contain special characters.')
 
             # ตรวจสอบว่ากรอกวันเกิดหรือไม่
             birth_date = form.cleaned_data.get('Birthday')
             if not birth_date:
-                form.add_error('Birthday', 'กรุณากรอกวันเกิด.')
+                form.add_error('Birthday', 'Please enter your date of birth.')
 
             # ตรวจสอบเบอร์โทรศัพท์ว่าถูกต้องหรือไม่
             phone_number = form.cleaned_data.get('Phone')
             if not phone_number or not re.match(r'^\d{10}$', phone_number):
-                form.add_error('Phone', 'กรุณาเบอร์โทรศัพท์ให้ถูกต้อง.')
+                form.add_error('Phone', 'Please enter a valid phone number.')
 
             # ตรวจสอบรหัสผ่านว่าปลอดภัยหรือไม่
             password = form.cleaned_data.get('Password')
@@ -231,12 +231,12 @@ def register_user(request):
                 r'[A-Za-z\d@$!%*?&]{8,}$'  # อย่างน้อย 8 ตัวอักษร
             )
             if not password or not re.match(password_criteria, password):
-                form.add_error('Password', 'อย่างน้อย 8 ตัว และต้องมีอักษรพิมพ์ใหญ่,และอักขระพิเศษ')
+                form.add_error('Password', 'At least 8 characters long and must include an uppercase letter and a special character.')
 
             # ตรวจสอบว่า Email อยู่ในรูปแบบที่ถูกต้องหรือไม่
             email = form.cleaned_data.get('Email')
             if not email or not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-                form.add_error('Email', 'ผิด format.')
+                form.add_error('Email', 'Please enter a valid format, such as including "@".')
 
             # หากมีข้อผิดพลาดในฟอร์ม
             if form.errors:
