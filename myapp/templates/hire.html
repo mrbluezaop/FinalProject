@@ -15,6 +15,12 @@
     <link rel="stylesheet" href="{% static 'myapp/stylehire.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>ฟอร์มสั่งซื้อ</title>
+    <style>
+        .required {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
@@ -34,18 +40,19 @@
                             {% endif %}
 
                             <!-- Width -->
-                            <label for="width">Width (meters)</label>
+                            <label for="width">Width (meters) <span class="required">*</span></label>
                             <input type="number" step="0.01" id="width" name="width" placeholder="Enter width" required>
 
                             <!-- Length -->
-                            <label for="length">Length (meters)</label>
+                            <label for="length">Length (meters) <span class="required">*</span></label>
                             <input type="number" step="0.01" id="length" name="length" placeholder="Enter length"
                                 required>
 
                             <!-- Height -->
-                            <label for="height">Height (meters)</label>
+                            <label for="height">Height (meters) <span class="required">*</span></label>
                             <input type="number" step="0.01" id="height" name="height" placeholder="Enter height"
                                 required>
+
 
                             <!-- Job Type -->
                             <label for="job_type">Job Type</label>
@@ -61,12 +68,14 @@
                             </select>
 
                             <!-- Budget -->
-                            <label for="budget">Budget (THB)</label>
+                            <label for="budget">Budget (THB) <span class="required">*</span></label>
                             <input type="number" id="budget" name="budget" placeholder="Enter budget" required>
 
-                            <label for="location">Location</label>
+                            <!-- Location -->
+                            <label for="location">Location <span class="required">*</span></label>
                             <textarea id="location" name="location" placeholder="Enter work location" rows="4" required
                                 maxlength="100"></textarea>
+
 
 
                             <!-- Submit Button -->
@@ -81,59 +90,74 @@
     </section>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // ✅ ป้องกันการพิมพ์ "-" และ "+"
+            document.querySelectorAll("input[type='number']").forEach(function (input) {
+                input.addEventListener("keypress", function (event) {
+                    let charCode = event.which ? event.which : event.keyCode;
+                    if (charCode === 45 || charCode === 43) { // "-" หรือ "+"
+                        event.preventDefault();
+                    }
+                });
+    
+                // ✅ ป้องกันไม่ให้วาง "-" หรือ "+"
+                input.addEventListener("paste", function (event) {
+                    let clipboardData = event.clipboardData || window.clipboardData;
+                    let pastedData = clipboardData.getData("text");
+                    if (pastedData.includes("-") || pastedData.includes("+")) {
+                        event.preventDefault();
+                    }
+                });
+            });
+    
+            // ✅ โค้ดเดิมของคุณ (ไม่ถูกลบหรือเปลี่ยนแปลง)
             document.getElementById("submitBtn").addEventListener("click", function (event) {
                 event.preventDefault();
-
+    
                 let form = document.getElementById("orderForm");
                 let formData = new FormData(form);
-
+    
                 fetch("/submit-hire", {
                     method: "POST",
                     body: formData,
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log("✅ DEBUG: PredictHire Data =", data.predict_hire);
-
-                            Swal.fire({
-                                icon: "success",
-                                title: "บันทึกข้อมูลสำเร็จ",
-                                text: "ใบเสนอราคาของคุณกำลังถูกดาวน์โหลด",
-                                confirmButtonText: "ตกลง"
-                            }).then(() => {
-                                console.log("✅ DEBUG: PredictHire_ID =", data.PredictHire_ID);
-                                let queryParams = new URLSearchParams(formData);
-                                queryParams.append("PredictHire_ID", data.PredictHire_ID); // ✅ เพิ่ม PredictHire_ID ไปใน URL
-                                let downloadUrl = `/download-pdf/?${queryParams.toString()}`;
-                                window.location.href = downloadUrl;
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "เกิดข้อผิดพลาด",
-                                text: data.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
-                                confirmButtonText: "ตกลง"
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error("❌ ERROR:", error);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("✅ DEBUG: PredictHire Data =", data.predict_hire);
+    
+                        Swal.fire({
+                            icon: "success",
+                            title: "บันทึกข้อมูลสำเร็จ",
+                            text: "ใบเสนอราคาของคุณกำลังถูกดาวน์โหลด",
+                            confirmButtonText: "ตกลง"
+                        }).then(() => {
+                            console.log("✅ DEBUG: PredictHire_ID =", data.PredictHire_ID);
+                            let queryParams = new URLSearchParams(formData);
+                            queryParams.append("PredictHire_ID", data.PredictHire_ID); // ✅ เพิ่ม PredictHire_ID ไปใน URL
+                            let downloadUrl = `/download-pdf/?${queryParams.toString()}`;
+                            window.location.href = downloadUrl;
+                        });
+                    } else {
                         Swal.fire({
                             icon: "error",
                             title: "เกิดข้อผิดพลาด",
-                            text: "ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองอีกครั้ง",
+                            text: data.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
                             confirmButtonText: "ตกลง"
                         });
+                    }
+                })
+                .catch(error => {
+                    console.error("❌ ERROR:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "เกิดข้อผิดพลาด",
+                        text: "ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองอีกครั้ง",
+                        confirmButtonText: "ตกลง"
                     });
+                });
             });
         });
-
-
-
     </script>
-
-
 </body>
 
 </html>

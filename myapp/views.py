@@ -293,8 +293,21 @@ def profile_edit_view(request):
 def edit_profile(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user)
+        
         if form.is_valid():
-            form.save()
+            profile = form.save(commit=False)  # ยังไม่บันทึกลงฐานข้อมูล
+
+            new_password = form.cleaned_data.get("Password")  # ดึงค่ารหัสผ่านจากฟอร์ม
+            
+            if new_password == "********":
+                # ถ้าผู้ใช้ไม่ได้เปลี่ยนรหัสผ่าน ให้ใช้รหัสผ่านเดิม
+                profile.Password = request.user.Password
+            else:
+                # ถ้าผู้ใช้เปลี่ยนรหัสผ่าน ค่อยแฮชรหัสใหม่ก่อนบันทึก
+                profile.Password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+            profile.save()  # บันทึกข้อมูลลงฐานข้อมูล
+
             return render(request, 'editprofile.html', {
                 'toast_message': 'Profile updated successfully!',
                 'toast_type': 'success',

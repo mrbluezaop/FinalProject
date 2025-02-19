@@ -10,8 +10,10 @@
     /* ใช้ Class เฉพาะเจาะจงกับหน้า editprofile */
     .editprofile-form {
         width: 50%;
-        max-width: 600px; /* กำหนดขนาดสูงสุดให้แบบฟอร์ม ไม่ให้กว้างเกินไป */
-        margin: 0 auto; /* จัดให้อยู่กึ่งกลาง */
+        max-width: 600px;
+        /* กำหนดขนาดสูงสุดให้แบบฟอร์ม ไม่ให้กว้างเกินไป */
+        margin: 0 auto;
+        /* จัดให้อยู่กึ่งกลาง */
     }
 
     .editprofile-form .fieldWrapper label {
@@ -33,8 +35,10 @@
         position: fixed;
         top: 20px;
         right: 20px;
-        background-color: #dff0d8; /* Default success background */
-        color: #3c763d; /* Default success text */
+        background-color: #dff0d8;
+        /* Default success background */
+        color: #3c763d;
+        /* Default success text */
         padding: 15px;
         border-radius: 5px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -42,8 +46,10 @@
     }
 
     .toast.error {
-        background-color: #f2dede; /* Error background */
-        color: #a94442; /* Error text */
+        background-color: #f2dede;
+        /* Error background */
+        color: #a94442;
+        /* Error text */
     }
 </style>
 
@@ -155,5 +161,14 @@
     <button type="submit" class="btn btn-success">Save Changes</button>
     <br><br>
 </form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var passwordField = document.querySelector("#id_Password");
+        if (passwordField) {
+            passwordField.value = "********";  // ✅ ตั้งค่าเริ่มต้นเป็น ******** โดยใช้ JavaScript
+        }
+    });
+</script>
+
 
 {% endblock %}
