@@ -9,7 +9,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-        /* ตั้งค่าพื้นฐานของหน้า */
         body {
             min-height: 100vh;
             display: flex;
@@ -20,48 +19,49 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* คอนเทนเนอร์หลัก */
-        .content-container {
+        .form-wrapper {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 700px;
+            max-width: 90%;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
             text-align: center;
         }
 
-        /* ฟอร์มสมัครสมาชิก */
-        form {
-            width: 300px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+        .form-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: space-between;
         }
 
-        /* หัวข้อฟอร์ม */
-        .register-title {
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        .form-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* ข้อความหัวข้อ */
-        header {
-            font-size: 24px;
-            font-weight: 500;
-        }
-
-        /* ปรับฟิลด์ Input */
         .field {
             display: flex;
             flex-direction: column;
-            /* จัดเรียง Help Text ใต้ Input */
             width: 100%;
-            max-width: 100%;
-            margin-bottom: 20px;
-            /* เพิ่มระยะห่าง */
+            margin-bottom: 15px;
+            min-height: 75px;
+            /* ✅ ปรับให้รองรับ help text เสมอ */
         }
 
-        /* Input Fields */
         .field input {
-            height: 50px;
+            height: 45px;
             width: 100%;
             border: 1px solid #ccc;
             padding: 0 15px;
@@ -71,180 +71,260 @@
             box-sizing: border-box;
         }
 
-        /* ปรับ Placeholder */
-        .field input::placeholder {
-            color: #999;
+        .help-text,
+        .check-message {
+            font-size: 0.75rem;
+            color: #1679cf;
+            margin-top: 5px;
+            min-height: 18px;
+            /* กำหนดความสูงให้เท่ากันทุกช่อง */
+            display: block;
+            /* ให้มีพื้นที่เสมอ */
+            height: auto; /* รักษาความสูง */
         }
 
-        /* ปรับปุ่มสมัคร */
-        .button {
-            height: 50px;
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
             width: 100%;
+            margin-top: 15px;
+        }
+
+        .button {
+            height: 45px;
+            width: 150px;
             border: none;
             font-size: 16px;
-            font-weight: 400;
             border-radius: 6px;
             color: #fff;
             background-color: #0171d3;
-            transition: all 0.3s ease;
             cursor: pointer;
-            text-decoration: none;
-            display: block;
             text-align: center;
-            line-height: 50px;
+            line-height: 45px;
             font-family: 'Poppins', sans-serif;
-            margin-top: 20px;
-            box-sizing: border-box;
+            transition: 0.3s;
         }
 
         .button:hover {
             background-color: #016dcb;
         }
 
-        /* ปรับปุ่มที่ถูกปิดใช้งาน */
         .button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
 
-        /* ปรับข้อความตรวจสอบ */
-        .check-message {
-            font-size: 12px;
-            margin-top: 5px;
+        .back-button {
+            background-color: #004aad;
         }
 
-        /* ปรับ Help Text */
-        .help-text {
-            font-size: 0.75rem;
-            color: #1679cf;
-            white-space: normal;
-            word-wrap: break-word;
-            word-break: break-word;
+        .back-button:hover {
+            background-color: #003b87;
+        }
+
+        /* ✅ ปรับขนาดของ Typeahead Suggestion Box */
+        .tt-menu {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
             width: 100%;
-            max-width: 100%;
-            display: block;
-            margin-top: 5px;
-            /* เว้นระยะห่างระหว่าง Input กับ Help Text */
-            min-height: 14px;
-            /* ป้องกันข้อความซ้อน */
+            max-height: 250px;
+            /* ✅ กำหนดความสูงสูงสุด */
+            overflow-y: auto;
+            /* ✅ ทำให้เลื่อนดูได้ */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        /* ปิด Help Text อัตโนมัติของ Django */
-        .help-text.django {
-            display: none;
+        /* ✅ ปรับระยะห่างระหว่างรายการ */
+        .tt-suggestion {
+            padding: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease-in-out;
         }
 
-        /* ปรับข้อความ Error */
-        .errorlist {
-            color: red;
-            font-size: 0.6rem;
-            margin-top: 5px;
+        /* ✅ ทำให้รายการ Hover ดูสวย */
+        .tt-suggestion:hover {
+            background-color: #f0f8ff;
+            /* ✅ เปลี่ยนสีพื้นหลัง */
         }
 
-        .field .errorlist {
-            margin-left: 5px;
+        /* ✅ เน้นตัวหนังสือที่ค้นหา */
+        .tt-highlight {
+            font-weight: bold;
+            color: #0171d3;
         }
 
-        /* ปรับ Alert */
+        /* ✅ ปรับ input ให้ดูสวย */
+        input[type="text"] {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            width: 100%;
+            font-size: 14px;
+            transition: border 0.3s ease-in-out;
+        }
+
+        /* ✅ เมื่อคลิก input ให้เส้นขอบเปลี่ยนสี */
+        input[type="text"]:focus {
+            border: 1px solid #0171d3;
+            box-shadow: 0px 0px 5px rgba(1, 113, 211, 0.5);
+            outline: none;
+        }
+
         .alert {
-            margin-bottom: 20px;
             padding: 15px;
-            border: 1px solid transparent;
-            border-radius: 4px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 500px;
         }
 
         .alert-success {
-            color: #3c763d;
             background-color: #dff0d8;
-            border-color: #d6e9c6;
-            text-align: center;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in-out;
         }
     </style>
 </head>
 
 <body>
-    <section class="content-section content-section-single">
-        <div class="content-container">
-            <!-- Display Success Message -->
-            {% if success_message %}
-            <div class="alert alert-success">
-                <p>{{ success_message }}</p>
-            </div>
-            <script>
-                setTimeout(function () {
-                    window.location.href = "{% url redirect_url %}";
-                }, 2000);  // หน่วงเวลา 2 วินาทีก่อนเปลี่ยนเส้นทาง
-            </script>
-            {% endif %}
-            <form method="post" class="form" id="registerForm" novalidate>
-                {% csrf_token %}
+    <div class="form-wrapper">
+        <div class="form-title">สมัครสมาชิก</div>
 
-                <div class="field">
-                    {{ form.Username }}
-                    <small id="usernameHelp" class="help-text" style="color: #1679cf;">
-                        The username must not contain special characters and must not exceed 20 characters
-                    </small>
-                    <div id="username-check" class="check-message" style="margin-top: 5px;"></div>
-                    {{ form.errors.Username }}
-                </div>
-
-                <div class="field">
-                    {{ form.Firstname }}
-                    {{ form.Firstname.errors }}
-                </div>
-
-                <div class="field">
-                    {{ form.Lastname }}
-                    {{ form.Lastname.errors }}
-                </div>
-
-                <div class="field">
-                    {{ form.Password }}
-                    <small id="passwordHelp" class="help-text" style="display: none; color: #1679cf;">
-                        At least 8 characters long and must contain an uppercase letter and a special character
-                    </small>
-                    {{ form.Password.errors }}
-                </div>
-
-                <div class="field">
-                    {{ form.Email }}
-                    <small id="emailHelp" class="help-text" style="display: none; color: #1679cf;">
-                        Please enter a valid format, such as including "@"
-                    </small>
-                    <div id="email-check" class="check-message" style="margin-top: 5px;"></div>
-                    {{ form.errors.Email }}
-                </div>
-
-                <div class="field">
-                    {{ form.Phone }}
-                    <small id="phoneHelp" class="help-text" style="display: none; color: #1679cf;">
-                        The phone number must be 10 digits long, e.g., 0812345678
-                    </small>
-                    {{ form.Phone.errors }}
-                </div>
-
-                <div class="field">
-                    {{ form.Address }}
-                    {{ form.Address.errors }}
-                </div>
-
-                <div class="field">
-                    {{ form.Birthday }}
-                    <small id="birthdayHelp" class="help-text" style="color: #1679cf;">
-                        Please select a date that is not later than today
-                    </small>
-                    {{ form.errors.Birthday }}
-                </div>
-
-                <br>
-                <button type="submit" class="button" id="submitButton" disabled>Register</button>
-                <a href="{% url 'login' %}" class="button">ย้อนกลับ</a>
-            </form>
+        {% if success_message %}
+        <div class="alert alert-success">
+            <p>{{ success_message }}</p>
         </div>
-    </section>
+        <script>
+            setTimeout(function () {
+                window.location.href = "{% url 'login' %}";
+            }, 2000);
+        </script>
+        {% endif %}
+
+        <form method="post" id="registerForm" novalidate>
+            {% csrf_token %}
+
+            <div class="form-container">
+                <!-- ✅ คอลัมน์ซ้าย: Username, Password, Firstname, Lastname, Email, Phone -->
+                <div class="form-section">
+                    <div class="field">
+                        {{ form.Username }}
+                        <small id="usernameHelp" class="help-text">The username must not contain special characters and must not exceed 20 characters</small>
+                        <div id="username-check" class="check-message"></div>
+                        {{ form.errors.Username }}
+                    </div>
+            
+                    <div class="field">
+                        {{ form.Password }}
+                        <small id="passwordHelp" class="help-text">At least 8 characters long and must contain an uppercase letter and a special character</small>
+                        {{ form.Password.errors }}
+                    </div>
+            
+                    <div class="field">
+                        {{ form.Firstname }}
+                        {{ form.Firstname.errors }}
+                    </div>
+            
+                    <div class="field">
+                        {{ form.Lastname }}
+                        {{ form.Lastname.errors }}
+                    </div>
+            
+                    <div class="field">
+                        {{ form.Email }}
+                        <small id="emailHelp" class="help-text">Please enter a valid format, such as including "@"</small>
+                        <div id="email-check" class="check-message"></div>
+                        {{ form.errors.Email }}
+                    </div>
+            
+                    <div class="field">
+                        {{ form.Phone }}
+                        <small id="phoneHelp" class="help-text">The phone number must be 10 digits long, e.g. 0812345678</small>
+                        {{ form.Phone.errors }}
+                    </div>
+            
+                    <!-- ✅ เพิ่มช่องกรอกวันเกิดที่นี่ -->
+                    <!-- ✅ เพิ่ม input วันเกิด พร้อมกำหนด max เป็นวันที่ปัจจุบัน -->
+                    <div class="field">
+                        <label for="id_Birthday"></label>
+                        <input type="date" name="Birthday" id="id_Birthday" class="form-input" required>
+                        <small id="birthdayHelp" class="help-text">Please enter your date of birth in the format YYYY-MM-DD.</small>
+                        {{ form.errors.Birthday }}
+                    </div>
+                </div>
+            
+                <!-- ✅ คอลัมน์ขวา: ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์ -->
+                <div class="form-section">
+                    <div class="field">
+                        <label for="house_number"></label>
+                        <input type="text" id="house_number" name="house_number" placeholder="Enter house number">
+                    </div>
+            
+                    <div class="field">
+                        <label for="district"></label>
+                        <input type="text" id="district" name="district" placeholder="District">
+                    </div>
+            
+                    <div class="field">
+                        <label for="amphoe"></label>
+                        <input type="text" id="amphoe" name="amphoe" placeholder="Amphoe">
+                    </div>
+            
+                    <div class="field">
+                        <label for="province"></label>
+                        <input type="text" id="province" name="province" placeholder="Province">
+                    </div>
+            
+                    <div class="field">
+                        <label for="zipcode"></label>
+                        <input type="text" id="zipcode" name="zipcode" maxlength="5" placeholder="Postal Code">
+                    </div>
+                </div>
+            </div>
+            
+
+            <!-- ✅ ปุ่มอยู่ตรงกลาง -->
+            <div class="button-container">
+                <button type="submit" class="button" id="submitButton" disabled>Register</button>
+                <a href="{% url 'login' %}" class="button back-button">ย้อนกลับ</a>
+            </div>
+        </form>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/realtimecheck.js' %}"></script>
     <script src="{% static 'js/helpregister.js' %}"></script>
+
+    <!-- ✅ เพิ่มระบบค้นหาตำบล/อำเภอ/จังหวัด/Zipcode อัตโนมัติ -->
+    <script type="text/javascript"
+        src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dependencies/JQL.min.js"></script>
+    <script type="text/javascript"
+        src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dependencies/typeahead.bundle.js"></script>
+    <script type="text/javascript"
+        src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.js"></script>
+
+    <script>
+        $.Thailand({
+            $district: $('#district'),
+            $amphoe: $('#amphoe'),
+            $province: $('#province'),
+            $zipcode: $('#zipcode'),
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            let today = new Date().toISOString().split("T")[0];
+            document.getElementById("id_Birthday").setAttribute("max", today);
+        });
+
+    </script>
 </body>
 
 </html>

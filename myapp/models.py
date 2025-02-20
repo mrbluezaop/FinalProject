@@ -10,9 +10,15 @@ class Member(models.Model):
     Password = models.CharField(max_length=100, blank=True, null=True)
     Email = models.EmailField(max_length=100, unique=True)
     Phone = models.CharField(max_length=10, blank=True, null=True)
-    Address = models.CharField(max_length=100, blank=True, null=True)
+
+    # ✅ บันทึกที่อยู่ที่รวมแล้ว
+    Address = models.CharField(max_length=255, blank=True, null=True)
+
     Birthday = models.DateField(null=True, blank=True)
     joined_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.Username
 
 class HireforAdmin(models.Model):
     STATUS_CHOICES = [

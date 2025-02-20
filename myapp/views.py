@@ -207,62 +207,83 @@ def register_user(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            # ตรวจสอบว่า Username ไม่มีอักขระพิเศษ
-            username = form.cleaned_data.get('Username')
-            if not username or not re.match(r'^[A-Za-z0-9]+$', username):  # อนุญาตเฉพาะ A-Z, a-z, 0-9
-                form.add_error('Username', 'The username must not contain special characters.')
+            try:
+                # ✅ ตรวจสอบว่า Username ไม่มีอักขระพิเศษ
+                username = form.cleaned_data.get('Username')
+                if not username or not re.match(r'^[A-Za-z0-9]+$', username):
+                    form.add_error('Username', 'The username must not contain special characters.')
 
-            # ตรวจสอบว่ากรอกวันเกิดหรือไม่
-            birth_date = form.cleaned_data.get('Birthday')
-            if not birth_date:
-                form.add_error('Birthday', 'Please enter your date of birth.')
+                # ✅ ตรวจสอบว่ากรอกวันเกิดหรือไม่
+                birth_date = form.cleaned_data.get('Birthday')
+                if not birth_date:
+                    form.add_error('Birthday', 'Please enter your date of birth.')
 
-            # ตรวจสอบเบอร์โทรศัพท์ว่าถูกต้องหรือไม่
-            phone_number = form.cleaned_data.get('Phone')
-            if not phone_number or not re.match(r'^\d{10}$', phone_number):
-                form.add_error('Phone', 'Please enter a valid phone number.')
+                # ✅ ตรวจสอบเบอร์โทรศัพท์ว่าถูกต้องหรือไม่
+                phone_number = form.cleaned_data.get('Phone')
+                if not phone_number or not re.match(r'^\d{10}$', phone_number):
+                    form.add_error('Phone', 'Please enter a valid phone number.')
 
-            # ตรวจสอบรหัสผ่านว่าปลอดภัยหรือไม่
-            password = form.cleaned_data.get('Password')
-            password_criteria = (
-                r'^(?=.*[A-Z])'        # ต้องมีตัวอักษรพิมพ์ใหญ่
-                r'(?=.*\d)'            # ต้องมีตัวเลข
-                r'(?=.*[@$!%*?&^#_])'  # ต้องมีอักขระพิเศษ
-                r'[A-Za-z\d@$!%*?&]{8,}$'  # อย่างน้อย 8 ตัวอักษร
-            )
-            if not password or not re.match(password_criteria, password):
-                form.add_error('Password', 'At least 8 characters long and must include an uppercase letter and a special character.')
+                # ✅ ตรวจสอบรหัสผ่านว่าปลอดภัยหรือไม่
+                password = form.cleaned_data.get('Password')
+                password_criteria = (
+                    r'^(?=.*[A-Z])'        # ต้องมีตัวอักษรพิมพ์ใหญ่
+                    r'(?=.*\d)'            # ต้องมีตัวเลข
+                    r'(?=.*[@$!%*?&^#_])'  # ต้องมีอักขระพิเศษ
+                    r'[A-Za-z\d@$!%*?&]{8,}$'  # อย่างน้อย 8 ตัวอักษร
+                )
+                if not password or not re.match(password_criteria, password):
+                    form.add_error('Password', 'At least 8 characters long and must include an uppercase letter and a special character.')
 
-            # ตรวจสอบว่า Email อยู่ในรูปแบบที่ถูกต้องหรือไม่
-            email = form.cleaned_data.get('Email')
-            if not email or not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-                form.add_error('Email', 'Please enter a valid format, such as including "@".')
+                # ✅ ตรวจสอบว่า Email อยู่ในรูปแบบที่ถูกต้องหรือไม่
+                email = form.cleaned_data.get('Email')
+                if not email or not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+                    form.add_error('Email', 'Please enter a valid format, such as including "@".')
 
-            # หากมีข้อผิดพลาดในฟอร์ม
-            if form.errors:
-                return render(request, 'register.html', {'form': form})
+                # ✅ รวมข้อมูลที่อยู่ก่อนบันทึกลง Address
+                house_number = request.POST.get('house_number', '').strip()
+                district = request.POST.get('district', '').strip()
+                amphoe = request.POST.get('amphoe', '').strip()
+                province = request.POST.get('province', '').strip()
+                zipcode = request.POST.get('zipcode', '').strip()
 
-            # ถ้าไม่มีข้อผิดพลาด ให้ดำเนินการบันทึกข้อมูล
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+                # ✅ ตรวจสอบว่าผู้ใช้กรอกข้อมูลที่อยู่ครบถ้วน
+                if not (house_number and district and amphoe and province and zipcode):
+                    form.add_error(None, 'Please fill in all address fields.')
 
-            # บันทึกฟอร์มพร้อมรหัสผ่านที่ถูก Hash
-            member = form.save(commit=False)
-            member.Password = hashed_password.decode('utf-8')
-            member.save()
+                # ✅ รวมข้อมูลที่อยู่เป็นข้อความเดียว
+                address = f"{house_number} ต.{district} อ.{amphoe} จ.{province} {zipcode}"
 
-             # ส่งข้อความสำเร็จไปยังเทมเพลต
-            return render(request, 'register.html', {
-                'form': RegisterForm(),  # ส่งฟอร์มใหม่ (ว่างเปล่า)
-                'success_message': 'Register successful!',  # ข้อความสำเร็จ
-                'redirect_url': 'login',  # URL ที่จะเปลี่ยนเส้นทาง (ใช้ `url name` ของหน้า main)
-            })
+                # ✅ หากมีข้อผิดพลาดในฟอร์ม
+                if form.errors:
+                    return render(request, 'register.html', {'form': form})
+
+                # ✅ ถ้าไม่มีข้อผิดพลาด ให้ดำเนินการบันทึกข้อมูล
+                hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+                # ✅ บันทึกฟอร์มพร้อมรหัสผ่านที่ถูก Hash และ Address ที่รวมแล้ว
+                member = form.save(commit=False)
+                member.Password = hashed_password.decode('utf-8')  # บันทึกรหัสผ่านแบบ Hash
+                member.Address = address  # ✅ บันทึกข้อมูลที่อยู่ที่รวมแล้วลงใน `Address`
+                member.save()
+
+                # ✅ **แทรก success_message และ redirect_url ไปที่ `register.html`**
+                return render(request, 'register.html', {
+                    'form': RegisterForm(),
+                    'success_message': 'Register successful!',
+                    'redirect_url': 'login',
+                })
+
+            except Exception as e:
+                print(f"Error saving user: {str(e)}")  # ✅ Debug ข้อผิดพลาดใน Terminal
+                form.add_error(None, 'An error occurred while saving. Please try again.')
+
         else:
-            # ส่งฟอร์มพร้อมข้อผิดพลาดกลับไป
-            return render(request, 'register.html', {'form': form})
+            print("Form validation failed:", form.errors)  # ✅ Debug form validation
+
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
 
+    return render(request, 'register.html', {'form': form})
 
 def profile_edit_view(request):
     username = request.session.get('username')

@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 class RegisterForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ['Username', 'Firstname', 'Lastname', 'Password', 'Email', 'Phone', 'Address', 'Birthday']
+        fields = ['Username', 'Firstname', 'Lastname', 'Password', 'Email', 'Phone', 'Birthday']
         widgets = {
             'Username': forms.TextInput(attrs={
                 'placeholder': 'Username',
@@ -23,12 +23,11 @@ class RegisterForm(forms.ModelForm):
             'Password': forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'form-input'}),
             'Email': forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'form-input'}),
             'Phone': forms.TextInput(attrs={'placeholder': 'Telephone', 'class': 'form-input'}),
-            'Address': forms.TextInput(attrs={'placeholder': 'Address', 'class': 'form-input'}),
             'Birthday': forms.DateInput(attrs={
                 'placeholder': 'Birth Date',
                 'type': 'date',
                 'class': 'form-input',
-                'max': date.today().isoformat()  # กำหนดวันที่สูงสุดเป็นปัจจุบัน
+                'max': date.today().isoformat()  # ✅ แก้ไขให้ถูกต้อง
             }),
         }
 
@@ -43,12 +42,6 @@ class RegisterForm(forms.ModelForm):
         if not lastname:
             raise ValidationError('กรุณากรอก Last Name.')
         return lastname
-
-    def clean_Address(self):
-        address = self.cleaned_data.get('Address')
-        if not address:
-            raise ValidationError('กรุณากรอก Address.')
-        return address
 
 class LoginForm(forms.Form):
     username = forms.CharField()
