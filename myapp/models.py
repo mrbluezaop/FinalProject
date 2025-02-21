@@ -47,10 +47,25 @@ class Hire(models.Model):
     Length = models.FloatField(verbose_name="Length (m.)")
     Height = models.FloatField(verbose_name="Height (m.)")
     Type = models.CharField(max_length=100)
-    Budget = models.FloatField()  # ✅ แก้ไข: เอา max_length ออก
+    Budget = models.FloatField()
     Location = models.CharField(max_length=150, default="-")
     Dateofhire = models.DateTimeField(default=now)
     Status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting_confirmation', verbose_name="Status")
+    QC_Number = models.IntegerField(unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.QC_Number:
+            last_hire = Hire.objects.order_by('-QC_Number').first()
+            if last_hire:
+                self.QC_Number = last_hire.QC_Number + 1
+            else:
+                self.QC_Number = 1 
+
+        super().save(*args, **kwargs)
+
+    def formatted_number(self):
+        """ แสดงหมายเลขเป็น 5 หลัก เช่น 00001, 00002 """
+        return str(self.QC_Number).zfill(5)
 
     def __str__(self):
         return f"Hire {self.Hire_ID} for Customer {self.Customer_ID}"

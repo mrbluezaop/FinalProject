@@ -943,7 +943,7 @@ def generate_pdf(request):
     member = get_object_or_404(Member, Customer_ID=customer_id)
     predict_hire = get_object_or_404(PredictHire, Predict_ID=predict_hire_id)
     hire = predict_hire.HireC_ID  # ✅ ดึง `Hire` ที่เกี่ยวข้อง
-
+    
     firstname = member.Firstname
     lastname = member.Lastname
     address = member.Address
@@ -956,6 +956,10 @@ def generate_pdf(request):
     amout_chair = predict_hire.Chair
     location = hire.Location
     address = location if location else "ไม่ได้ระบุสถานที่"
+    qc_number = predict_hire.HireC_ID.QC_Number
+
+    def formatted_number(a):
+        return str(a).zfill(5)
 
     # ✅ ใช้ os.path.join() เพื่อให้พาธฟอนต์ถูกต้อง
     font_path = os.path.join(settings.BASE_DIR, "static", "fonts", "THSarabunNew.ttf")
@@ -1060,11 +1064,11 @@ def generate_pdf(request):
     current_date = datetime.now().strftime("%d/%m/%Y")
     random_number = random.randint(10000, 99999)
     current_year = datetime.now().year
-    qc_number = f"QC-{random_number}/{current_year}"
+    '''qc_number = f"QC-{random_number}/{current_year}"'''
 
     # ✅ ข้อมูลฝั่งขวา (เลขที่และวันที่)
     pdf.drawString(360, y_start + 50, "เลขที่:")  
-    pdf.drawString(400, y_start + 50, qc_number)  
+    pdf.drawString(400, y_start + 50, formatted_number(qc_number))  
 
     pdf.drawString(360, y_start + 15, "ว/ด/ป:")  
     pdf.drawString(400, y_start + 15, current_date)  
