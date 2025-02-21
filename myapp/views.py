@@ -957,6 +957,7 @@ def generate_pdf(request):
     location = hire.Location
     address = location if location else "ไม่ได้ระบุสถานที่"
     qc_number = predict_hire.HireC_ID.QC_Number
+    member_location = member.Address
 
     def formatted_number(a):
         return str(a).zfill(5)
@@ -1021,8 +1022,8 @@ def generate_pdf(request):
     pdf.setFont(font_name, 14)
 
     # ✅ วาดกรอบตารางข้อมูลลูกค้า (ด้านบน)
-    pdf.rect(x_table_start, y_start - 30, table_width, 100, stroke=1, fill=0)  
-    pdf.line(345, y_start + 70, 345, y_start - 30)  
+    pdf.rect(x_table_start, y_start - 50, table_width, 120, stroke=1, fill=0)  
+    pdf.line(345, y_start + 70, 345, y_start - 50)  
     pdf.line(345, y_start + 35, x_table_start + table_width, y_start + 35)  
 
     # ✅ ลงทะเบียนฟอนต์ภาษาไทย
@@ -1038,8 +1039,9 @@ def generate_pdf(request):
 
     # ✅ ปรับระยะห่างให้เหมาะสม
     x_label = 70   # ตำแหน่ง X สำหรับ Label (เช่น "ที่อยู่:")
-    x_value = 130  # ตำแหน่ง X สำหรับค่าของลูกค้า
+    x_value = 150  # ตำแหน่ง X สำหรับค่าของลูกค้า
     y_gap = 15     # ลดระยะห่างระหว่างบรรทัด
+    y_offset = 5   # ✅ เพิ่มระยะห่างป้องกันการชน
 
     # ✅ ข้อมูลฝั่งซ้าย (ลูกค้า)
     pdf.drawString(x_label, y_start + 50, "ชื่อลูกค้า:")  
@@ -1048,17 +1050,26 @@ def generate_pdf(request):
     pdf.drawString(x_label, y_start + 50 - y_gap, "ชื่องาน:")      
     pdf.drawString(x_value, y_start + 50 - y_gap, job_type)  
 
-    # ✅ ใช้ Paragraph เพื่อให้ "ที่อยู่" ตัดบรรทัดอัตโนมัติ และรองรับฟอนต์ไทย
-    pdf.drawString(x_label, y_start + 50 - (y_gap * 2), "ที่อยู่:")
+    # ✅ ใช้ Paragraph เพื่อให้ "ที่อยู่ว่าจ้างงาน" ตัดบรรทัดอัตโนมัติ
+    pdf.drawString(x_label, y_start + 50 - (y_gap * 2), "ที่อยู่ว่าจ้างงาน:")
 
-    # ✅ คำนวณความสูงของ Paragraph ล่วงหน้า
-    address_paragraph = Paragraph(f"<font name='THSarabunNew' size=14>{address}</font>", style_address)  # ✅ ปรับขนาดฟอนต์ใน Paragraph
-    w, h = address_paragraph.wrap(200, 60)  # ✅ เพิ่มความสูงให้รองรับฟอนต์ที่ใหญ่ขึ้น
-
-    # ✅ ปรับตำแหน่งให้บรรทัดแรกของที่อยู่ อยู่ในระดับเดิม
+    # ✅ คำนวณขนาดของ Paragraph ล่วงหน้า
+    address_paragraph = Paragraph(f"<font name='THSarabunNew' size=14>{address}</font>", style_address)
+    w, h = address_paragraph.wrap(200, 80)  # ✅ ขยายความสูงให้รองรับข้อความที่ยาวขึ้น
     y_adjustment = h - 14  # ✅ ปรับให้ข้อความไม่ดันขึ้นไป
+    address_paragraph.drawOn(pdf, x_value, y_start + 50 - (y_gap * 2) - y_adjustment)
 
-    address_paragraph.drawOn(pdf, x_value, y_start + 50 - (y_gap * 2) - y_adjustment)  # ✅ วางตำแหน่งให้บรรทัดแรกคงที่
+    # ✅ ระยะห่างสำหรับบรรทัดถัดไป (เพิ่มจากเดิมเพื่อป้องกันชนกัน)
+    next_y_position = y_start + 70 - (y_gap * 2) - y_adjustment - y_offset  
+
+    pdf.drawString(x_label, next_y_position - (y_gap * 2), "ที่อยู่:")
+
+    # ✅ คำนวณขนาดของ Paragraph ล่วงหน้า
+    member_location_paragraph = Paragraph(f"<font name='THSarabunNew' size=14>{member_location}</font>", style_address)
+    w, h = member_location_paragraph.wrap(200, 80)  # ✅ กำหนดความกว้างที่เหมาะสม
+    yy_adjustment = h - 14  # ✅ ปรับให้ข้อความไม่ดันขึ้นไป
+    member_location_paragraph.drawOn(pdf, x_value, next_y_position - (y_gap * 2) - yy_adjustment)
+
     
     # ✅ ดึงวันที่ปัจจุบันและสุ่มเลข QC
     current_date = datetime.now().strftime("%d/%m/%Y")
