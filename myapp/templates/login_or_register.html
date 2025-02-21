@@ -17,28 +17,28 @@
                 {% csrf_token %}
                 <label for="chk" aria-hidden="true">Sign up</label>
                 {{ register_form.Username.errors }}
-                <input type="text" name="Username" placeholder="ป้อน ID ของคุณ" required="">
+                <input type="text" name="Username" placeholder="Please Enter Your ID" required="">
                 
                 {{ register_form.Fname.errors }}
-                <input type="text" name="Fname" placeholder="ป้อน ชื่อจริงของคุณ" required="">
+                <input type="text" name="Fname" placeholder="Please Enter Your Firstname" required="">
                 
                 {{ register_form.Lname.errors }}
-                <input type="text" name="Lname" placeholder="ป้อน นามสกุลของคุณ" required="">
+                <input type="text" name="Lname" placeholder="Please Enter Your Lastname" required="">
                 
                 {{ register_form.Psw.errors }}
-                <input type="password" name="Psw" placeholder="ป้อน รหัสผ่านของคุณ" required="">
+                <input type="password" name="Psw" placeholder="Please Enter Your Password" required="">
                 
                 {{ register_form.Email.errors }}
-                <input type="email" name="Email" placeholder="ป้อน อีเมลล์ของคุณ" required="">
+                <input type="email" name="Email" placeholder="Please Enter Your Email" required="">
                 
                 {{ register_form.Tel.errors }}
-                <input type="tel" name="Tel" placeholder="ป้อน เบอร์โทรศัพท์ของคุณ" required="">
+                <input type="tel" name="Tel" placeholder="Please Enter Your Phone" required="">
                 
                 {{ register_form.Address.errors }}
-                <input type="text" name="Address" placeholder="ป้อน ที่อยู่ของคุณ" required="">
+                <input type="text" name="Address" placeholder="Please Enter Your Address" required="">
                 
                 {{ register_form.Bdate.errors }}
-                <input type="date" name="Bdate" placeholder="ป้อน วันเกิดของคุณ" required="">
+                <input type="date" name="Bdate" placeholder="Please Enter Your Birthday" required="">
                 
                 <button type="submit" name="register">Sign up</button>
             </form>

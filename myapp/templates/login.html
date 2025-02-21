@@ -88,6 +88,27 @@
             /* Ensure padding is included in the element's total width and height */
         }
 
+        .buttonE {
+            height: 50px;
+            width: 100%;
+            border: none;
+            font-size: 16px;
+            font-weight: 400;
+            border-radius: 6px;
+            color: #fff;
+            background-color: #42bd41;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            line-height: 50px;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 20px;
+            box-sizing: border-box;
+            /* Ensure padding is included in the element's total width and height */
+        }
+
         .button:hover {
             background-color: #016dcb;
         }
@@ -118,7 +139,7 @@
 
             <form method="post" class="form">
                 {% csrf_token %}
-                <header>Login</header><br>
+                <header>Sign In</header><br>
 
                 <div class="field">
                     <input type="text" id="username" name="username" placeholder="Username"
@@ -129,8 +150,8 @@
                     <input type="password" id="password" name="password" placeholder="Password">
                 </div>
 
-                <button type="submit" class="button">Login</button>
-                <a href="{% url 'register' %}" class="button">Signup</a>
+                <button type="submit" class="buttonE">Enter</button>
+                <a href="{% url 'register' %}" class="button">Sign Up</a>
 
                 <!-- Display Error -->
                 {% if error_message %}

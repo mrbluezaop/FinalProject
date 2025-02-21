@@ -139,9 +139,9 @@
                 if (!width || !length || !height || !job_type || !budget || !location) {
                     Swal.fire({
                         icon: "warning",
-                        title: "กรุณากรอกข้อมูลให้ครบ!",
-                        text: "กรุณากรอกค่า Width, Length, Height, Budget และเลือก Job Type ก่อนกด Predict",
-                        confirmButtonText: "ตกลง"
+                        title: "Please fill in all information",
+                        text: "Please Enter Width, Length, Height, Budget And Select Job Type Before Predict",
+                        confirmButtonText: "Submit"
                     });
                     return; // ❌ ไม่ให้ส่งข้อมูลถ้ายังกรอกไม่ครบ
                 }
@@ -173,8 +173,8 @@
                         Swal.fire({
                             icon: "error",
                             title: "Error in Prediction",
-                            text: "ไม่สามารถพยากรณ์ได้ กรุณาลองใหม่",
-                            confirmButtonText: "ตกลง"
+                            text: "Unable to predict. Please try again.",
+                            confirmButtonText: "Submit"
                         });
                     }
                 });
@@ -201,9 +201,9 @@
                 // ✅ แจ้งเตือน Reset สำเร็จ
                 Swal.fire({
                     icon: "success",
-                    title: "Reset สำเร็จ!",
-                    text: "ข้อมูลทั้งหมดถูกล้างแล้ว",
-                    confirmButtonText: "ตกลง"
+                    title: "Reset Success!",
+                    text: "All data has been cleared.",
+                    confirmButtonText: "Submit"
                 });
             });
 
@@ -219,9 +219,9 @@
                 if (!width || !length || !height || !job_type || !budget) {
                     Swal.fire({
                         icon: "warning",
-                        title: "กรุณากรอกข้อมูลให้ครบ!",
-                        text: "กรุณากรอกค่า Width, Length, Height, Budget และเลือก Job Type ก่อนกด Save",
-                        confirmButtonText: "ตกลง"
+                        title: "Please fill in all information",
+                        text: "Please Enter Width, Length, Height, Budget And Select Job Type Before Predict",
+                        confirmButtonText: "Submit"
                     });
                     return; // ❌ ไม่ให้ส่งข้อมูลถ้ายังกรอกไม่ครบ
                 } 
@@ -231,9 +231,9 @@
                         !$('#tableResult').text().trim()) {
                     Swal.fire({
                         icon: "warning",
-                        title: "ต้องกด Predict ก่อน!",
-                        text: "กรุณากดปุ่ม Predict เพื่อคำนวณค่าก่อนทำการบันทึก",
-                        confirmButtonText: "ตกลง"
+                        title: "Please, Press Predict First",
+                        text: "Please, Press Predict First Before Save",
+                        confirmButtonText: "Submit"
                     });
                     return; // ❌ ไม่ให้ส่งข้อมูลถ้ายังไม่ได้ Predict
                 }
@@ -266,7 +266,7 @@
                     success: function(response) {
                         Swal.fire({
                             icon: "success",
-                            title: "บันทึกข้อมูลสำเร็จ!",
+                            title: "Data Saved Successfully",
                             html: `
                                 <div style="text-align: left;">
                                     <p><strong>Width:</strong> ${width} m</p>
@@ -283,7 +283,7 @@
                                     <p><strong>Table:</strong> ${table}</p>
                                 </div>
                             `,
-                            confirmButtonText: "ตกลง"
+                            confirmButtonText: "Submit"
                         }).then(() => {
                             window.location.href = "{% url 'predictcustom' %}";
                         });
@@ -291,9 +291,9 @@
                     error: function(xhr, status, error) {
                         Swal.fire({
                             icon: "error",
-                            title: "เกิดข้อผิดพลาด!",
-                            text: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่",
-                            confirmButtonText: "ตกลง"
+                            title: "Something Wrong",
+                            text: "Unable to save data. Please try again.",
+                            confirmButtonText: "Submit"
                         }).then(() => {
                             window.location.href = "{% url 'predictcustom' %}";
                         });

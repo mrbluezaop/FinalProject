@@ -127,9 +127,9 @@
     
                         Swal.fire({
                             icon: "success",
-                            title: "บันทึกข้อมูลสำเร็จ",
-                            text: "ใบเสนอราคาของคุณกำลังถูกดาวน์โหลด",
-                            confirmButtonText: "ตกลง"
+                            title: "Data Saved Successfully",
+                            text: "Quote is being downloaded",
+                            confirmButtonText: "Submit"
                         }).then(() => {
                             console.log("✅ DEBUG: PredictHire_ID =", data.PredictHire_ID);
                             let queryParams = new URLSearchParams(formData);
@@ -140,9 +140,9 @@
                     } else {
                         Swal.fire({
                             icon: "error",
-                            title: "เกิดข้อผิดพลาด",
-                            text: data.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
-                            confirmButtonText: "ตกลง"
+                            title: "Something Wrong",
+                            text: data.error || "Something Wrong About Data",
+                            confirmButtonText: "Submit"
                         });
                     }
                 })
@@ -150,9 +150,9 @@
                     console.error("❌ ERROR:", error);
                     Swal.fire({
                         icon: "error",
-                        title: "เกิดข้อผิดพลาด",
-                        text: "ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองอีกครั้ง",
-                        confirmButtonText: "ตกลง"
+                        title: "Something Wrong",
+                        text: "Unable to send order. Please try again",
+                        confirmButtonText: "Submit"
                     });
                 });
             });

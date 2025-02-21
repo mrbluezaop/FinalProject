@@ -137,7 +137,7 @@
                   {% elif predict.HireA_ID.Status == 'completed' %}
                   <span style="color: green; font-weight: bold;">Completed</span>
                   {% else %}
-                  <span style="color: gray;">ไม่ระบุสถานะ</span>
+                  <span style="color: gray;">Status not specified</span>
                   {% endif %}
                 </td>
                 <td>
@@ -563,7 +563,7 @@
                             icon: "error",
                             title: "Prediction Failed",
                             text: "Missing required fields in prediction response.",
-                            confirmButtonText: "ตกลง"
+                            confirmButtonText: "Submit"
                         });
                         console.error("❌ Incomplete prediction data:", prediction);
                         return;
@@ -591,7 +591,7 @@
                         icon: "error",
                         title: "Prediction Error",
                         text: "ไม่สามารถดึงข้อมูลพยากรณ์ได้ กรุณาลองใหม่",
-                        confirmButtonText: "ตกลง"
+                        confirmButtonText: "Submit"
                     });
                 }
             });
@@ -663,7 +663,7 @@
                       Swal.fire({
                           icon: "error",
                           title: "Error",
-                          text: "ไม่สามารถดึงข้อมูลทรัพยากรได้ กรุณาลองใหม่",
+                          text: "Unable to retrieve resource information. Please try again.",
                           confirmButtonText: "OK"
                       });
                   }
@@ -760,7 +760,7 @@
                       Swal.fire({
                           icon: "error",
                           title: "Error",
-                          text: "ไม่สามารถดึงข้อมูลพยากรณ์ได้ กรุณาลองใหม่",
+                          text: "Unable to retrieve resource information. Please try again.",
                           confirmButtonText: "OK"
                       });
                   }
