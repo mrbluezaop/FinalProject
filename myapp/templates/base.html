@@ -38,6 +38,22 @@
          text-decoration: none;
          /* เอาการเส้นใต้ข้อความลิงก์ออกไป */
       }
+
+      .nav-item a i {
+         transition: none !important;
+         /* ปิดการเปลี่ยนแปลงเมื่อ hover */
+         opacity: 1 !important;
+         /* ทำให้ icon ชัดเจนเสมอ */
+         color: black !important;
+         /* คงสีดำไว้ */
+      }
+
+      .nav-item a:hover i {
+         opacity: 1 !important;
+         /* ไม่ให้โปร่งใสเมื่อ hover */
+         color: black !important;
+         /* คงสีเดิมเมื่อ hover */
+      }
    </style>
    {% block title %}
    {% endblock %}
@@ -79,20 +95,25 @@
                      <a class="nav-link" href="{% url 'contact' %}">Contact</a>
                   </li>
                </ul>
-               <div class="nav-item">
-                  <p>
-                     {% if request.session.username %}
-                     Welcome, {{ request.session.username }}
-                     <a href="{% url 'editprofile' %}">
-                        <i class="fa-solid fa-user fa-2xl"></i>
-                     </a>
-                     {% else %}
-                     <a href="{% url 'login' %}">
-                        <i class="fa-solid fa-user fa-2xl"></i>
-                     </a>
-                     {% endif %}
-                  </p>
-               </div>
+               <ul class="navbar-nav ml-auto">
+                  {% if request.session.username %}
+                  <li class="nav-item">
+                     <p class="nav-link">
+                        Welcome, {{ request.session.username }}
+                        <a href="{% url 'editprofile' %}">
+                           <i class="fa-solid fa-user fa-2xl"></i>
+                        </a>
+                     </p>
+                  </li>
+                  {% else %}
+                  <li class="nav-item">
+                     <a class="nav-link" href="{% url 'login' %}">Sign In</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" href="{% url 'register' %}">Sign Up</a>
+                  </li>
+                  {% endif %}
+               </ul>
                {% if request.session.username %}
                <form action="{% url 'logout' %}" method="post">
                   {% csrf_token %}

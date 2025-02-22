@@ -982,7 +982,7 @@ def generate_pdf(request):
 
     # รายการสินค้า
     items = [
-        ("Wood", amout_wood, "แผ่น"),
+        ("Wood (120*240 cm)", amout_wood, "แผ่น"),
         ("Paint", amout_paint, "แกลลอน"),
         ("Lighting", amout_lighting, "ชุด"),
         ("Nail", amout_nail, "กล่อง"),
@@ -1066,7 +1066,7 @@ def generate_pdf(request):
 
     # ✅ คำนวณขนาดของ Paragraph ล่วงหน้า
     member_location_paragraph = Paragraph(f"<font name='THSarabunNew' size=14>{member_location}</font>", style_address)
-    w, h = member_location_paragraph.wrap(200, 80)  # ✅ กำหนดความกว้างที่เหมาะสม
+    w, h = member_location_paragraph.wrap(150, 80)  # ✅ กำหนดความกว้างที่เหมาะสม
     yy_adjustment = h - 14  # ✅ ปรับให้ข้อความไม่ดันขึ้นไป
     member_location_paragraph.drawOn(pdf, x_value, next_y_position - (y_gap * 2) - yy_adjustment)
 
@@ -1091,65 +1091,167 @@ def generate_pdf(request):
     table_height = (len(items) + 3) * 20  # ความสูงของตารางสินค้า
     y_end = y_table_start - table_height  # คำนวณขอบล่างให้เท่ากัน
 
-    # ✅ เพิ่มตารางรายการสินค้า
-    data = [["ลำดับ", "รายละเอียด", "จำนวน", "หน่วย", "หมายเหตุ"]]
+        # ✅ ปรับโครงสร้างตารางสินค้า **ลบคอลัมน์ "หมายเหตุ" ออก**
+    data = [["ลำดับ", "รายละเอียด", "จำนวน", "หน่วย", "ราคา/หน่วย", "จำนวนเงิน (บาท)"]]
+
+    # ✅ กำหนดราคาต่อหน่วยของสินค้า
+    price_per_unit = {
+        "Wood (120*240 cm)": 350,
+        "Paint": 350,
+        "Lighting": 75,
+        "Nail": 50,
+        "Table": 1500,
+        "Chair": 1000
+    }
+
+    # ✅ คำนวณราคาทั้งหมด และเพิ่มข้อมูลในตาราง
     for i, (desc, qty, unit) in enumerate(items, start=1):
-        data.append([i, desc, qty, unit, "-"])
+        unit_price = price_per_unit.get(desc, 0)  # ดึงราคาต่อหน่วย
+        total_price = qty * unit_price  # คำนวณราคาทั้งหมด
+        data.append([i, desc, qty, unit, f"{unit_price:,.2f}", f"{total_price:,.2f}"])  # ❌ ลบคอลัมน์ "หมายเหตุ"
 
+    # ✅ ปรับขนาดของคอลัมน์ให้พอดีกับหน้ากระดาษ A4 (ลบคอลัมน์สุดท้ายออก)
+    table = Table(data, colWidths=[40, 160, 50, 60, 80, 100])  # ❌ ปรับความกว้างใหม่
 
-    # ❌ ลบ `pdf.rect()` ที่ใช้วาดกรอบรอบตารางสินค้า (เพื่อป้องกันเส้นซ้อน)
-    # pdf.rect(x_table_start, y_end, table_width, table_height, stroke=1, fill=0)  # ลบออก
-
-    # ✅ สร้างตารางสินค้า (ให้ Table ควบคุมเส้นเอง)
-    table = Table(data, colWidths=[55, 200, 50, 100, 100])
+    # ✅ ปรับสไตล์ตารางสินค้า
     table.setStyle(TableStyle([
-    ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  # ✅ ใช้ฟอนต์ไทย
-    ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
-    ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-    ("GRID", (0, 0), (-1, -1), 1, colors.black),
-]))
+        ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  # ✅ ใช้ฟอนต์ไทย
+        ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),  # ✅ หัวข้อคอลัมน์ตรงกลาง
+
+        # ✅ จัดตำแหน่งของข้อมูลแต่ละคอลัมน์
+        ("ALIGN", (0, 1), (0, -1), "CENTER"),  # ✅ ลำดับ (ตรงกลาง)
+        ("ALIGN", (2, 1), (2, -1), "CENTER"),  # ✅ จำนวน (ตรงกลาง)
+        ("ALIGN", (3, 1), (3, -1), "CENTER"),  # ✅ หน่วย (ตรงกลาง)
+        ("ALIGN", (1, 1), (1, -1), "LEFT"),    # ✅ รายละเอียด (ชิดซ้าย)
+        ("ALIGN", (4, 1), (5, -1), "RIGHT"),   # ✅ ราคา/หน่วย และ จำนวนเงิน (บาท) (ชิดขวา)
+
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+    ]))
 
     table.wrapOn(pdf, x_table_start, 500)
-    table.drawOn(pdf, x_table_start, y_end)  
+    table.drawOn(pdf, x_table_start, y_end)
 
-    # ✅ ปรับตำแหน่งตารางเงื่อนไขการชำระเงินให้เลื่อนลงมา
-    y_payment_start = y_start - 350  # ปรับระยะให้ตารางเงื่อนไขอยู่ต่ำลงจากตารางหลัก
 
-    payment_data = [["งวดที่ชำระ", "รายละเอียด"]]
-    payments = [
-        ("งวดที่ 1", "50% เมื่อตกลงว่าจ้าง"),
-        ("งวดที่ 2", "30% ก่อนเข้าพื้นที่ ดำเนินการงาน"),
-        ("งวดที่ 3", "20% ก่อนรื้อถอน")
+    # ✅ คำนวณราคารวมของสินค้า (Sub Total)
+    if 'total_subtotal' not in locals():
+        total_subtotal = sum(qty * price_per_unit.get(desc, 0) for desc, qty, unit in items)
+
+        # ✅ เพิ่มข้อมูลสรุปยอดเงิน
+    discount = 0  # ส่วนลด (กำหนดเป็น 0 หรือค่าที่ต้องการ)
+    vat = total_subtotal * 0.07  # ภาษีมูลค่าเพิ่ม 7%
+    net_total = total_subtotal + vat - discount  # คำนวณยอดรวมสุทธิ
+
+    # ✅ เพิ่มช่องสรุปยอดเงินทั้งหมด
+    total_summary_data = [
+        ["", "", "", "รวมจำนวนเงินทั้งสิ้น", f"{total_subtotal:,.2f}"],
+        ["", "", "", "หัก ส่วนลด (Discount)", f"{discount:,.2f}" if discount > 0 else "-"],
+        ["", "", "", "รวมเป็นเงิน (Total)", f"{total_subtotal:,.2f}"],
+        ["", "", "", "ภาษีมูลค่าเพิ่ม 7% (VAT)", f"{vat:,.2f}"],
+        ["", "", "", "รวมจำนวนเงินทั้งสิ้น (Net Total)", f"{net_total:,.2f}"]
     ]
+
+    # ✅ กำหนดขนาดคอลัมน์
+    total_summary_table = Table(total_summary_data, colWidths=[40, 160, 50, 140, 100])
+
+    # ✅ ปรับสไตล์ตาราง
+    total_summary_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),
+        
+        # ✅ หัวข้อคอลัมน์ยังคงอยู่ตรงกลาง
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        
+        # ✅ ตัวหนังสือ (ฝั่งซ้าย) ชิดซ้าย
+        ("ALIGN", (3, 0), (3, -1), "LEFT"),
+        
+        # ✅ ตัวเลข (ฝั่งขวา) ชิดขวา
+        ("ALIGN", (4, 0), (4, -1), "RIGHT"),
+
+        # ✅ สีเทาเฉพาะช่องสุดท้ายของแต่ละรายการ
+        ("BACKGROUND", (3, 0), (-1, 0), colors.lightgrey),
+        ("BACKGROUND", (3, -1), (-1, -1), colors.lightblue),
+
+        # ✅ ลบเส้นกรอบของ 3 ช่องแรก
+        ("SPAN", (0, 0), (2, 0)),  
+        ("SPAN", (0, 1), (2, 1)),  
+        ("SPAN", (0, 2), (2, 2)),  
+        ("SPAN", (0, 3), (2, 3)),  
+        ("SPAN", (0, 4), (2, 4)),  
+
+        # ✅ ลบเส้นขอบบนของ "รวมจำนวนเงินทั้งสิ้น" เพื่อให้ต่อเนื่องกับตารางด้านบน
+        ("LINEBELOW", (3, 0), (-1, 0), 1, colors.black),
+        ("NOSPLIT", (3, 0), (-1, 0)),
+
+        # ✅ กำหนดเส้นกรอบเฉพาะช่องที่มีข้อมูล
+        ("GRID", (3, 0), (-1, -1), 1, colors.black),
+    ]))
+
+    # ✅ คำนวณตำแหน่งให้อยู่ล่างสุดของทุกตาราง
+    y_total_summary_start = y_end - 51  # ✅ ปรับให้ต่อกันพอดี
+
+    # ✅ วางตาราง "รวมจำนวนเงินทั้งสิ้น (Sub Total)" ไว้ล่างสุด
+    total_summary_table.wrapOn(pdf, x_table_start, y_total_summary_start)
+    total_summary_table.drawOn(pdf, x_table_start, y_total_summary_start - 39)
+
+
+    # ✅ ปรับตำแหน่งตารางเงื่อนไขการชำระเงินให้เลื่อนลงมา (ต่ำกว่าตารางสรุปยอดเงิน)
+    y_payment_start = y_total_summary_start - 80  # ✅ เลื่อนลงให้ไม่ทับกัน
+
+        # ✅ คำนวณยอด Net Total (หากยังไม่ได้คำนวณ)
+    if 'net_total' not in locals():
+        net_total = total_subtotal + vat - discount  # ✅ ยอดรวมสุทธิ
+
+    # ✅ เพิ่มคอลัมน์ "ราคา" ในตารางงวดชำระเงิน
+    payment_data = [["งวดที่ชำระ", "รายละเอียด", "ราคา (บาท)"]]
+    payments = [
+        ("งวดที่ 1", "50% เมื่อตกลงว่าจ้าง", net_total * 0.50),
+        ("งวดที่ 2", "30% ก่อนเข้าพื้นที่ ดำเนินการงาน", net_total * 0.30),
+        ("งวดที่ 3", "20% ก่อนรื้อถอน", net_total * 0.20),
+    ]
+
     for payment in payments:
-        payment_data.append(payment)
+        formatted_price = f"{payment[2]:,.2f}"  # ✅ แปลงเป็นเลขทศนิยม 2 ตำแหน่ง
+        payment_data.append([payment[0], payment[1], formatted_price])
 
     # ✅ ตรวจสอบว่าฟอนต์ภาษาไทยถูกต้อง
     pdfmetrics.registerFont(TTFont("THSarabunNew", "static/fonts/THSarabunNew.ttf"))
 
     # ✅ ปรับตารางเงื่อนไขการชำระเงินให้รองรับภาษาไทย
-    payment_table = Table(payment_data, colWidths=[100, 350])
+    payment_table = Table(payment_data, colWidths=[100, 250, 140])  # ✅ ปรับขนาดให้ตรงกัน
+    # ✅ ปรับตารางเงื่อนไขการชำระเงินให้รองรับภาษาไทย
     payment_table.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  # ✅ ใช้ฟอนต์ภาษาไทย
+        ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  
         ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+
+        # ✅ หัวข้อคอลัมน์ยังคงอยู่ตรงกลาง
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+
+        # ✅ งวดที่ชำระ (คอลัมน์แรก) อยู่ตรงกลางเหมือนเดิม
+        ("ALIGN", (0, 1), (0, -1), "CENTER"),
+
+        # ✅ รายละเอียดชิดซ้าย
+        ("ALIGN", (1, 1), (1, -1), "LEFT"),
+
+        # ✅ ราคา (บาท) ชิดขวา
+        ("ALIGN", (2, 1), (2, -1), "RIGHT"),
+
+        # ✅ กำหนดเส้นตาราง
         ("GRID", (0, 0), (-1, -1), 1, colors.black),
     ]))
 
+    # ✅ วาดตารางเงื่อนไขการชำระเงิน
     payment_table.wrapOn(pdf, x_table_start, y_payment_start)
-    payment_table.drawOn(pdf, x_table_start, y_payment_start)
+    payment_table.drawOn(pdf, x_table_start, y_payment_start - 50)
 
     # ✅ เพิ่มพื้นที่สำหรับการลงนามที่มุมขวาล่าง
-    signature_x = 350  # กำหนดตำแหน่ง X ของช่องลงชื่อ
-    signature_y = 100  # กำหนดตำแหน่ง Y ของช่องลงชื่อ
+    signature_x = 350  # ✅ กำหนดตำแหน่ง X ของช่องลงชื่อ
+    signature_y = y_payment_start - 100  # ✅ ปรับให้อยู่ล่างสุดของเอกสาร
 
     pdf.setFont("THSarabunNew", 14)
-    pdf.drawString(signature_x, signature_y + 40, "ลงชื่อ................................................")  
-    pdf.drawString(signature_x + 40, signature_y + 20, "(ชื่อ-นามสกุล)")  
-    pdf.drawString(signature_x, signature_y, "วันที่.....................")  
-
+    pdf.drawString(signature_x, signature_y + -50, "ลงชื่อ................................................")  
+    pdf.drawString(signature_x + 40, signature_y + -65, "(นาย ไพบูลย์ พิชัยช่วง)")  
 
 
     # ✅ บันทึก PDF
