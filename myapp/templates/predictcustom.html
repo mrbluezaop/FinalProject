@@ -98,6 +98,10 @@
                 <div class="predict-results">
                     <h1>Prediction Results</h1>
                     <div class="result-box">
+                        <label>Wood (Pc.):</label>
+                        <span id="woodResult"></span>
+                    </div>
+                    <div class="result-box">
                         <label>Paint (Cans):</label>
                         <span id="paintResult"></span>
                     </div>
@@ -160,6 +164,7 @@
                     contentType: 'application/json',
                     headers: { "X-CSRFToken": getCookie("csrftoken") },  
                     success: function (response) {
+                        $('#woodResult').text(response.Wood);
                         $('#paintResult').text(response.Paint);
                         $('#chairResult').text(response.Chair);
                         $('#lightingResult').text(response.Lighting);
@@ -189,6 +194,7 @@
                 $('#budget').val('');
 
                 // ล้างค่าผลลัพธ์
+                $('#woodResult').text('');
                 $('#paintResult').text('');
                 $('#chairResult').text('');
                 $('#lightingResult').text('');
@@ -228,7 +234,7 @@
                 // ✅ ตรวจสอบว่ามีการกด Predict แล้วหรือยัง (ผลลัพธ์ต้องไม่ว่าง)
                 else if (!$('#paintResult').text().trim() && !$('#chairResult').text().trim() &&
                         !$('#lightingResult').text().trim() && !$('#nailResult').text().trim() &&
-                        !$('#tableResult').text().trim()) {
+                        !$('#tableResult').text().trim() && !$('#woodResult').text().trim() ) {
                     Swal.fire({
                         icon: "warning",
                         title: "Please, Press Predict First",
@@ -239,6 +245,7 @@
                 }
 
                 // ✅ ถ้าข้อมูลครบแล้วให้ส่งข้อมูลไปยังเซิร์ฟเวอร์
+                var wood = parseInt($('#woodResult').text()) || 0;
                 var paint = parseInt($('#paintResult').text()) || 0;
                 var chair = parseInt($('#chairResult').text()) || 0;
                 var lighting = parseInt($('#lightingResult').text()) || 0;

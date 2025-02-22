@@ -56,6 +56,14 @@
     .result-box input {
       text-align: center;
     }
+
+    .form-actionsPop {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px; /* ปรับระยะห่างจากด้านบน */
+    }
+
+
   </style>
 </head>
 
@@ -242,6 +250,10 @@
           <br>
           <div class="predict-results">
             <div class="result-box">
+            <label>Wood (Pc.):</label>
+              <input type="number" id="woodResult" placeholder="Enter Wood Piece" readonly>
+            </div>
+            <div class="result-box">
               <label>Paint (Cans):</label>
               <input type="number" id="paintResult" placeholder="Enter Paint Cans" readonly>
             </div>
@@ -264,7 +276,7 @@
           </div>
 
           <!-- ปุ่ม CLOSE -->
-          <div class="form-actions">
+          <div class="form-actionsPop">
             <button type="button" class="close-btn" id="closePopup">CLOSE</button>
           </div>
         </div>
@@ -566,7 +578,7 @@
                     if (!prediction || typeof prediction !== "object" ||
                         !("Paint" in prediction) || !("Chair" in prediction) ||
                         !("Lighting" in prediction) || !("Nail" in prediction) ||
-                        !("Table" in prediction)) {
+                        !("Table" in prediction) || !("Wood" in prediction)) {
                         Swal.fire({
                             icon: "error",
                             title: "Prediction Failed",
@@ -578,7 +590,7 @@
                     }
 
                     // ✅ อัปเดตค่าผลลัพธ์ใน `<input>`
-                    $('#paintResult').val(prediction.Wood);
+                    $('#woodResult').val(prediction.Wood);
                     $('#paintResult').val(prediction.Paint);
                     $('#chairResult').val(prediction.Chair);
                     $('#lightingResult').val(prediction.Lighting);
@@ -705,7 +717,7 @@
                       }
 
                       // ✅ ตั้งค่าข้อมูลฝั่ง Current Data
-                      document.getElementById("currentWood").innerText = `${predict.Wood} Cans`;
+                      document.getElementById("currentWood").innerText = `${predict.Wood} Pc.`;
                       document.getElementById("currentPaint").innerText = `${predict.Paint} Cans`;
                       document.getElementById("currentChair").innerText = `${predict.Chair} Chairs`;
                       document.getElementById("currentLighting").innerText = `${predict.Lighting} Bulbs`;

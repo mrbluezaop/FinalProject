@@ -479,7 +479,7 @@ def submit_hire(request):
             def round_custom(value):
                 return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
 
-            wood = area / 2.5
+            wood = area / 3
 
             # เรียกใช้งานฟังก์ชัน predictionder
             response = predictionder(width, length, height, job_type, budget)
@@ -752,6 +752,7 @@ def prediction(request):
             predict_nail = predicted_nail(area, width_input, height_input)
             predict_table = model_table.predict(input_data_fortable)[0]
 
+            Wood = round_custom(wood)
             Paint = round_custom(predict_paint)
             Chair = round_custom(predict_chair)
             Lighting =  round_custom(predict_lighting)
@@ -759,6 +760,7 @@ def prediction(request):
             Table = round_custom(predict_table)
 
             return JsonResponse({
+                "Wood": Wood,
                 "Paint": Paint,
                 "Chair": Chair,
                 "Lighting": Lighting,
@@ -805,7 +807,7 @@ def submit_hireA(request):
             def round_custom(value):
                 return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
 
-            wood = area / 2.5
+            wood = area / 3
             # ✅ บันทึกข้อมูลลงในตาราง HireforAdmin
             hire_admin = HireforAdmin.objects.create(
                 Width=width,
@@ -1250,7 +1252,7 @@ def generate_pdf(request):
 
     pdf.setFont("THSarabunNew", 14)
     pdf.drawString(signature_x, signature_y + -50, "ลงชื่อ................................................")  
-    pdf.drawString(signature_x + 40, signature_y + -65, "(นาย ไพบูลย์ พิชัยช่วง)")  
+    pdf.drawString(signature_x + 30, signature_y + -65, "(นาย ไพบูลย์ พิชัยช่วง)")  
 
 
     # ✅ บันทึก PDF
