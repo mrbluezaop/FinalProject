@@ -1000,17 +1000,21 @@ def generate_pdf(request):
         pass  # ถ้าไม่มีโลโก้ จะไม่แสดง (ป้องกัน error)
 
     # ✅ เพิ่มข้อมูลบริษัท (ใช้ฟอนต์ที่ถูกต้อง)
-    pdf.setFont(font_name, 18)
-    pdf.drawString(180, 780, company_name)
+    pdfmetrics.registerFont(TTFont("THSarabunNewBold", "static/fonts/THSarabunNewBold.ttf"))
+    pdf.setFont("THSarabunNewBold", 18)
+    pdf.drawString(180, 780, "บริษัท เดอะวินเนอร์ อินทีเรีย & แอดเวอร์ไทซิ่ง จำกัด")  # ✅ ตัวหนาแล้ว!
 
     pdf.setFont(font_name, 14)
     pdf.drawString(180, 760, company_address)
     pdf.drawString(180, 740, company_tax)
     pdf.drawString(180, 720, company_contact)
 
-    # ✅ เพิ่มหัวข้อเอกสาร
-    pdf.setFont(font_name, 18)
-    pdf.drawString(200, 690, "ใบเสนอราคา / ใบสั่งซื้อ")
+    # ✅ ลงทะเบียนฟอนต์ตัวหนา
+    pdfmetrics.registerFont(TTFont("THSarabunNewBold", "static/fonts/THSarabunNewBold.ttf"))
+
+    # ✅ ตั้งค่าฟอนต์ตัวหนาก่อนวาดข้อความ
+    pdf.setFont("THSarabunNewBold", 18)
+    pdf.drawString(200, 690, "ใบเสนอราคา / ใบสั่งซื้อ")  # ✅ ตัวหนาแล้ว!
     
     # ✅ ขนาดของกรอบและตำแหน่งของตาราง
     table_width = 500  # ตั้งให้เท่ากันทั้งสองตาราง
@@ -1115,21 +1119,21 @@ def generate_pdf(request):
 
     # ✅ ปรับสไตล์ตารางสินค้า
     table.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  # ✅ ใช้ฟอนต์ไทย
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-        ("ALIGN", (0, 0), (-1, 0), "CENTER"),  # ✅ หัวข้อคอลัมน์ตรงกลาง
+    ("FONTNAME", (0, 0), (-1, 0), "THSarabunNewBold"),  # ✅ ทำให้เฉพาะหัวคอลัมน์เป็นตัวหนา
+    ("FONTNAME", (0, 1), (-1, -1), "THSarabunNew"),  # ✅ ข้อมูลภายในตารางเป็นฟอนต์ปกติ
+    ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),  # ✅ หัวคอลัมน์พื้นหลังสีฟ้า
+    ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),  # ✅ สีข้อความในหัวตารางเป็นสีดำ
+    ("ALIGN", (0, 0), (-1, 0), "CENTER"),  # ✅ หัวข้อคอลัมน์ตรงกลาง
 
-        # ✅ จัดตำแหน่งของข้อมูลแต่ละคอลัมน์
-        ("ALIGN", (0, 1), (0, -1), "CENTER"),  # ✅ ลำดับ (ตรงกลาง)
-        ("ALIGN", (2, 1), (2, -1), "CENTER"),  # ✅ จำนวน (ตรงกลาง)
-        ("ALIGN", (3, 1), (3, -1), "CENTER"),  # ✅ หน่วย (ตรงกลาง)
-        ("ALIGN", (1, 1), (1, -1), "LEFT"),    # ✅ รายละเอียด (ชิดซ้าย)
-        ("ALIGN", (4, 1), (5, -1), "RIGHT"),   # ✅ ราคา/หน่วย และ จำนวนเงิน (บาท) (ชิดขวา)
+    # ✅ จัดตำแหน่งของข้อมูลแต่ละคอลัมน์
+    ("ALIGN", (0, 1), (0, -1), "CENTER"),  # ✅ ลำดับ (ตรงกลาง)
+    ("ALIGN", (2, 1), (2, -1), "CENTER"),  # ✅ จำนวน (ตรงกลาง)
+    ("ALIGN", (3, 1), (3, -1), "CENTER"),  # ✅ หน่วย (ตรงกลาง)
+    ("ALIGN", (1, 1), (1, -1), "LEFT"),    # ✅ รายละเอียด (ชิดซ้าย)
+    ("ALIGN", (4, 1), (5, -1), "RIGHT"),   # ✅ ราคา/หน่วย และ จำนวนเงิน (บาท) (ชิดขวา)
 
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-    ]))
-
+    ("GRID", (0, 0), (-1, -1), 1, colors.black),
+]))
     table.wrapOn(pdf, x_table_start, 500)
     table.drawOn(pdf, x_table_start, y_end)
 
@@ -1221,25 +1225,20 @@ def generate_pdf(request):
     payment_table = Table(payment_data, colWidths=[100, 250, 140])  # ✅ ปรับขนาดให้ตรงกัน
     # ✅ ปรับตารางเงื่อนไขการชำระเงินให้รองรับภาษาไทย
     payment_table.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, -1), "THSarabunNew"),  
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+    ("FONTNAME", (0, 0), (-1, 0), "THSarabunNewBold"),  # ✅ ทำให้เฉพาะหัวคอลัมน์เป็นตัวหนา
+    ("FONTNAME", (0, 1), (-1, -1), "THSarabunNew"),  # ✅ ข้อมูลภายในตารางเป็นฟอนต์ปกติ
+    ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),  # ✅ หัวคอลัมน์พื้นหลังสีฟ้า
+    ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),  # ✅ สีข้อความในหัวตารางเป็นสีดำ
+    ("ALIGN", (0, 0), (-1, 0), "CENTER"),  # ✅ หัวข้อคอลัมน์ตรงกลาง
 
-        # ✅ หัวข้อคอลัมน์ยังคงอยู่ตรงกลาง
-        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+    # ✅ จัดตำแหน่งของข้อมูลแต่ละคอลัมน์
+    ("ALIGN", (0, 1), (0, -1), "CENTER"),  # ✅ งวดที่ชำระ (ตรงกลาง)
+    ("ALIGN", (1, 1), (1, -1), "LEFT"),    # ✅ รายละเอียด (ชิดซ้าย)
+    ("ALIGN", (2, 1), (2, -1), "RIGHT"),   # ✅ ราคา (บาท) (ชิดขวา)
 
-        # ✅ งวดที่ชำระ (คอลัมน์แรก) อยู่ตรงกลางเหมือนเดิม
-        ("ALIGN", (0, 1), (0, -1), "CENTER"),
+    ("GRID", (0, 0), (-1, -1), 1, colors.black),  # ✅ เส้นตารางทั้งหมด
+]))
 
-        # ✅ รายละเอียดชิดซ้าย
-        ("ALIGN", (1, 1), (1, -1), "LEFT"),
-
-        # ✅ ราคา (บาท) ชิดขวา
-        ("ALIGN", (2, 1), (2, -1), "RIGHT"),
-
-        # ✅ กำหนดเส้นตาราง
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-    ]))
 
     # ✅ วาดตารางเงื่อนไขการชำระเงิน
     payment_table.wrapOn(pdf, x_table_start, y_payment_start)
