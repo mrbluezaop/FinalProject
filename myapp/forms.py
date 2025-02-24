@@ -9,9 +9,24 @@ from django.core.exceptions import ValidationError
 
 
 class RegisterForm(forms.ModelForm):
+
+    # ✅ เพิ่ม Checkbox PDPA
+    pdpa = forms.BooleanField(
+        required=True,
+        error_messages={'required': 'Please accept the PDPA policy before registering!'}
+    )
+
+    # ✅ เพิ่มฟิลด์ข้อมูลที่อยู่
+    house_number = forms.CharField(required=True, error_messages={'required': 'Please enter your address.'})
+    district = forms.CharField(required=True, error_messages={'required': 'Please enter your district.'})
+    amphoe = forms.CharField(required=True, error_messages={'required': 'Please enter your amphoe.'})
+    province = forms.CharField(required=True, error_messages={'required': 'Please enter your province.'})
+    zipcode = forms.CharField(required=True, error_messages={'required': 'Please enter your postal code.'})
+
     class Meta:
         model = Member
-        fields = ['Username', 'Firstname', 'Lastname', 'Password', 'Email', 'Phone', 'Birthday']
+        fields = ['Username', 'Firstname', 'Lastname', 'Password', 'Email', 'Phone', 'Birthday', 
+                  'house_number', 'district', 'amphoe', 'province', 'zipcode', 'pdpa']
         widgets = {
             'Username': forms.TextInput(attrs={
                 'placeholder': 'Username',
@@ -42,6 +57,45 @@ class RegisterForm(forms.ModelForm):
         if not lastname:
             raise ValidationError('กรุณากรอก Last Name.')
         return lastname
+    
+    # ✅ เพิ่มฟังก์ชันตรวจสอบ PDPA
+    def clean_pdpa(self):
+        pdpa = self.cleaned_data.get('pdpa')
+        if not pdpa:
+            raise ValidationError('กรุณาติ๊กยอมรับ PDPA ก่อนสมัครสมาชิก!')
+        return pdpa
+
+    # ✅ เพิ่มฟังก์ชันตรวจสอบข้อมูลที่อยู่แต่ละช่อง
+    def clean_house_number(self):
+        house_number = self.cleaned_data.get('house_number')
+        if not house_number.strip():
+            raise ValidationError('Please enter your address.')
+        return house_number
+
+    def clean_district(self):
+        district = self.cleaned_data.get('district')
+        if not district.strip():
+            raise ValidationError('Please enter your district.')
+        return district
+
+    def clean_amphoe(self):
+        amphoe = self.cleaned_data.get('amphoe')
+        if not amphoe.strip():
+            raise ValidationError('Please enter your amphoe.')
+        return amphoe
+
+    def clean_province(self):
+        province = self.cleaned_data.get('province')
+        if not province.strip():
+            raise ValidationError('Please enter your province.')
+        return province
+
+    def clean_zipcode(self):
+        zipcode = self.cleaned_data.get('zipcode')
+        if not zipcode.strip():
+            raise ValidationError('Please enter your postal code.')
+        return zipcode
+    
 
 class LoginForm(forms.Form):
     username = forms.CharField()

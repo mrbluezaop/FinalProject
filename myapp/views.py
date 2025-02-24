@@ -218,6 +218,11 @@ def register_user(request):
                 if not birth_date:
                     form.add_error('Birthday', 'Please enter your date of birth.')
 
+                # ✅ ตรวจสอบว่า PDPA ถูกติ๊กหรือไม่
+                pdpa_accepted = form.cleaned_data.get('pdpa')
+                if not pdpa_accepted:
+                    form.add_error('pdpa', 'Please accept the PDPA policy before registering!')
+
                 # ✅ ตรวจสอบเบอร์โทรศัพท์ว่าถูกต้องหรือไม่
                 phone_number = form.cleaned_data.get('Phone')
                 if not phone_number or not re.match(r'^\d{10}$', phone_number):

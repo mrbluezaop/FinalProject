@@ -80,7 +80,8 @@
             /* กำหนดความสูงให้เท่ากันทุกช่อง */
             display: block;
             /* ให้มีพื้นที่เสมอ */
-            height: auto; /* รักษาความสูง */
+            height: auto;
+            /* รักษาความสูง */
         }
 
         .button-container {
@@ -192,6 +193,66 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             animation: fadeIn 0.5s ease-in-out;
         }
+
+        .pdpa-container {
+            display: flex;
+            justify-content: flex-start;
+            /* จัดให้ Checkbox อยู่ทางซ้ายของข้อความ */
+        }
+
+        .pdpa-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            /* ปรับระยะห่างระหว่าง checkbox และข้อความ */
+            cursor: pointer;
+            /* ทำให้สามารถคลิกที่ข้อความเพื่อเลือก checkbox ได้ */
+        }
+
+        .pdpa-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+        }
+
+        /* ✅ Popup Background */
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* ✅ กล่องเนื้อหา Popup */
+        .popup-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            margin: 10% auto;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        ul.errorlist {
+            color: red;
+            /* ✅ เปลี่ยนสีข้อความเป็นสีแดง */
+            font-size: 14px;
+            /* ✅ ปรับขนาดให้เล็กลง */
+            font-weight: bold;
+            /* ✅ ทำให้ตัวหนาเพื่อให้อ่านง่าย */
+            list-style: none;
+            /* ✅ เอาจุด bullet ออก */
+            padding: 0;
+            margin: 5px 0;
+        }
     </style>
 </head>
 
@@ -218,80 +279,133 @@
                 <div class="form-section">
                     <div class="field">
                         {{ form.Username }}
-                        <small id="usernameHelp" class="help-text">The username must not contain special characters and must not exceed 20 characters</small>
+                        <small id="usernameHelp" class="help-text">The username must not contain special characters and
+                            must not exceed 20 characters</small>
                         <div id="username-check" class="check-message"></div>
                         {{ form.errors.Username }}
                     </div>
-            
+
                     <div class="field">
                         {{ form.Password }}
-                        <small id="passwordHelp" class="help-text">At least 8 characters long and must contain an uppercase letter and a special character</small>
+                        <small id="passwordHelp" class="help-text">At least 8 characters long and must contain an
+                            uppercase letter and a special character</small>
                         {{ form.Password.errors }}
                     </div>
-            
+
                     <div class="field">
                         {{ form.Firstname }}
                         {{ form.Firstname.errors }}
                     </div>
-            
+
                     <div class="field">
                         {{ form.Lastname }}
                         {{ form.Lastname.errors }}
                     </div>
-            
+
                     <div class="field">
                         {{ form.Email }}
-                        <small id="emailHelp" class="help-text">Please enter a valid format, such as including "@"</small>
+                        <small id="emailHelp" class="help-text">Please enter a valid format, such as including
+                            "@"</small>
                         <div id="email-check" class="check-message"></div>
                         {{ form.errors.Email }}
                     </div>
-            
+
                     <div class="field">
                         {{ form.Phone }}
-                        <small id="phoneHelp" class="help-text">The phone number must be 10 digits long, e.g. 0812345678</small>
+                        <small id="phoneHelp" class="help-text">The phone number must be 10 digits long, e.g.
+                            0812345678</small>
                         {{ form.Phone.errors }}
                     </div>
-            
+
                     <!-- ✅ เพิ่มช่องกรอกวันเกิดที่นี่ -->
                     <!-- ✅ เพิ่ม input วันเกิด พร้อมกำหนด max เป็นวันที่ปัจจุบัน -->
                     <div class="field">
                         <label for="id_Birthday"></label>
                         <input type="date" name="Birthday" id="id_Birthday" class="form-input" required>
-                        <small id="birthdayHelp" class="help-text">Please enter your date of birth in the format YYYY-MM-DD.</small>
+                        <small id="birthdayHelp" class="help-text">Please enter your date of birth in the format
+                            YYYY-MM-DD.</small>
                         {{ form.errors.Birthday }}
                     </div>
                 </div>
-            
+
                 <!-- ✅ คอลัมน์ขวา: ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์ -->
                 <div class="form-section">
                     <div class="field">
                         <label for="house_number"></label>
                         <input type="text" id="house_number" name="house_number" placeholder="Address">
+                        {% if form.errors.house_number %}
+                        <small class="error-text" style="color: red;">{{ form.errors.house_number.0 }}</small>
+                        {% endif %}
                     </div>
-            
+
                     <div class="field">
                         <label for="district"></label>
                         <input type="text" id="district" name="district" placeholder="District">
+                        {% if form.errors.district %}
+                        <small class="error-text" style="color: red;">{{ form.errors.district.0 }}</small>
+                        {% endif %}
                     </div>
-            
+
                     <div class="field">
                         <label for="amphoe"></label>
                         <input type="text" id="amphoe" name="amphoe" placeholder="Amphoe">
+                        {% if form.errors.amphoe %}
+                        <small class="error-text" style="color: red;">{{ form.errors.amphoe.0 }}</small>
+                        {% endif %}
                     </div>
-            
+
                     <div class="field">
                         <label for="province"></label>
                         <input type="text" id="province" name="province" placeholder="Province">
+                        {% if form.errors.province %}
+                        <small class="error-text" style="color: red;">{{ form.errors.province.0 }}</small>
+                        {% endif %}
                     </div>
-            
+
                     <div class="field">
                         <label for="zipcode"></label>
                         <input type="text" id="zipcode" name="zipcode" maxlength="5" placeholder="Postal Code">
+                        {% if form.errors.zipcode %}
+                        <small class="error-text" style="color: red;">{{ form.errors.zipcode.0 }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="field pdpa-container">
+                        <label class="pdpa-label">
+                            {{ form.pdpa }}
+                            I agree to the <a href="#" id="pdpa-link">PDPA policy</a>
+                        </label>
+                        {% if form.pdpa.errors %}
+                        <small class="help-text" style="color: red;">{{ form.pdpa.errors.0 }}</small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            
+            <!-- ✅ Popup PDPA -->
+            <div id="pdpa-popup" class="popup">
+                <div class="popup-content">
+                    <span class="close-btn">&times;</span>
+                    <h2>📌 นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA Policy)</h2>
+                    <p>เราให้ความสำคัญกับข้อมูลของคุณ
+                        และขอแจ้งให้คุณทราบว่าข้อมูลที่เราเก็บรวบรวมจะถูกใช้เพื่อพัฒนาบริการของเรา
+                        โดยมีรายละเอียดดังนี้:</p>
 
+                    <p>1️⃣ <strong>การเก็บรวบรวมข้อมูล:</strong><br>
+                        - เราเก็บข้อมูล เช่น ชื่อ, อีเมล, เบอร์โทรศัพท์, ที่อยู่ เพื่อวัตถุประสงค์ในการให้บริการ</p>
+
+                    <p>2️⃣ <strong>วัตถุประสงค์ในการใช้ข้อมูล:</strong><br>
+                        - เพื่อการให้บริการที่มีประสิทธิภาพ และเพื่อการพัฒนาเว็บไซต์ให้ดียิ่งขึ้น</p>
+
+                    <p>3️⃣ <strong>สิทธิของผู้ใช้:</strong><br>
+                        - คุณสามารถขอเข้าถึง แก้ไข หรือลบข้อมูลของคุณได้ทุกเมื่อ</p>
+
+                    <p>4️⃣ <strong>การรักษาความปลอดภัย:</strong><br>
+                        - ข้อมูลของคุณจะถูกเก็บรักษาอย่างปลอดภัยและไม่มีการเปิดเผยแก่บุคคลที่สาม</p>
+
+                    <p>📩 <strong>ติดต่อเรา:</strong><br>
+                        หากมีข้อสงสัย กรุณาติดต่อ <a href="">Thewinner@gmail.com</a></p>
+                </div>
+            </div>
             <!-- ✅ ปุ่มอยู่ตรงกลาง -->
             <div class="button-container">
                 <button type="submit" class="button" id="submitButton" disabled>Register</button>
@@ -323,7 +437,36 @@
             let today = new Date().toISOString().split("T")[0];
             document.getElementById("id_Birthday").setAttribute("max", today);
         });
+        $(document).ready(function () {
+            // ✅ เปิด popup เมื่อกด checkbox PDPA
+            $('#pdpa').on('change', function () {
+                if ($(this).is(':checked')) {
+                    console.log("Checkbox checked - Showing popup");
+                    $('#pdpa-popup').fadeIn();
+                }
+            });
 
+            // ✅ เปิด popup เมื่อกดลิงก์ "PDPA policy"
+            $('#pdpa-link').on('click', function (event) {
+                event.preventDefault(); // ป้องกันลิงก์โหลดหน้าใหม่
+                console.log("PDPA link clicked - Showing popup");
+                $('#pdpa-popup').fadeIn();
+            });
+
+            // ✅ ปิด popup เมื่อกดปุ่ม ✖
+            $('.close-btn').on('click', function () {
+                console.log("Close button clicked - Hiding popup");
+                $('#pdpa-popup').fadeOut();
+            });
+
+            // ✅ ปิด popup เมื่อกดด้านนอก
+            $(window).on('click', function (event) {
+                if ($(event.target).is('#pdpa-popup')) {
+                    console.log("Outside popup clicked - Hiding popup");
+                    $('#pdpa-popup').fadeOut();
+                }
+            });
+        });
     </script>
 </body>
 
