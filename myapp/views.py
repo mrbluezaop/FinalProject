@@ -393,18 +393,20 @@ def logout(request):
     return redirect('login')
 
 def get_member(request, member_id):
-    # ดึงข้อมูลสมาชิกจาก Customer_ID
+
+    # ✅ ดึงข้อมูลสมาชิกจาก Customer_ID
     member = get_object_or_404(Member, Customer_ID=member_id)
+
     return JsonResponse({
         'id': member.Customer_ID,
         'username': member.Username,
         'firstname': member.Firstname,
         'lastname': member.Lastname,
-        'password': member.Password,
+        'password': "AxcSD!ZXzxcvC123!",  # ✅ ป้องกันการเปิดเผยรหัสผ่าน
         'email': member.Email,
         'phone': member.Phone,
         'address': member.Address,
-        'birthday': member.Birthday.strftime('%Y-%m-%d') if member.Birthday else None,
+        'birthday': member.Birthday.strftime('%Y-%m-%d') if member.Birthday else None
     })
 
 
@@ -422,7 +424,7 @@ def update_member(request):
 
             # อัปเดตรหัสผ่าน (ใช้ bcrypt แฮชใน Backend)
             new_password = data.get('password')
-            if new_password:
+            if new_password and new_password != "AxcSD!ZXzxcvC123!":
                 hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
                 member.Password = hashed_password.decode('utf-8')  # เก็บค่า hashed เป็น string
 
