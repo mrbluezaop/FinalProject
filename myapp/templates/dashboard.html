@@ -15,6 +15,24 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
     <script src="{% static 'js/popup.js' %}"></script>
+    <script>
+        function validateForm() {
+            let firstName = document.getElementById("popup-firstname").value.trim();
+            let lastName = document.getElementById("popup-lastname").value.trim();
+            
+            if (firstName === "") {
+                alert("First Name cannot be empty.");
+                return false;
+            }
+            return true;
+
+            if (lastName === "") {
+                alert("Last Name cannot be empty.");
+                return false;
+            }
+            return true;
+        }
+    </script>
   </head>
 
   <body>

@@ -421,6 +421,18 @@ def update_member(request):
                 return JsonResponse({'status': 'error', 'message': 'Customer_ID is required'})
 
             member = Member.objects.get(Customer_ID=customer_id)
+            
+            # ตรวจสอบว่า firstname และ lastname ไม่เป็นค่าว่าง
+            firstname = data.get('firstname', member.Firstname)
+            lastname = data.get('lastname', member.Lastname)
+            phone = data.get('phone', member.Phone)
+
+            if firstname.strip() == '':
+                return JsonResponse({'status': 'error', 'message': 'Firstname cannot be empty'})
+            if lastname.strip() == '':
+                return JsonResponse({'status': 'error', 'message': 'Lastname cannot be empty'})
+            if phone.strip() == '':
+                return JsonResponse({'status': 'error', 'message': 'Phone cannot be empty'})
 
             # อัปเดตรหัสผ่าน (ใช้ bcrypt แฮชใน Backend)
             new_password = data.get('password')
@@ -429,10 +441,10 @@ def update_member(request):
                 member.Password = hashed_password.decode('utf-8')  # เก็บค่า hashed เป็น string
 
             # อัปเดตข้อมูลอื่น ๆ
-            member.Firstname = data.get('firstname', member.Firstname)
-            member.Lastname = data.get('lastname', member.Lastname)
+            member.Firstname = firstname
+            member.Lastname = lastname
             member.Email = data.get('email', member.Email)
-            member.Phone = data.get('phone', member.Phone)
+            member.Phone = phone
             member.Address = data.get('address', member.Address)
             member.Birthday = data.get('birthday', member.Birthday)
             member.save()
