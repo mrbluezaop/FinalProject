@@ -273,7 +273,7 @@ def register_user(request):
 
                 # ✅ **แทรก success_message และ redirect_url ไปที่ `register.html`**
                 return render(request, 'register.html', {
-                    'form': RegisterForm(),
+                    'form': RegisterForm(), # ฟอร์มใหม่
                     'success_message': 'Register successful!',
                     'redirect_url': 'login',
                 })
@@ -390,7 +390,7 @@ def logout(request):
     print("Before flush:", request.session.items())
     request.session.flush()
     print("After flush:", request.session.items())
-    return redirect('login')
+    return redirect('main')
 
 def get_member(request, member_id):
 

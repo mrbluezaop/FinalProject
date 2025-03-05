@@ -467,6 +467,11 @@
                 }
             });
         });
+        document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("registerForm").reset();
+        localStorage.clear();
+        sessionStorage.clear();
+    });
     </script>
 </body>
 
