@@ -700,8 +700,10 @@ try:
     model_chair = joblib.load(os.path.join(MODEL_DIR, 'model_chair.pkl'))
     model_lighting = joblib.load(os.path.join(MODEL_DIR, 'model_lighting.pkl'))
     model_table = joblib.load(os.path.join(MODEL_DIR, 'model_table.pkl'))
+    model_paint = joblib.load(os.path.join(MODEL_DIR, 'model_paint.pkl'))
     model_paint_group1 = joblib.load(os.path.join(MODEL_DIR, 'paint', 'model_paint1.pkl'))
     model_paint_group2 = joblib.load(os.path.join(MODEL_DIR, 'paint', 'model_paint2.pkl'))
+    model_nail = joblib.load(os.path.join(MODEL_DIR, 'model_nail.pkl'))
     model_nail_group1 = joblib.load(os.path.join(MODEL_DIR, 'nail', 'model_nail1.pkl'))
     model_nail_group2 = joblib.load(os.path.join(MODEL_DIR, 'nail', 'model_nail2.pkl'))
 except Exception as e:
@@ -738,6 +740,16 @@ def prediction(request):
             def round_custom(value):
                 return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
             
+            input_data_forpaint = pd.DataFrame({
+                'Wood (sm.)': [area],
+                'Width': [width_input],
+                'Height': [height_input]
+            })
+
+            input_data_fornail = pd.DataFrame({
+                'Wood (sm.)': [area]
+            })
+
             input_data_forchair = pd.DataFrame({
                 'Budget': [budget_input],
                 'Width': [width_input],
@@ -765,10 +777,12 @@ def prediction(request):
                 'Booth': [label_type]
             })
 
-            predict_paint = predicted_paint(area, width_input, height_input, length_input)
+            #predict_paint = predicted_paint(area, width_input, height_input, length_input)
+            predict_paint = model_paint.predict(input_data_forpaint)[0]
             predict_chair = model_chair.predict(input_data_forchair)[0]
             predict_lighting = model_lighting.predict(input_data_forlight)[0]
-            predict_nail = predicted_nail(area, width_input, height_input)
+            #predict_nail = predicted_nail(area, width_input, height_input)
+            predict_nail = model_nail.predict(input_data_fornail)[0]
             predict_table = model_table.predict(input_data_fortable)[0]
 
             Wood = round_custom(wood)
@@ -894,6 +908,16 @@ def predictionder(width, length, height, job_type, budget):
         def round_custom(value):
             return math.ceil(value) if value - math.floor(value) >= 0.5 else math.floor(value)
         
+        input_data_forpaint = pd.DataFrame({
+            'Wood (sm.)': [area],
+            'Width': [width_input],
+            'Height': [height_input]
+        })
+
+        input_data_fornail = pd.DataFrame({
+            'Wood (sm.)': [area]
+        })
+
         input_data_forchair = pd.DataFrame({
             'Budget': [budget],
             'Width': [width_input],
@@ -921,11 +945,19 @@ def predictionder(width, length, height, job_type, budget):
             'Booth': [label_type]
         })
 
-        predict_paint = predicted_paint(area, width_input, height_input, length_input)
+        #predict_paint = predicted_paint(area, width_input, height_input, length_input)
+        predict_paint = model_paint.predict(input_data_forpaint)[0]
         predict_chair = model_chair.predict(input_data_forchair)[0]
         predict_lighting = model_lighting.predict(input_data_forlight)[0]
-        predict_nail = predicted_nail(area, width_input, height_input)
+        #predict_nail = predicted_nail(area, width_input, height_input)
+        predict_nail = model_nail.predict(input_data_fornail)[0]
         predict_table = model_table.predict(input_data_fortable)[0]
+
+        Paint = round_custom(predict_paint)
+        Chair = round_custom(predict_chair)
+        Lighting = round_custom(predict_lighting)
+        Nail = round_custom(predict_nail)
+        Table = round_custom(predict_table)
 
         Paint = round_custom(predict_paint)
         Chair = round_custom(predict_chair)
