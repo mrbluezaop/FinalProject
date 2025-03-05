@@ -26,14 +26,12 @@ SECRET_KEY = 'django-insecure-lfd(3ne%ucj2%d4libtd1ycqbebr###ctc%z0ax4ip+eb&*rti
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
-'''
 ALLOWED_HOSTS = ["thewinnerinteriors.com", "www.thewinnerinteriors.com"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://thewinnerinteriors.com",
     "https://www.thewinnerinteriors.com"
-]'''
+]
 
 
 # Application definition
